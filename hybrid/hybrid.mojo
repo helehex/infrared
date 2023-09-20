@@ -2353,7 +2353,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
         elif sq == 0:
             return acc
         else:
-            return sq*(self*mul + acc)
+            return sq*(self*mul) + acc
     '''
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
