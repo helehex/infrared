@@ -2333,11 +2333,27 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn fma(self, mul: Self, acc: Self.Scalar) -> Self.Scalar:
-        return self.s.fma(mul.s,acc)
+        @parameter
+        if sq == 1:
+            return self.s.fma(mul.s,acc)
+        elif sq == -1:
+            return self.s.fma(-mul.s,acc)
+        elif sq == 0:
+            return acc
+        else:
+            return self.s.fma(sq*mul.s,acc)
     
     @always_inline
     fn fma(self, mul: Self, acc: Self) -> Self.Multivector:
-        return self*mul + acc
+        @parameter
+        if sq == 1:
+            return self*mul + acc
+        elif sq == -1:
+            return -self*mul + acc
+        elif sq == 0:
+            return acc
+        else:
+            return sq*(self*mul + acc)
     '''
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
