@@ -1,3 +1,4 @@
+```Rust
 from infrared.hybrid import Complex, Hyplex, Paraplex, Complex32, HyplexInt, HSIMD
 
 let i = Complex.I(1)   # imaginary unit
@@ -26,3 +27,4 @@ h4 = 1/(h4 + Complex32.I(0.5))
 h5 = (h5 - 1000)//(h5*HyplexInt.I(1))
 
 print("After:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
+```
