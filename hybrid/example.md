@@ -1,3 +1,5 @@
+A notebooks cell example:
+
 ```Rust
 from infrared.hybrid import Complex, Hyplex, Paraplex, Complex32, HyplexInt, HSIMD
 
