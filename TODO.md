@@ -1,6 +1,8 @@
 # TODO
 - make a full GA generator
-- mlir stuff?
+- infrared.hybrid
+  - mlir?
   - problem with unit HSIMD's
   - benchmarking
-- infrared.hybrid pow() and mod() functions
+  - pow() and mod() functions
+  - pointer?
