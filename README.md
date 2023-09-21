@@ -12,8 +12,8 @@ Geometric Algebra for Mojo🔥
 ```Rust
 from infrared.hybrid import Hyplex
 
-let a: Hyplex = Hyplex(1,1)
-print(a)        #//: 1 + 1x
-print(a.x)      #//: 1x
-print(a.x*a.x)  #//: 1
+let x: Hyplex.I = Hyplex.I(1)
+print(x)    #//: 1x
+print(x*x)  #//: 1
+print(1+x)  #//: 1 + 1x
 ```
