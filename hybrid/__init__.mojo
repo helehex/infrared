@@ -21,3 +21,5 @@ from .hybrid import Int32G01 as ComplexInt32
 from .hybrid import Int64G01 as ComplexInt64
 from .hybrid import Int32G001 as ParaplexInt32
 from .hybrid import Int64G001 as ParaplexInt64
+
+from .hybrid import _print
