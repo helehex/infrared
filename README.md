@@ -7,13 +7,15 @@ Geometric Algebra for Mojo🔥
   - Complex variants, each with Int, Float, and SIMD variants
 
 
-## examples: 
+## hybrid example: 
 
 ```Rust
-from infrared.hybrid import Hyplex
+from infrared.hybrid import Hyplex, _print
 
-let x: Hyplex.I = Hyplex.I(1)
-print(x)    #//: 1x
-print(x*x)  #//: 1
-print(1+x)  #//: 1 + 1x
+var x: Hyplex.I = Hyplex.I(1)
+_print(x)    #//: 1x
+_print(x*x)  #//: 1
+x += 0.5
+_print(x)    #//: 0.5 + 1x
+_print(x*x)  #//: 1.25 + 1x
 ```
