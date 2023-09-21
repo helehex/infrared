@@ -1,5 +1,5 @@
-# infrared
-Geometric Algebra for Mojo🔥
+# Infrared 🔥
+Geometric Algebra for Mojo
 
 ## package layout:
 
@@ -12,7 +12,8 @@ Geometric Algebra for Mojo🔥
 ```Python
 from infrared.hybrid import Hyplex, _print
 
-var x: Hyplex.I = Hyplex.I(1)
+var x: Hyplex = Hyplex.I(1)
+
 _print(x)    #: 1x
 _print(x*x)  #: 1
 x += 0.5
