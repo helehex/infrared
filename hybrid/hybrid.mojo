@@ -1,6 +1,7 @@
 from math.math import min, max, sqrt
 
 # temporary fn's, move somewhere else eventually
+fn _print(): print()
 fn _print(a: Int): print(a)
 fn _print(a: FloatLiteral): print(a)
 fn _print[sq: Int](a: FloatH[sq]): print(a.__str__())
