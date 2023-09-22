@@ -11,6 +11,16 @@ fn _print[sq: Int](a: IntH[sq].I): print(a.__str__())
 fn _print[dt: DType, sw: Int](a: SIMD[dt,sw]): print(a)
 fn _print[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw]): print(a.__str__())
 fn _print[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].I): print(a.__str__())
+fn _symbol[sq: Int]() -> String:
+    @parameter
+    if sq == 1:
+        return "x"
+    elif sq == -1:
+        return "i"
+    elif sq == 0:
+        return "o"
+    else:
+        return "[" + String(sq) + "]"
 @always_inline
 fn _min(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral: return min(Float64(a),Float64(b)).value
 @always_inline
@@ -478,7 +488,7 @@ struct FloatH_i[sq: Int]:
     #------ Formatting ------#
     
     fn __str__(self) -> String:
-        return String(self.s) + "x"
+        return String(self.s) + _symbol[sq]()
     
     
     #------ Operators ------#
@@ -1118,7 +1128,7 @@ struct IntH_i[sq: Int]:
     #------ Formatting ------#
     
     fn __str__(self) -> String:
-        return String(self.s) + "x"
+        return String(self.s) + _symbol[sq]()
     
     
     #------ Operators ------#
@@ -2226,7 +2236,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     fn __str__(self) -> String:
         @parameter
         if sw == 1:
-            return String(self.s[0]) + "x"
+            return String(self.s[0]) + _symbol[sq]()
         else:
             var s: String = ""
             for index in range(sw): s += self[index].__str__() + "\n"
