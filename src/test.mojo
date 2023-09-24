@@ -5,7 +5,7 @@ def main():
 
 def simple_test():
     from infrared.hybrid import Hyplex, Complex, Paraplex
-    from infrared.irio import _print
+    from infrared.io import _print
 
     let x = Hyplex.I(1)
     let i = Complex.I(1)
@@ -48,7 +48,7 @@ def simple_test():
 
 def int_test():
     from infrared.hybrid import HyplexInt, ComplexInt, ParaplexInt
-    from infrared.irio import _print
+    from infrared.io import _print
 
     let i = ComplexInt.I(1)   #// imaginary unit
     let x = HyplexInt.I(1)    #// hypernary unit
@@ -87,7 +87,7 @@ def int_test():
 
 def simd_test():
     import infrared.hybrid as irh
-    from infrared.irio import _print
+    from infrared.io import _print
 
     let x = irh.Hyplex.I(1)
     let i = irh.Complex.I(1)
