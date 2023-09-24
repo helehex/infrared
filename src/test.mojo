@@ -1,4 +1,4 @@
-from infrared.io import _print
+from infrared.irio import _print
 
 def main():
     simple_test()
