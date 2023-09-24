@@ -6,3 +6,4 @@
   - benchmarking
   - pow() and mod() functions
   - pointer?
+  - use float in sq parameterization, instead of int?
