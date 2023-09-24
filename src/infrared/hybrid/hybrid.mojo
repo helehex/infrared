@@ -610,15 +610,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s/other.s
-        elif sq == -1:
-            return -self.s/other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s/other.s)
+        return self.s/other.s
     
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -634,15 +626,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s//other.s
-        elif sq == -1:
-            return -self.s//other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s//other.s)
+        return self.s//other.s
     
     @always_inline
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -718,15 +702,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s/self.s
-        elif sq == -1:
-            return -other.s/self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s/self.s)
+        return other.s/self.s
     
     @always_inline
     fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -742,15 +718,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s//self.s
-        elif sq == -1:
-            return -other.s//self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s//self.s)
+        return other.s//self.s
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1329,15 +1297,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Fraction.Scalar:
-        @parameter
-        if sq == 1:
-            return (self.s/other.s).value
-        elif sq == -1:
-            return (-self.s/other.s).value
-        elif sq == 0:
-            return 0
-        else:
-            return ((sq*self.s)/other.s).value
+        return (self.s/other.s).value
     
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Fraction.Multivector:
@@ -1349,15 +1309,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s//other.s
-        elif sq == -1:
-            return -self.s//other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s//other.s)
+        return self.s//other.s
     
     @always_inline
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1443,15 +1395,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Fraction.Scalar:
-        @parameter
-        if sq == 1:
-            return (other.s/self.s).value
-        elif sq == -1:
-            return (-other.s/self.s).value
-        elif sq == 0:
-            return 0
-        else:
-            return ((sq*other.s)/self.s).value
+        return (other.s/self.s).value
     
     @always_inline
     fn __rtruediv__(self, other: Self.Multivector) -> Self.Fraction.Multivector:
@@ -1463,15 +1407,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s//self.s
-        elif sq == -1:
-            return -other.s//self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s//self.s)
+        return other.s//self.s
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -2583,15 +2519,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s/other.s
-        elif sq == -1:
-            return -self.s/other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s/other.s)
+        return self.s/other.s
     
     @always_inline
     fn __truediv__(self, other: Self.Fraction) -> Self.Scalar:
@@ -2619,15 +2547,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s//other.s
-        elif sq == -1:
-            return -self.s//other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s//other.s)
+        return self.s//other.s
     
     @always_inline
     fn __floordiv__(self, other: Self.Fraction) -> Self.Scalar:
@@ -2750,15 +2670,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s/self.s
-        elif sq == -1:
-            return -other.s/self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s/self.s)
+        return other.s/self.s
     
     @always_inline
     fn __rtruediv__(self, other: Self.Fraction) -> Self.Scalar:
@@ -2786,15 +2698,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s//self.s
-        elif sq == -1:
-            return -other.s//self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s//self.s)
+        return other.s//self.s
         
     @always_inline
     fn __rfloordiv__(self, other: Self.Fraction) -> Self.Scalar:

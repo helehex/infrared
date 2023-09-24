@@ -1,4 +1,5 @@
 def main():
+    int_test()
     simple_test()
     simd_test()
 
@@ -12,12 +13,15 @@ def simple_test():
 
     _print(x)    #: 1x
     _print(x*x)  #: 1
+    _print(x/x)  #: 1
     _print()
     _print(i)    #: 1i
     _print(i*i)  #: -1
+    _print(i/i)  #: 1
     _print()
     _print(o)    #: 1o
     _print(o*o)  #: 0
+    _print(o/o)  #: 1
     _print()
 
     rx = 0.5 + x
@@ -40,6 +44,45 @@ def simple_test():
     _print(ro*ro)      #: 0.25 + 1o
     _print((o/ro)*ro)  #: 1o
     _print(ro*8 // o)  #:
+
+
+def int_test():
+    from infrared.hybrid import HyplexInt, ComplexInt, ParaplexInt
+    from infrared.irio import _print
+
+    let i = ComplexInt.I(1)   #// imaginary unit
+    let x = HyplexInt.I(1)    #// hypernary unit
+    let o = ParaplexInt.I(1)  #// pararnary unit
+
+    print("Squares:")
+    print("i*i = ", i*i) #// prints '-1'
+    print("x*x = ", x*x) #// prints '1'
+    print("o*o = ", o*o) #// prints '0'
+    print()
+
+    print("div:")
+    print("i/i = ", i/i) #// prints '-1'
+    print("x/x = ", x/x) #// prints '1'
+    print("o/o = ", o/o) #// prints '0'
+    print()
+
+    #//------------ some examples:
+    var h1 = ComplexInt(1,3)
+    var h2 = HyplexInt(1,3)
+    var h3 = ParaplexInt(1,3)
+    var h4 = 5 + ComplexInt.I(-10)
+    var h5 = HyplexInt(128, 128)<<1
+    h5 >>= x
+
+    print("Before:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
+
+    h1 = h1*h1
+    h2 *= h2
+    h3 = h3*h3
+    h4 += ComplexInt.I(4)//i
+    h5 = (h5 - 1000)//(h5*x)
+
+    print("After:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
 
 
 def simd_test():
