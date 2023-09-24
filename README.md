@@ -11,7 +11,7 @@ Geometric Algebra for Mojo
 
 ```Python
 from infrared.hybrid import Hyplex, Complex, Paraplex
-from infrared.irio import _print
+from infrared.io import _print
 
 let x = Hyplex.I(1)
 let i = Complex.I(1)
