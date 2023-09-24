@@ -131,8 +131,8 @@ struct FloatH[sq: Int]:
         return self.s == 0 and self.i == Self.I()
     
     @always_inline
-    fn __discrete__(self) -> Self.Discrete:
-        return Self.Discrete(self.s.__int__(), self.i.__discrete__())
+    fn discrete(self) -> Self.Discrete:
+        return Self.Discrete(self.s.__int__(), self.i.discrete())
     
     
     #------ Formatting ------#
@@ -145,13 +145,13 @@ struct FloatH[sq: Int]:
     
     # name may change; currently with GSIMD: Coef means a length 1 SIMD, Scalar means a length sw SIMD, but the get_coef function returns a Scalar type... possibley reverse indexing, or reverse aliases
     @always_inline
-    fn __getcoef__(self, index: Int) -> Self.Scalar: 
+    fn get_coef(self, index: Int) -> Self.Scalar: 
         if index == 0: return self.s
         if index == 1: return self.i.s
         return 0
     
     @always_inline
-    fn __setcoef__(inout self, index: Int, coef: Self.Scalar):
+    fn set_coef(inout self, index: Int, coef: Self.Scalar):
         if index == 0: self.s = coef
         if index == 1: self.i.s = coef
         
@@ -176,22 +176,10 @@ struct FloatH[sq: Int]:
     
     
     #------ Operators ------#
-    
+
     @always_inline
     fn __neg__(self) -> Self:
         return Self(-self.s, -self.i)
-    
-    @always_inline
-    fn __conj__(self) -> Self:
-        return Self(self.s, -self.i)
-    
-    @always_inline
-    fn __normsq__(self) -> Self.Scalar:
-        return self.s*self.s + self.i.s*self.i.s
-    
-    @always_inline
-    fn __norm__(self) -> Self.Scalar:
-        return sqrt(Float64(self.__normsq__())).value
     
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
@@ -200,6 +188,18 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
         return self.s != other.s or self.i != other.i
+
+    @always_inline
+    fn conj(self) -> Self:
+        return Self(self.s, -self.i)
+    
+    @always_inline
+    fn normsq(self) -> Self.Scalar:
+        return self.s*self.s + self.i.s*self.i.s
+    
+    @always_inline
+    fn norm(self) -> Self.Scalar:
+        return sqrt(Float64(self.normsq())).value
     
     
     #------ Arithmetic ------#
@@ -258,7 +258,7 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self * (1/Self.Scalar(other))
+        return self/Self.Scalar(other)
     
     @always_inline
     fn __truediv__(self, other: Self.I) -> Self:
@@ -267,6 +267,22 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __truediv__(self, other: Self) -> Self:
         return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) / (other.s*other.s - other.i*other.i)
+
+    @always_inline
+    fn __floordiv__(self, other: Self.Scalar) -> Self:
+        return Self(self.s//other, self.i//other)
+
+    @always_inline
+    fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
+        return self//Self.Scalar(other)
+    
+    @always_inline
+    fn __floordiv__(self, other: Self.I) -> Self:
+        return Self(self.i//other, self.s//other)
+    
+    @always_inline
+    fn __floordiv__(self, other: Self) -> Self:
+        return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) // (other.s*other.s - other.i*other.i)
     
     
     #------ Reverse Arithmetic ------#
@@ -277,7 +293,7 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __radd__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self(other + self.s, self.i)
+        return Self.Scalar(other) + self
     
     @always_inline
     fn __radd__(self, other: Self.I) -> Self:
@@ -293,7 +309,7 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __rsub__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self(other - self.s, -self.i)
+        return Self.Scalar(other) - self
     
     @always_inline
     fn __rsub__(self, other: Self.I) -> Self:
@@ -309,7 +325,7 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self(other*self.s, other*self.i)
+        return Self.Scalar(other)*self
     
     @always_inline
     fn __rmul__(self, other: Self.I) -> Self:
@@ -325,7 +341,7 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i))
+        return Self.Scalar(other)/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.I) -> Self:
@@ -334,6 +350,24 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self:
         return Self(other.s*self.s - other.i*self.i, other.i*self.s - other.s*self.i) / (self.s*self.s - self.i*self.i)
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Scalar) -> Self:
+        let d: Self.Scalar = self.s*self.s - self.i*self.i
+        return Self(self.s*other // d, -self.i*other // d)
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
+        return Self.Scalar(other)//self
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self.I) -> Self:
+        let d: Self.Scalar = self.s*self.s - self.i*self.i
+        return Self(-self.i*other // d, self.s*other // d)
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self) -> Self:
+        return Self(other.s*self.s - other.i*self.i, other.i*self.s - other.s*self.i) // (self.s*self.s - self.i*self.i)
     
     
     #------ Internal Arithmetic ------#
@@ -401,6 +435,18 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __itruediv__(inout self, other: Self):
         self = self/other
+
+    @always_inline
+    fn __ifloordiv__(inout self, other: Self.Scalar):
+        self = self//other
+    
+    @always_inline
+    fn __ifloordiv__(inout self, other: Self.I):
+        self = self//other
+    
+    @always_inline
+    fn __ifloordiv__(inout self, other: Self):
+        self = self//other
         
         
         
@@ -455,7 +501,7 @@ struct FloatH_i[sq: Int]:
         return self.s == 0
     
     @always_inline
-    fn __discrete__(self) -> Self.Discrete:
+    fn discrete(self) -> Self.Discrete:
         return Self.Discrete(self.s.__int__())
     
     
@@ -501,6 +547,10 @@ struct FloatH_i[sq: Int]:
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
+
+    @always_inline
+    fn __add__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
+        return self + Self.Scalar(other)
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
@@ -513,6 +563,10 @@ struct FloatH_i[sq: Int]:
     @always_inline
     fn __sub__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(-other, self)
+
+    @always_inline
+    fn __sub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
+        return self - Self.Scalar(other)
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
@@ -525,6 +579,10 @@ struct FloatH_i[sq: Int]:
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
         return Self(self.s*other)
+
+    @always_inline
+    fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
+        return self*Self.Scalar(other)
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
@@ -545,6 +603,10 @@ struct FloatH_i[sq: Int]:
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self:
         return Self(self.s/other)
+
+    @always_inline
+    fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
+        return self/Self.Scalar(other)
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Scalar:
@@ -561,6 +623,31 @@ struct FloatH_i[sq: Int]:
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(other.s, -other.i) * (self/(other.s*other.s - other.i*other.i))
+
+    @always_inline
+    fn __floordiv__(self, other: Self.Scalar) -> Self:
+        return Self(self.s//other)
+
+    @always_inline
+    fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
+        return self//Self.Scalar(other)
+    
+    @always_inline
+    fn __floordiv__(self, other: Self) -> Self.Scalar:
+        @parameter
+        if sq == 1:
+            return self.s//other.s
+        elif sq == -1:
+            return -self.s//other.s
+        elif sq == 0:
+            return 0
+        else:
+            return sq*(self.s//other.s)
+    
+    @always_inline
+    fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
+        let d = other.s*other.s - other.i*other.i
+        return Self.Multivector(-other.i*self // d, other.s*self // d)
     
     
     #------ Reverse Arithmetic ------#
@@ -571,7 +658,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __radd__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return Self.Multivector(other, self)
+        return Self.Scalar(other) + self
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
@@ -587,7 +674,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __rsub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return Self.Multivector(other, -self)
+        return Self.Scalar(other) - self
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
@@ -603,7 +690,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self(other*self.s)
+        return Self.Scalar(other)*self
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
@@ -627,7 +714,7 @@ struct FloatH_i[sq: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self(other/self.s)
+        return Self.Scalar(other)/self
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Scalar:
@@ -644,6 +731,30 @@ struct FloatH_i[sq: Int]:
     @always_inline
     fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
         return other * (1/self)
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Scalar) -> Self:
+        return Self(other//self.s)
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
+        return Self.Scalar(other)//self
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self) -> Self.Scalar:
+        @parameter
+        if sq == 1:
+            return other.s//self.s
+        elif sq == -1:
+            return -other.s//self.s
+        elif sq == 0:
+            return 0
+        else:
+            return sq*(other.s//self.s)
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.i//self, other.s//self)
     
     
     #------ Internal Arithmetic ------#
@@ -773,18 +884,6 @@ struct IntH[sq: Int]:
         return Self(-self.s, -self.i)
     
     @always_inline
-    fn __conj__(self) -> Self:
-        return Self(self.s, -self.i)
-    
-    @always_inline
-    fn __normsq__(self) -> Self.Scalar:
-        return self.s*self.s + self.i.s*self.i.s
-    
-    @always_inline
-    fn __norm__(self) -> Self.Fraction.Scalar:
-        return Self.Fraction(self).__norm__()
-    
-    @always_inline
     fn __eq__(self, other: Self) -> Bool:
         return self.s == other.s and self.i == other.i
     
@@ -792,6 +891,17 @@ struct IntH[sq: Int]:
     fn __ne__(self, other: Self) -> Bool:
         return self.s != other.s or self.i != other.i
     
+    @always_inline
+    fn conj(self) -> Self:
+        return Self(self.s, -self.i)
+    
+    @always_inline
+    fn normsq(self) -> Self.Scalar:
+        return self.s*self.s + self.i.s*self.i.s
+    
+    @always_inline
+    fn norm(self) -> Self.Fraction.Scalar:
+        return Self.Fraction(self).norm()
     
     #------ Bit ------#
     
@@ -1535,13 +1645,13 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     # name may change; currently with GSIMD: Coef means a length 1 SIMD, Scalar means a length sw SIMD, but the get_coef function returns a Scalar type... possibley reverse indexing, or reverse aliases
     @always_inline
-    fn __getcoef__(self, index: Int) -> Self.Scalar: 
+    fn getcoef(self, index: Int) -> Self.Scalar: 
         if index == 0: return self.s
         if index == 1: return self.i.s
         return 0
     
     @always_inline
-    fn __setcoef__(inout self, index: Int, coef: Self.Scalar):
+    fn setcoef(inout self, index: Int, coef: Self.Scalar):
         if index == 0: self.s = coef
         if index == 1: self.i.s = coef
         
@@ -1592,24 +1702,24 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self(-self.s, -self.i)
     
     @always_inline
-    fn __conj__(self) -> Self:
-        return Self(self.s, -self.i)
-    
-    @always_inline
-    fn __normsq__(self) -> Self.Scalar:
-        return self.s*self.s + self.i.s*self.i.s
-    
-    @always_inline
-    fn __norm__(self) -> Self.Scalar:
-        return sqrt(self.__normsq__())
-    
-    @always_inline
     fn __eq__(self, other: Self) -> Bool:
         return self.s == other.s and self.i == other.i
     
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
         return self.s != other.s or self.i != other.i
+
+    @always_inline
+    fn conj(self) -> Self:
+        return Self(self.s, -self.i)
+    
+    @always_inline
+    fn normsq(self) -> Self.Scalar:
+        return self.s*self.s + self.i.s*self.i.s
+    
+    @always_inline
+    fn norm(self) -> Self.Scalar:
+        return sqrt(self.normsq())
     
     
     #------ SIMD ------#
