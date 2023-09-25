@@ -1554,6 +1554,10 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn cast[target: DType](self) -> HSIMD[sq,target,sw]:
         return HSIMD[sq,target,sw](self.s.cast[target](), self.i.cast[target]())
+
+    @always_inline
+    fn to_discrete(self) -> Self.Discrete:
+        return Self.Discrete(self.s.to_int(), self.i.to_discrete())
     
     
     #------ Formatting ------#
@@ -1644,6 +1648,10 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
         return self.s != other.s or self.i != other.i
+
+    @always_inline
+    fn __len__(self) -> Int:
+        return sw
 
     @always_inline
     fn conj(self) -> Self:
@@ -2249,6 +2257,10 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn cast[target: DType](self) -> HSIMD_i[sq,target,sw]:
         return HSIMD_i[sq,target,sw](self.s.cast[target]())
+
+    @always_inline
+    fn to_discrete(self) -> Self.Discrete:
+        return Self.Discrete(self.s.to_int())
     
     
     #------ Formatting ------#
@@ -2314,6 +2326,10 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
         return self.s >= other.s
+
+    @always_inline
+    fn __len__(self) -> Int:
+        return sw
     
     
     #------ SIMD ------#

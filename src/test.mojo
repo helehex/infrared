@@ -129,9 +129,9 @@ def simd_test():
     ri[1] -= i
     ro[1] -= o
 
-    rx[2] *= x
-    ri[2] *= i
-    ro[2] *= o
+    rx[2] *= x * 10
+    ri[2] *= i * 10
+    ro[2] *= o * 10
 
     rx[3] /= x/32
     ri[3] /= i/32
