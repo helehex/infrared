@@ -3,6 +3,7 @@ def main():
     simple_test()
     simd_test()
 
+
 def simple_test():
     from infrared.hybrid import Hyplex, Complex, Paraplex
     from infrared.io import _print
