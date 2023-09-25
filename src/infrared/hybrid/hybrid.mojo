@@ -1749,6 +1749,10 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self(self.s.shuffle[mask](other.s), self.x.shuffle[mask](other.x))
     '''
     @always_inline
+    fn slice[slice_width: Int](self, offset: Int) -> HSIMD[sq,dt,slice_width]:
+        return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.i.slice[slice_width](offset))
+
+    @always_inline
     fn rotate_left[shift: Int](self) -> Self:
         return Self(self.s.rotate_left[shift](), self.i.rotate_left[shift]())
     
@@ -2410,6 +2414,10 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     fn shuffle[*mask: Int](self, other: Self) -> Self:
         return Self(self.s.shuffle[mask](other.s))
     '''
+    @always_inline
+    fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
+        return HSIMD_i[sq,dt,slice_width](self.s.slice[slice_width](offset))
+
     @always_inline
     fn rotate_left[shift: Int](self) -> Self:
         return Self(self.s.rotate_left[shift]())

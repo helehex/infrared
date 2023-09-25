@@ -137,11 +137,14 @@ def simd_test():
     ri[3] /= i/32
     ro[3] /= o/32
 
-    _print(rx)     #:
-    _print(rx*rx)  #:
+    _print(rx)
+    _print(rx*rx)
     _print()
-    _print(ri)     #:
-    _print(ri*ri)  #:
+    _print(ri)
+    _print(ri*ri)
     _print()
-    _print(ro)     #:
-    _print(ro*ro)  #:
+    _print(ro)
+    _print(ro*ro)
+    
+    _print(ro.slice[2](2))
+    _print(ro[2].to_discrete())
