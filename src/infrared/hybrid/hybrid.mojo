@@ -131,8 +131,8 @@ struct FloatH[sq: Int]:
         return self.s == 0 and self.i == Self.I()
     
     @always_inline
-    fn discrete(self) -> Self.Discrete:
-        return Self.Discrete(self.s.__int__(), self.i.discrete())
+    fn to_discrete(self) -> Self.Discrete:
+        return Self.Discrete(self.s.__int__(), self.i.to_discrete())
     
     
     #------ Formatting ------#
@@ -501,7 +501,7 @@ struct FloatH_i[sq: Int]:
         return self.s == 0
     
     @always_inline
-    fn discrete(self) -> Self.Discrete:
+    fn to_discrete(self) -> Self.Discrete:
         return Self.Discrete(self.s.__int__())
     
     
@@ -1340,7 +1340,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rrshift__(self, other: Self.Multivector) -> Self.Multivector:
-         return Self.Multivector(other.s, other.i.s>>self.s)
+        return Self.Multivector(other.s, other.i.s>>self.s)
     
     
     #------ Reverse Arithmetic ------#
