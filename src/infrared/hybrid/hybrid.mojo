@@ -1,8 +1,6 @@
 from math.math import min, max, sqrt
 
 
-
-
 #------------ Hyplex Numbers ------------#
 #---
 #------ basis: [s, x]
@@ -10,7 +8,6 @@ from math.math import min, max, sqrt
 #------ x*x = 1
 #------ (currently an alias of FloatH[1]; x = i, i*i=1)
 #---
-
 alias G1      = FloatH[1]
 alias FloatG1 = FloatH[1]
 alias IntG1     = IntH[1]
@@ -27,7 +24,6 @@ alias Int64G1   = HSIMD[1,DType.int64,1]
 #------ i*i = -1
 #------ (currently an alias of FloatH[-1])
 #---
-
 alias G01      = FloatH[-1]
 alias FloatG01 = FloatH[-1]
 alias IntG01     = IntH[-1]
@@ -44,7 +40,6 @@ alias Int64G01   = HSIMD[-1,DType.int64,1]
 #------ o*o = 1
 #------ (currently an alias of FloatH[0]; o = i, i*i=0)
 #---
-
 alias G001      = FloatH[0]
 alias FloatG001 = FloatH[0]
 alias IntG001     = IntH[0]
@@ -57,7 +52,7 @@ alias Int64G001   = HSIMD[0,DType.int64,1]
 
 
 #------------ Hybrid Float ------------#
-
+#---
 @register_passable("trivial")
 struct FloatH[sq: Int]:
     
@@ -452,7 +447,7 @@ struct FloatH[sq: Int]:
         
         
 #------ Float I ------#
-
+#---
 @register_passable("trivial")
 struct FloatH_i[sq: Int]:
     
@@ -747,7 +742,7 @@ struct FloatH_i[sq: Int]:
         
         
 #------------ Hybrid Int ------------#
-
+#---
 @register_passable("trivial")
 struct IntH[sq: Int]:
     
@@ -1136,7 +1131,7 @@ struct IntH[sq: Int]:
         
         
 #------ I ------#
-        
+#---        
 @register_passable("trivial")
 struct IntH_i[sq: Int]:
     
@@ -1465,7 +1460,7 @@ struct IntH_i[sq: Int]:
     
     
 #------------ Hybrid SIMD ------------#
-
+#---
 @register_passable("trivial")
 struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
@@ -2201,7 +2196,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     
 #------ I ------#
-    
+#---
 @register_passable("trivial")
 struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
