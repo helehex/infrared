@@ -3,6 +3,7 @@ def main():
     simple_test()
     simd_test()
     other_test()
+    utils_test()
 
 
 def simple_test():
@@ -49,6 +50,7 @@ def simple_test():
     _print(ro/ro)      #: 1
     _print((o/ro)*ro)  #: 1o
     _print(ro*8 // o)  #:
+    _print()
 
 
 def int_test():
@@ -89,6 +91,7 @@ def int_test():
 
     print("After:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
 
+
 def other_test():
     import infrared.hybrid as ir
     from infrared.io import _print
@@ -103,6 +106,7 @@ def other_test():
     _print(h*h)
     _print(h/h)
     _print((1/h)*(h*h))
+    _print()
 
 
 def simd_test():
@@ -139,6 +143,7 @@ def simd_test():
     _print()
     _print(ro)     #: 0.5 + 1o
     _print(ro*ro)  #: 0.25 + 1o
+    _print()
 
     rx[0] += x
     ri[0] += i
@@ -158,13 +163,26 @@ def simd_test():
 
     _print(rx)
     _print(rx*rx)
-    
     _print()
     _print(ri)
     _print(ri*ri)
     _print()
     _print(ro)
     _print(ro*ro)
+    _print()
     
     _print(ro.slice[2](2))
     _print(ro[2].to_discrete())
+    _print()
+
+
+def utils_test():
+    import infrared.hybrid as irh
+    from infrared.io import _print
+    from infrared.math import select
+
+    let a: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](4,-1)
+    let b: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](7,-2)
+    let test: SIMD[DType.bool,8] = SIMD[DType.bool,8](True, False, True, False, True, False, True, False)
+
+    _print(select(test,a,b))
