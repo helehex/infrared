@@ -1,6 +1,5 @@
 # TODO
 - make a full GA generator
-
 - infrared.hybrid
   - benchmarking / lower to mlir
   - hybrid and DTypePointer
