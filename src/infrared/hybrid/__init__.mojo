@@ -1,4 +1,8 @@
-from .hybrid import FloatH, IntH, HSIMD
+from .hybrid import *
+
+from .discrete import IntH
+from .fraction import FloatH
+from .hsimd import HSIMD
 
 from .hybrid import G1 as Hyplex
 from .hybrid import G01 as Complex
