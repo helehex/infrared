@@ -4,7 +4,7 @@ Geometric Algebra for Mojo
 ## package layout:
 
 - infrared.hybrid
-  - Hyplex, Complex, and Paraplex types. Each with Int, Float, and SIMD variants.
+  - Hybrid complex types, parameterized on the Antiscalar square. Each with Int, Float, and SIMD variants.
 
 ## hybrid example: 
 
