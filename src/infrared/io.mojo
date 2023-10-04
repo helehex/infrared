@@ -11,3 +11,15 @@ fn _print[sq: Int](a: IntH[sq].I): print(a.__str__())
 fn _print[dt: DType, sw: Int](a: SIMD[dt,sw]): print(a)
 fn _print[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw]): print(a.__str__())
 fn _print[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].I): print(a.__str__())
+
+# get the symbol for formatting
+fn symbol[sq: Int]() -> String:
+    @parameter
+    if sq == 1:
+        return "x"
+    elif sq == -1:
+        return "i"
+    elif sq == 0:
+        return "o"
+    else:
+        return "[" + String(sq) + "]"
