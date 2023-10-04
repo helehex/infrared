@@ -65,7 +65,7 @@ fn mul[dt: DType, sw: Int](a: SIMD[dt,sw], b: SIMD[dt,sw]) -> SIMD[dt,sw]:
 #---
 from math import sqrt as _sqrt
 
-@always_inline # reduntant
+@always_inline # mock
 fn sqrt[dt: DType, sw: Int](o: SIMD[dt,sw]) -> SIMD[dt,sw]:
     return _sqrt(o)
 
@@ -80,7 +80,7 @@ from math import atan2 as _atan2
 
 @always_inline # reduntant
 fn atan2[dt: DType, sw: Int](y: SIMD[dt,sw], x: SIMD[dt,sw]) -> SIMD[dt,sw]:
-    return atan2(y,x)
+    return _atan2(y,x)
 
 
 
