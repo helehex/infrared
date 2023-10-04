@@ -16,8 +16,6 @@ def math_test():
     let z32: irh.Complex32 = irh.Complex32(-1,-1)
     
 
-
-
 def simple_test():
     from infrared.hybrid import Hyplex, Complex, Paraplex
     from infrared.io import _print
