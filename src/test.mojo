@@ -4,6 +4,18 @@ def main():
     simd_test()
     other_test()
     utils_test()
+    math_test()
+
+
+def math_test():
+    import infrared.hybrid as irh
+    from infrared.io import _print
+
+    alias z: irh.Complex = irh.Complex(-1,-1)
+    let z64: irh.Complex32 = irh.Complex32(-1,-1)
+    let z32: irh.Complex32 = irh.Complex32(-1,-1)
+    
+
 
 
 def simple_test():
@@ -179,7 +191,7 @@ def simd_test():
 def utils_test():
     import infrared.hybrid as irh
     from infrared.io import _print
-    from infrared.math import select
+    from infrared import select
 
     let a: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](4,-1)
     let b: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](7,-2)
