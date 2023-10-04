@@ -4,8 +4,7 @@ Geometric Algebra for Mojo
 ## package layout:
 
 - infrared.hybrid
-  - Complex types. Each with Int, Float, and SIMD variants.
-
+  - Hyplex, Complex, and Paraplex types. Each with Int, Float, and SIMD variants.
 
 ## hybrid example: 
 
@@ -13,6 +12,7 @@ Geometric Algebra for Mojo
 from infrared.hybrid import Hyplex, Complex, Paraplex
 from infrared.io import _print
 
+# define some unit antiscalars
 let x = Hyplex.I(1)
 let i = Complex.I(1)
 let o = Paraplex.I(1)
