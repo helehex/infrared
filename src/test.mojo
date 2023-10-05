@@ -19,10 +19,11 @@ def math_test():
 def simple_test():
     from infrared.hybrid import Hyplex, Complex, Paraplex
     from infrared.io import _print
+    _print("--- simple test:")
 
-    let x = Hyplex.I(1)
-    let i = Complex.I(1)
-    let o = Paraplex.I(1)
+    alias x = Hyplex.I(1)
+    alias i = Complex.I(1)
+    alias o = Paraplex.I(1)
 
     _print(x)    #: 1x
     _print(x*x)  #: 1
@@ -66,6 +67,7 @@ def simple_test():
 def int_test():
     from infrared.hybrid import HyplexInt, ComplexInt, ParaplexInt
     from infrared.io import _print
+    _print("--- int test:")
 
     let i = ComplexInt.I(1)   #// imaginary unit
     let x = HyplexInt.I(1)    #// hypernary unit
@@ -105,7 +107,7 @@ def int_test():
 def other_test():
     import infrared.hybrid as ir
     from infrared.io import _print
-
+    _print("--- other test:")
     # alias MyHybrid = ir.FloatH[-2]
 
     let i: ir.FloatH[-2] = ir.FloatH[-2](0.0,1.2)
@@ -122,6 +124,7 @@ def other_test():
 def simd_test():
     import infrared.hybrid as irh
     from infrared.io import _print
+    _print("--- simd test:")
 
     let x = irh.Hyplex.I(1)
     let i = irh.Complex.I(1)
@@ -190,6 +193,7 @@ def utils_test():
     import infrared.hybrid as irh
     from infrared.io import _print
     from infrared import select
+    _print("--- utils test:")
 
     let a: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](4,-1)
     let b: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](7,-2)
