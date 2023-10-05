@@ -260,7 +260,7 @@ fn abs[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 #------ sig
 #---
 #--- (sign)
-#--- works on each coefficient (minor-algebra) in the multivector (major-algebra), unlike norm
+#--- works on each coefficient (minor-algebra) in the multivector (major-algebra), unlike normalize
 #--- abs(<M>p) * sig(<M>p) = <M>p
 #---
 
@@ -283,8 +283,8 @@ fn sig[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 #------ arg
 #---
 #--- (argument)
-#--- works on each coefficient (minor-algebra) in the multivector (major-algebra), unlike norm
-#--- e^I(arg(<M>p)) = sign(<M>p)
+#--- works on each coefficient (minor-algebra) in the multivector (major-algebra), unlike thet
+#--- e^I(arg(<M>p)) = sig(<M>p)
 #---
 
 @always_inline
