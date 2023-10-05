@@ -13,9 +13,9 @@ from infrared.hybrid import Hyplex, Complex, Paraplex
 from infrared.io import _print
 
 # define some unit antiscalars
-let x = Hyplex.I(1)
-let i = Complex.I(1)
-let o = Paraplex.I(1)
+alias x = Hyplex.I(1)
+alias i = Complex.I(1)
+alias o = Paraplex.I(1)
 
 _print(x)      #: 1x
 _print(x * x)  #: 1
