@@ -323,7 +323,7 @@ fn reverse[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> 
     return mulsign[nels, dt,sw, 1, 1, -1, -1](o)
 
 fn involute[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
-    return mulsign[nels, dt,sw, -1, 1, -1, 1](o)
+    return mulsign[nels, dt,sw, 1, -1, 1, -1](o)
 
 fn conjugate[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     return mulsign[nels, dt,sw, 1, -1, -1, 1](o) # cant infer: nels, dt, sw?
