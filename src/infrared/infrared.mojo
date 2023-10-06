@@ -303,31 +303,28 @@ fn arg[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 
 
 #------ mulsign
-'''
-from enki ganja.js:
-
-get Negative (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= -this[i]; return res; };
-get Reverse (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,1,-1,-1][grades[i]%4]; return res; };
-get Involute (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; };
-get Conjugate (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; };
-'''
 
 from utils.static_tuple import StaticTuple
 from utils.list import VariadicList
 from algorithm.functional import unroll
 
+@always_inline
 fn negative[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     return mulsign[nels, dt,sw, -1, -1, -1, -1](o)
 
+@always_inline
 fn reverse[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     return mulsign[nels, dt,sw, 1, 1, -1, -1](o)
 
+@always_inline
 fn involute[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     return mulsign[nels, dt,sw, 1, -1, 1, -1](o)
 
+@always_inline
 fn conjugate[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     return mulsign[nels, dt,sw, 1, -1, -1, 1](o) # cant infer: nels, dt, sw?
 
+@always_inline
 fn mulsign[nels: Int, dt: DType, sw: Int, *pat: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     alias pat_: VariadicList[Int] = VariadicList(pat)
     var result: StaticTuple[nels, SIMD[dt,sw]] = o
