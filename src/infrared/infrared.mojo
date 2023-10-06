@@ -265,17 +265,17 @@ fn abs[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 #---
 
 @always_inline
-fn sig[dt: DType, sw: Int](s: SIMD[dt,sw]) -> SIMD[dt,sw]:
+fn sign[dt: DType, sw: Int](s: SIMD[dt,sw]) -> SIMD[dt,sw]:
     # is there std sign? also not accounting for 0 divisor. could make some parameterized branches
     return s/abs(s)
 
 @always_inline
-fn sig[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return sig(i.s)
+fn sign[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
+    return sign(i.s)
 
 @always_inline
-fn sig[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
-    return sig(h.s) + sig(h.i)
+fn sign[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
+    return sign(h.s) + sign(h.i)
 
 
 
@@ -283,13 +283,13 @@ fn sig[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 #------ arg
 #---
 #--- (argument)
-#--- works on each coefficient (minor-algebra) in the multivector (major-algebra), unlike thet
-#--- e^I(arg(<M>p)) = sig(<M>p)
+#--- works on each coefficient (minor-algebra) in the multivector (major-algebra), unlike phase
+#--- e^I(arg(<M p>)) = sig(<M p>)
 #---
 
 @always_inline
 fn arg[dt: DType, sw: Int](s: SIMD[dt,sw]) -> SIMD[dt,sw]:
-    return (1 - sig(s))*hfpi
+    return (1 - sign(s))*hfpi
 
 @always_inline
 fn arg[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
@@ -301,6 +301,48 @@ fn arg[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 
 
 
+
+#------ mulsign
+'''
+from enki ganja.js:
+
+get Negative (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= -this[i]; return res; };
+get Reverse (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,1,-1,-1][grades[i]%4]; return res; };
+get Involute (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; };
+get Conjugate (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; };
+'''
+
+from utils.static_tuple import StaticTuple
+from utils.list import VariadicList
+from algorithm.functional import unroll
+
+fn reverse[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
+    return mulsign[nels, dt,sw, 1, 1, -1, -1](o)
+
+fn involute[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
+    return mulsign[nels, dt,sw, -1, 1, -1, 1](o)
+
+fn conjugate[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
+    return mulsign[nels, dt,sw, 1, -1, -1, 1](o) # cant infer: nels, dt, sw?
+
+fn mulsign[nels: Int, dt: DType, sw: Int, *pat: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
+    alias pat_: VariadicList[Int] = VariadicList(pat)
+    var result: StaticTuple[nels, SIMD[dt,sw]] = o
+
+    @parameter
+    fn _mul[i: Int]():
+        alias s: Int = pat_[i%len(pat_)] # alias is compile time
+        result[i] *= s
+
+    unroll[nels, _mul]()
+    return result
+
+
+#------ norm
+# norm_rev  - sqrt(a*rev(a))
+# norm_coef - euclidean norm of coefficients sqrt(coef<M 0>**2 + coef<M 1>**2 + ...), returns coefficient type
+
+#------ normalized
 
 
 
@@ -326,7 +368,7 @@ fn setsign[sq: Int, dt: DType, sw: Int](mag: SIMD[dt,sw], sig: HSIMD[sq,dt,sw]) 
 
 @always_inline
 fn setsign[sq: Int, dt: DType, sw: Int](mag: HSIMD[sq,dt,sw], sig: SIMD[dt,sw]) -> SIMD[dt,sw]:
-    return copysign(mag.s, sign)
+    return setsign(mag.s, sign)
 
 
 #--- natural exponential
@@ -375,4 +417,5 @@ fn pow[dt: DType, sw: Int](a: SIMD[dt,sw], b: HSIMD[-1,dt,sw].I) -> HSIMD[-1,dt,
 @always_inline
 fn pow[dt: DType, sw: Int](a: SIMD[dt,sw], b: HSIMD[-1,dt,sw]) -> HSIMD[-1,dt,sw]:
     return exp(b*_log(a))
+
 '''

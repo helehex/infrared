@@ -1,10 +1,21 @@
 def main():
-    int_test()
-    simple_test()
-    simd_test()
-    other_test()
-    utils_test()
-    math_test()
+    #int_test()
+    #simple_test()
+    #simd_test()
+    #other_test()
+    #utils_test()
+    #math_test()
+    mulsign_test()
+
+
+fn mulsign_test():
+    from infrared.infrared import reverse
+    
+    alias nels = 4
+
+    let a = StaticTuple[nels, Int32](1,1,1,1)
+    let b = reverse[nels, DType.int32, 1](a) # not sure if parameter inference works here
+    for i in range(nels): print(b[i])
 
 
 def math_test():
