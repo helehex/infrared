@@ -316,6 +316,9 @@ from utils.static_tuple import StaticTuple
 from utils.list import VariadicList
 from algorithm.functional import unroll
 
+fn negative[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
+    return mulsign[nels, dt,sw, -1, -1, -1, -1](o)
+
 fn reverse[nels: Int, dt: DType, sw: Int](o: StaticTuple[nels, SIMD[dt,sw]]) -> StaticTuple[nels, SIMD[dt,sw]]:
     return mulsign[nels, dt,sw, 1, 1, -1, -1](o)
 

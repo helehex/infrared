@@ -10,12 +10,10 @@ def main():
 
 fn mulsign_test():
     from infrared.infrared import reverse
-    
-    alias nels = 4
 
-    let a = StaticTuple[nels, Int32](1,1,1,1)
-    let b = reverse[nels, DType.int32, 1](a) # not sure if parameter inference works here
-    for i in range(nels): print(b[i])
+    let a = StaticTuple[4, Int32](1,1,1,1)
+    let b = reverse[4, DType.int32, 1](a) # not sure if parameter inference works here
+    for i in range(4): print(b[i])
 
 
 def math_test():
