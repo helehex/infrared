@@ -1,4 +1,7 @@
 def main():
+    
+    # aborted
+
     #int_test()
     simple_test()
     #simd_test()
@@ -35,15 +38,15 @@ def simple_test():
     alias o = Paraplex.I
 
     # strange things
-    _print[1](x)    #: 1x
+    _print(x)    #: 1x
     _print(x*x)  #: 1
     _print(x/x)  #: 1
     _print()
-    _print[-1](i)    #: 1i
+    _print(i)    #: 1i
     _print(i*i)  #: -1
     _print(i/i)  #: 1
     _print()
-    _print[0](o)    #: 1o
+    _print(o)    #: 1o
     _print(o*o)  #: 0
     _print(o/o)  #: 1
     _print()
@@ -52,25 +55,25 @@ def simple_test():
     ri = 0.5 + i
     ro = 0.5 + o
 
-    _print[1](rx)         #: 0.5 + 1x
-    _print[1](rx*rx)      #: 1.25 + 1x
-    _print[1](rx/rx)      #: 1
-    _print[1]((x/rx)*rx)  #: 1x
-    _print[1](rx*8 // x)  #:
+    _print(rx)         #: 0.5 + 1x
+    _print(rx*rx)      #: 1.25 + 1x
+    _print(rx/rx)      #: 1
+    _print((x/rx)*rx)  #: 1x
+    _print(rx*8 // x)  #:
     _print()
 
-    _print[-1](ri)         #: 0.5 + 1i
-    _print[-1](ri*ri)      #: -0.75 + 1i
-    _print[-1](ri/ri)      #: 1
-    _print[-1]((i/ri)*ri)  #: 1i
-    _print[-1](ri*8 // i)  #:
+    _print(ri)         #: 0.5 + 1i
+    _print(ri*ri)      #: -0.75 + 1i
+    _print(ri/ri)      #: 1
+    _print((i/ri)*ri)  #: 1i
+    _print(ri*8 // i)  #:
     _print()
 
-    _print[0](ro)         #: 0.5 + 1o
-    _print[0](ro*ro)      #: 0.25 + 1o
-    _print[0](ro/ro)      #: 1
-    _print[0]((o/ro)*ro)  #: 1o
-    _print[0](ro*8 // o)  #:
+    _print(ro)         #: 0.5 + 1o
+    _print(ro*ro)      #: 0.25 + 1o
+    _print(ro/ro)      #: 1
+    _print((o/ro)*ro)  #: 1o
+    _print(ro*8 // o)  #:
     _print()
 
 '''
