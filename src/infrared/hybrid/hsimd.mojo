@@ -13,28 +13,33 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     #---- Multivector = Self
     alias Scalar = SIMD[dt,sw]
-    alias I = HSIMD_i[sq,dt,sw]
+    alias Antiscalar = HSIMD_i[sq,dt,sw]
+    alias I = Self.Antiscalar()
     
     var s: Self.Scalar
-    var i: Self.I
+    var i: Self.Antiscalar
     
     
     #------ Initialize ------#
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0,i:0}
+        return Self{s:0,i:Self.Antiscalar{s:0}}
     
     @always_inline
     fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s,i:0}
+        return Self{s:s,i:Self.Antiscalar{s:0}}
     
     @always_inline
-    fn __init__(i: Self.I) -> Self:
+    fn __init__(i: Self.Antiscalar) -> Self:
         return Self{s:0,i:i}
     
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.I) -> Self:
+    fn __init__(s: Self.Scalar, i: Self.Scalar) -> Self:
+        return Self{s:s,i:Self.Antiscalar{s:i}}
+
+    @always_inline
+    fn __init__(s: Self.Scalar, i: Self.Antiscalar) -> Self:
         return Self{s:s,i:i}
     
     @always_inline
@@ -43,15 +48,19 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __init__(s: Self.Fraction.Scalar) -> Self:
-        return Self{s:s,i:0}
+        return Self{s:s,i:Self.Antiscalar{s:0}}
     
     @always_inline
-    fn __init__(i: Self.Fraction.I) -> Self:
-        return Self{s:0,i:Self.I(i)}
+    fn __init__(i: Self.Fraction.Antiscalar) -> Self:
+        return Self{s:0,i:i}
     
     @always_inline
-    fn __init__(s: Self.Fraction.Scalar, i: Self.Fraction.I) -> Self:
-        return Self{s:s,i:Self.I(i)}
+    fn __init__(s: Self.Fraction.Scalar, i: Self.Fraction.Scalar) -> Self:
+        return Self{s:s,i:Self.Antiscalar{s:i}}
+
+    @always_inline
+    fn __init__(s: Self.Fraction.Scalar, i: Self.Fraction.Antiscalar) -> Self:
+        return Self{s:s,i:i}
     
     @always_inline
     fn __init__(m: Self.Discrete) -> Self:
@@ -59,15 +68,19 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __init__(s: Self.Discrete.Scalar) -> Self:
-        return Self{s:s,i:0}
+        return Self{s:s,i:Self.Antiscalar{s:0}}
     
     @always_inline
-    fn __init__(i: Self.Discrete.I) -> Self:
-        return Self{s:0,i:Self.I(i)}
+    fn __init__(i: Self.Discrete.Antiscalar) -> Self:
+        return Self{s:0,i:i}
     
     @always_inline
-    fn __init__(s: Self.Discrete.Scalar, i: Self.Discrete.I) -> Self:
-        return Self{s:s,i:Self.I(i)}
+    fn __init__(s: Self.Discrete.Scalar, i: Self.Discrete.Scalar) -> Self:
+        return Self{s:s,i:Self.Antiscalar{s:i}}
+
+    @always_inline
+    fn __init__(s: Self.Discrete.Scalar, i: Self.Discrete.Antiscalar) -> Self:
+        return Self{s:s,i:i}
     
     @always_inline
     fn __init__(u: Self.Unit) -> Self:
@@ -75,10 +88,10 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s,i:0}
+        return Self{s:s,i:Self.Antiscalar{s:0}}
     
     @always_inline
-    fn __init__(i: Self.Unit.I) -> Self:
+    fn __init__(i: Self.Unit.Antiscalar) -> Self:
         return Self{s:0,i:i}
     
     
@@ -196,23 +209,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn splat(self, other: Self.Fraction.Scalar) -> Self:
-        return self.splat(Self.Unit.Scalar(other))
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Discrete.Scalar) -> Self:
-        return self.splat(Self.Unit.Scalar(other))
+        return self.splat(other)
     
     @always_inline
-    fn splat(self, other: Self.Unit.I) -> Self:
+    fn splat(self, other: Self.Unit.Antiscalar) -> Self:
         return Self(self.s, other)
     
     @always_inline
-    fn splat(self, other: Self.Fraction.I) -> Self:
-        return self.splat(Self.Unit.I(other))
+    fn splat(self, other: Self.Fraction.Antiscalar) -> Self:
+        return self.splat(other)
     
     @always_inline
-    fn splat(self, other: Self.Discrete.I) -> Self:
-        return self.splat(Self.Unit.I(other))
+    fn splat(self, other: Self.Discrete.Antiscalar) -> Self:
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Unit) -> Self:
@@ -220,18 +233,18 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn splat(self, other: Self.Fraction) -> Self:
-        return self.splat(Self.Unit(other))
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Discrete) -> Self:
-        return self.splat(Self.Unit(other))
+        return self.splat(other)
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self:
         return Self(self.s.fma(mul,acc), self.i*mul)
     
     @always_inline
-    fn fma(self, mul: Self.Scalar, acc: Self.I) -> Self:
+    fn fma(self, mul: Self.Scalar, acc: Self.Antiscalar) -> Self:
         return Self(self.s*mul, self.i.fma(mul,acc))
     
     @always_inline
@@ -239,15 +252,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self(self.s.fma(mul,acc.s), self.i.fma(mul,acc.i))
     
     @always_inline
-    fn fma(self, mul: Self.I, acc: Self.Scalar) -> Self:
+    fn fma(self, mul: Self.Antiscalar, acc: Self.Scalar) -> Self:
         return Self(self.i.fma(mul,acc), self.s*mul)
     
     @always_inline
-    fn fma(self, mul: Self.I, acc: Self.I) -> Self:
+    fn fma(self, mul: Self.Antiscalar, acc: Self.Antiscalar) -> Self:
         return Self(self.i*mul, self.s.fma(mul.s,acc.s))
     
     @always_inline
-    fn fma(self, mul: Self.I, acc: Self) -> Self:
+    fn fma(self, mul: Self.Antiscalar, acc: Self) -> Self:
         return Self(self.i.fma(mul,acc.s), self.s.fma(mul.s,acc.i.s))
     
     @always_inline
@@ -255,12 +268,12 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self(self.s.fma(mul.s, self.i.fma(mul.i,acc)), self.i.fma(mul.s, self.s*mul.i))
     
     @always_inline
-    fn fma(self, mul: Self, acc: Self.I) -> Self:
-        return Self(self.s.fma(mul.s, self.i*mul.i), self.i.fma(mul.s, Self.I(self.s.fma(mul.i.s,acc.s))))
+    fn fma(self, mul: Self, acc: Self.Antiscalar) -> Self:
+        return Self(self.s.fma(mul.s, self.i*mul.i), self.i.fma(mul.s, Self.Antiscalar{s:self.s.fma(mul.i.s,acc.s)}))
     
     @always_inline
     fn fma(self, mul: Self, acc: Self) -> Self:
-        return Self(self.s.fma(mul.s, self.i.fma(mul.i,acc.s)), self.i.fma(mul.s, Self.I(self.s.fma(mul.i.s,acc.i.s))))
+        return Self(self.s.fma(mul.s, self.i.fma(mul.i,acc.s)), self.i.fma(mul.s, Self.Antiscalar{s:self.s.fma(mul.i.s,acc.i.s)}))
     '''
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
@@ -299,23 +312,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __add__(self, other: Self.Fraction.Scalar) -> Self:
-        return self + Self.Scalar(other)
+        return self + other
     
     @always_inline
     fn __add__(self, other: Self.Discrete.Scalar) -> Self:
-        return self + Self.Scalar(other)
+        return self + other
     
     @always_inline
-    fn __add__(self, other: Self.I) -> Self:
+    fn __add__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.i + other)
     
     @always_inline
-    fn __add__(self, other: Self.Fraction.I) -> Self:
-        return self + Self.I(other)
+    fn __add__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return self + other
     
     @always_inline
-    fn __add__(self, other: Self.Discrete.I) -> Self:
-        return self + Self.I(other)
+    fn __add__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return self + other
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
@@ -327,23 +340,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __sub__(self, other: Self.Fraction.Scalar) -> Self:
-        return self - Self.Scalar(other)
+        return self - other
     
     @always_inline
     fn __sub__(self, other: Self.Discrete.Scalar) -> Self:
-        return self - Self.Scalar(other)
+        return self - other
     
     @always_inline
-    fn __sub__(self, other: Self.I) -> Self:
+    fn __sub__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.i - other)
     
     @always_inline
-    fn __sub__(self, other: Self.Fraction.I) -> Self:
-        return self - Self.I(other)
+    fn __sub__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return self - other
     
     @always_inline
-    fn __sub__(self, other: Self.Discrete.I) -> Self:
-        return self - Self.I(other)
+    fn __sub__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return self - other
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
@@ -355,23 +368,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __mul__(self, other: Self.Fraction.Scalar) -> Self:
-        return self*Self.Scalar(other)
+        return self*other
     
     @always_inline
     fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
-        return self*Self.Scalar(other)
+        return self*other
     
     @always_inline
-    fn __mul__(self, other: Self.I) -> Self:
+    fn __mul__(self, other: Self.Antiscalar) -> Self:
         return Self(self.i*other, self.s*other)
     
     @always_inline
-    fn __mul__(self, other: Self.Fraction.I) -> Self:
-        return self*Self.I(other)
+    fn __mul__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return self*other
     
     @always_inline
-    fn __mul__(self, other: Self.Discrete.I) -> Self:
-        return self*Self.I(other)
+    fn __mul__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return self*other
     
     @always_inline
     fn __mul__(self, other: Self) -> Self:
@@ -383,23 +396,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self/Self.Scalar(other)
+        return self/other
     
     @always_inline
     fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self/Self.Scalar(other)
+        return self/other
     
     @always_inline
-    fn __truediv__(self, other: Self.I) -> Self:
+    fn __truediv__(self, other: Self.Antiscalar) -> Self:
         return self * (1/other)
     
     @always_inline
-    fn __truediv__(self, other: Self.Fraction.I) -> Self:
-        return self/Self.I(other)
+    fn __truediv__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return self/other
     
     @always_inline
-    fn __truediv__(self, other: Self.Discrete.I) -> Self:
-        return self/Self.I(other)
+    fn __truediv__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return self/other
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self:
@@ -411,23 +424,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self//Self.Scalar(other)
+        return self//other
     
     @always_inline
     fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self//Self.Scalar(other)
+        return self//other
     
     @always_inline
-    fn __floordiv__(self, other: Self.I) -> Self:
+    fn __floordiv__(self, other: Self.Antiscalar) -> Self:
         return Self(self.i//other, self.s//other)
     
     @always_inline
-    fn __floordiv__(self, other: Self.Fraction.I) -> Self:
-        return self//Self.I(other)
+    fn __floordiv__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return self//other
     
     @always_inline
-    fn __floordiv__(self, other: Self.Discrete.I) -> Self:
-        return self//Self.I(other)
+    fn __floordiv__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return self//other
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self:
@@ -442,23 +455,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __radd__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other) + self
+        return other + self
     
     @always_inline
-    fn __radd__(self, other: Self.I) -> Self:
+    fn __radd__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, other + self.i)
     
     @always_inline
-    fn __radd__(self, other: Self.Fraction.I) -> Self:
-        return Self.I(other) + self
+    fn __radd__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return other + self
     
     @always_inline
-    fn __radd__(self, other: Self.Discrete.I) -> Self:
-        return Self.I(other) + self
+    fn __radd__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
@@ -470,23 +483,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rsub__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other) - self
+        return other - self
     
     @always_inline
-    fn __rsub__(self, other: Self.I) -> Self:
+    fn __rsub__(self, other: Self.Antiscalar) -> Self:
         return Self(-self.s, other - self.i)
     
     @always_inline
-    fn __rsub__(self, other: Self.Fraction.I) -> Self:
-        return Self.I(other) - self
+    fn __rsub__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return other - self
     
     @always_inline
-    fn __rsub__(self, other: Self.Discrete.I) -> Self:
-        return Self.I(other) - self
+    fn __rsub__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
@@ -498,23 +511,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)*self
+        return other*self
     
     @always_inline
-    fn __rmul__(self, other: Self.I) -> Self:
+    fn __rmul__(self, other: Self.Antiscalar) -> Self:
         return Self(other*self.i, other*self.s)
     
     @always_inline
-    fn __rmul__(self, other: Self.Fraction.I) -> Self:
-        return Self.I(other)*self
+    fn __rmul__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return other*self
     
     @always_inline
-    fn __rmul__(self, other: Self.Discrete.I) -> Self:
-        return Self.I(other)*self
+    fn __rmul__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self:
@@ -526,23 +539,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)/self
+        return other/self
     
     @always_inline
-    fn __rtruediv__(self, other: Self.I) -> Self:
+    fn __rtruediv__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, -self.i) * (other/(self.s.fma(self.s, -self.i*self.i)))
     
     @always_inline
-    fn __rtruediv__(self, other: Self.Fraction.I) -> Self:
-        return Self.I(other)/self
+    fn __rtruediv__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return other/self
     
     @always_inline
-    fn __rtruediv__(self, other: Self.Discrete.I) -> Self:
-        return Self.I(other)/self
+    fn __rtruediv__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self:
@@ -554,23 +567,23 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other)//self
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)//self
+        return other//self
     
     @always_inline
-    fn __rfloordiv__(self, other: Self.I) -> Self:
+    fn __rfloordiv__(self, other: Self.Antiscalar) -> Self:
         return (Self(self.s, -self.i)*other) // self.s.fma(self.s, -self.i*self.i)
     
     @always_inline
-    fn __rfloordiv__(self, other: Self.Fraction.I) -> Self:
-        return Self.I(other)//self
+    fn __rfloordiv__(self, other: Self.Fraction.Antiscalar) -> Self:
+        return other//self
     
     @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete.I) -> Self:
-        return Self.I(other)//self
+    fn __rfloordiv__(self, other: Self.Discrete.Antiscalar) -> Self:
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self:
@@ -592,15 +605,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         self = self + other
     
     @always_inline
-    fn __iadd__(inout self, other: Self.I):
+    fn __iadd__(inout self, other: Self.Antiscalar):
         self = self + other
         
     @always_inline
-    fn __iadd__(inout self, other: Self.Fraction.I):
+    fn __iadd__(inout self, other: Self.Fraction.Antiscalar):
         self = self + other
         
     @always_inline
-    fn __iadd__(inout self, other: Self.Discrete.I):
+    fn __iadd__(inout self, other: Self.Discrete.Antiscalar):
         self = self + other
     
     @always_inline
@@ -620,15 +633,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         self = self - other
     
     @always_inline
-    fn __isub__(inout self, other: Self.I):
+    fn __isub__(inout self, other: Self.Antiscalar):
         self = self - other
         
     @always_inline
-    fn __isub__(inout self, other: Self.Fraction.I):
+    fn __isub__(inout self, other: Self.Fraction.Antiscalar):
         self = self - other
         
     @always_inline
-    fn __isub__(inout self, other: Self.Discrete.I):
+    fn __isub__(inout self, other: Self.Discrete.Antiscalar):
         self = self - other
     
     @always_inline
@@ -648,15 +661,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         self = self*other
     
     @always_inline
-    fn __imul__(inout self, other: Self.I):
+    fn __imul__(inout self, other: Self.Antiscalar):
         self = self*other
         
     @always_inline
-    fn __imul__(inout self, other: Self.Fraction.I):
+    fn __imul__(inout self, other: Self.Fraction.Antiscalar):
         self = self*other
         
     @always_inline
-    fn __imul__(inout self, other: Self.Discrete.I):
+    fn __imul__(inout self, other: Self.Discrete.Antiscalar):
         self = self*other
     
     @always_inline
@@ -676,15 +689,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         self = self/other
     
     @always_inline
-    fn __itruediv__(inout self, other: Self.I):
+    fn __itruediv__(inout self, other: Self.Antiscalar):
         self = self/other
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Fraction.I):
+    fn __itruediv__(inout self, other: Self.Fraction.Antiscalar):
         self = self/other
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Discrete.I):
+    fn __itruediv__(inout self, other: Self.Discrete.Antiscalar):
         self = self/other
     
     @always_inline
@@ -704,15 +717,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         self = self//other
     
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.I):
+    fn __ifloordiv__(inout self, other: Self.Antiscalar):
         self = self//other
         
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.Fraction.I):
+    fn __ifloordiv__(inout self, other: Self.Fraction.Antiscalar):
         self = self//other
         
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.Discrete.I):
+    fn __ifloordiv__(inout self, other: Self.Discrete.Antiscalar):
         self = self//other
     
     @always_inline
@@ -727,14 +740,14 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
 @register_passable("trivial")
 struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
-    alias Fraction = FloatH[sq].I
-    alias Discrete = IntH[sq].I
+    alias Fraction = FloatH[sq].Antiscalar
+    alias Discrete = IntH[sq].Antiscalar
     alias Coef = SIMD[dt,1]
     alias Unit = HSIMD_i[sq,dt,1]
     
     alias Multivector = HSIMD[sq,dt,sw]
     alias Scalar = SIMD[dt,sw]
-    #---- I = Self
+    #---- Antiscalar = Self
     
     var s: Self.Scalar
     
@@ -743,36 +756,20 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0}
-    
-    @always_inline
-    fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s}
-    
+        return Self{s:1}
+
     @always_inline
     fn __init__(i: Self.Fraction) -> Self:
         return Self{s:i.s}
-    
-    @always_inline
-    fn __init__(s: Self.Fraction.Scalar) -> Self:
-        return Self{s:s}
     
     @always_inline
     fn __init__(i: Self.Discrete) -> Self:
         return Self{s:i.s}
     
     @always_inline
-    fn __init__(s: Self.Discrete.Scalar) -> Self:
-        return Self{s:s}
-    
-    @always_inline
     fn __init__(u: Self.Unit) -> Self:
         return Self{s:u.s}
-    '''
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s}
-    '''
+
     
     #------ To ------#
     
@@ -782,11 +779,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn cast[target: DType](self) -> HSIMD_i[sq,target,sw]:
-        return HSIMD_i[sq,target,sw](self.s.cast[target]())
+        return HSIMD_i[sq,target,sw]{s:self.s.cast[target]()}
 
     @always_inline
     fn to_discrete(self) -> Self.Discrete:
-        return Self.Discrete(self.s.to_int())
+        return Self.Discrete{s:self.s.to_int()}
     
     
     #------ Formatting ------#
@@ -805,7 +802,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __getitem__(self, index: Int) -> Self.Unit:
-        return Self.Unit(self.s[index])
+        return Self.Unit{s:self.s[index]}
     
     @always_inline
     fn __setitem__(inout self, index: Int, item: Self.Unit):
@@ -824,18 +821,18 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn reduce_max(self) -> Self.Unit:
-        return Self.Unit(self.s.reduce_max())
+        return Self.Unit{s:self.s.reduce_max()}
     
     @always_inline
     fn reduce_min(self) -> Self.Unit:
-        return Self.Unit(self.s.reduce_min())
+        return Self.Unit{s:self.s.reduce_min()}
     
     
     #------ Operators ------#
     
     @always_inline
     fn __neg__(self) -> Self:
-        return Self(-self.s)
+        return Self{s:-self.s}
     
     @always_inline
     fn __lt__(self, other: Self) -> Bool:  
@@ -874,11 +871,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn splat(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-         return self.splat(Self.Unit.Scalar(other))
+         return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self.splat(Self.Unit.Scalar(other))
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Unit) -> Self:
@@ -886,11 +883,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn splat(self, other: Self.Fraction) -> Self:
-        return self.splat(Self.Unit(other))
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Discrete) -> Self:
-        return self.splat(Self.Unit(other))
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
@@ -898,11 +895,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn splat(self, other: Self.Fraction.Multivector) -> Self.Multivector:
-        return self.splat(Self.Unit.Multivector(other))
+        return self.splat(other)
     
     @always_inline
     fn splat(self, other: Self.Discrete.Multivector) -> Self.Multivector:
-        return self.splat(Self.Unit.Multivector(other))
+        return self.splat(other)
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self.Multivector:
@@ -910,7 +907,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self) -> Self:
-        return Self(self.s.fma(mul,acc.s))
+        return Self{s:self.s.fma(mul,acc.s)}
     
     @always_inline
     fn fma(self, mul: Self, acc: Self.Scalar) -> Self.Scalar:
@@ -946,23 +943,23 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     '''
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
-        return HSIMD_i[sq,dt,slice_width](self.s.slice[slice_width](offset))
+        return HSIMD_i[sq,dt,slice_width]{s:self.s.slice[slice_width](offset)}
 
     @always_inline
     fn rotate_left[shift: Int](self) -> Self:
-        return Self(self.s.rotate_left[shift]())
+        return Self{s:self.s.rotate_left[shift]()}
     
     @always_inline
     fn rotate_right[shift: Int](self) -> Self:
-        return Self(self.s.rotate_right[shift]())
+        return Self{s:self.s.rotate_right[shift]()}
     
     @always_inline
     fn shift_left[shift: Int](self) -> Self:
-        return Self(self.s.shift_left[shift]())
+        return Self{s:self.s.shift_left[shift]()}
     
     @always_inline
     fn shift_right[shift: Int](self) -> Self:
-        return Self(self.s.shift_right[shift]())
+        return Self{s:self.s.shift_right[shift]()}
     
     
     #------ Arithmetic ------#
@@ -973,23 +970,23 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __add__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return self + Self.Scalar(other)
+        return self + other
     
     @always_inline
     fn __add__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self + Self.Scalar(other)
+        return self + other
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s)
+        return Self{s:self.s + other.s}
     
     @always_inline
     fn __add__(self, other: Self.Fraction) -> Self:
-        return self + Self(other)
+        return self + other
     
     @always_inline
     fn __add__(self, other: Self.Discrete) -> Self:
-        return self + Self(other)
+        return self + other
     
     @always_inline
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1001,23 +998,23 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __sub__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return self - Self.Scalar(other)
+        return self - other
     
     @always_inline
     fn __sub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self - Self.Scalar(other)
+        return self - other
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
-        return Self(self.s - other.s)
+        return Self{s:self.s - other.s}
     
     @always_inline
     fn __sub__(self, other: Self.Fraction) -> Self:
-        return self - Self(other)
+        return self - other
     
     @always_inline
     fn __sub__(self, other: Self.Discrete) -> Self:
-        return self - Self(other)
+        return self - other
     
     @always_inline
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1025,15 +1022,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self(self.s*other)
+        return Self{s:self.s*other}
     
     @always_inline
     fn __mul__(self, other: Self.Fraction.Scalar) -> Self:
-        return self*Self.Scalar(other)
+        return self*other
     
     @always_inline
     fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
-        return self*Self.Scalar(other)
+        return self*other
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
@@ -1049,11 +1046,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __mul__(self, other: Self.Fraction) -> Self.Scalar:
-        return self*Self(other)
+        return self*other
     
     @always_inline
     fn __mul__(self, other: Self.Discrete) -> Self.Scalar:
-        return self*Self(other)
+        return self*other
     
     @always_inline
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1061,15 +1058,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s/other)
+        return Self{s:self.s/other}
     
     @always_inline
     fn __truediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self/Self.Scalar(other)
+        return self/other
     
     @always_inline
     fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self/Self.Scalar(other)
+        return self/other
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Scalar:
@@ -1077,11 +1074,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self.Fraction) -> Self.Scalar:
-        return self/Self(other)
+        return self/other
     
     @always_inline
     fn __truediv__(self, other: Self.Discrete) -> Self.Scalar:
-        return self/Self(other)
+        return self/other
     
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1089,15 +1086,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s//other)
+        return Self{s:self.s//other}
     
     @always_inline
     fn __floordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self//Self.Scalar(other)
+        return self//other
     
     @always_inline
     fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self//Self.Scalar(other)
+        return self//other
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
@@ -1105,11 +1102,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self.Fraction) -> Self.Scalar:
-        return self//Self(other)
+        return self//other
     
     @always_inline
     fn __floordiv__(self, other: Self.Discrete) -> Self.Scalar:
-        return self//Self(other)
+        return self//other
     
     @always_inline
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1124,23 +1121,23 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __radd__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return Self.Scalar(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return Self.Scalar(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s)
+        return Self{s:other.s + self.s}
     
     @always_inline
     fn __radd__(self, other: Self.Fraction) -> Self:
-        return Self(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self.Discrete) -> Self:
-        return Self(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1152,23 +1149,23 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rsub__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return Self.Scalar(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return Self.Scalar(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self(other.s - self.s)
+        return Self{s:other.s - self.s}
     
     @always_inline
     fn __rsub__(self, other: Self.Fraction) -> Self:
-        return Self(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self.Discrete) -> Self:
-        return Self(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1176,15 +1173,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self(other*self.s)
+        return Self{s:other*self.s}
     
     @always_inline
     fn __rmul__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
@@ -1200,11 +1197,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self.Fraction) -> Self.Scalar:
-        return Self(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self.Discrete) -> Self.Scalar:
-        return Self(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1212,15 +1209,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self:
-        return Self(other/self.s)
+        return Self{s:other/self.s}
     
     @always_inline
     fn __rtruediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Scalar:
@@ -1228,11 +1225,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self.Fraction) -> Self.Scalar:
-        return Self(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Discrete) -> Self.Scalar:
-        return Self(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1240,15 +1237,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Scalar) -> Self:
-        return Self(other//self.s)
+        return Self{s:other//self.s}
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return Self.Scalar(other)//self
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)//self
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:
@@ -1256,11 +1253,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
         
     @always_inline
     fn __rfloordiv__(self, other: Self.Fraction) -> Self.Scalar:
-         return Self(other)//self
+         return other//self
         
     @always_inline
     fn __rfloordiv__(self, other: Self.Discrete) -> Self.Scalar:
-         return Self(other)//self
+         return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:

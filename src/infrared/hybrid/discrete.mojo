@@ -15,52 +15,61 @@ struct IntH[sq: Int]:
     
     #---- Multivector = Self
     alias Scalar = Int
-    alias I = IntH_i[sq]
+    alias Antiscalar = IntH_i[sq]
+    alias I = Self.Antiscalar()
     
     var s: Self.Scalar
-    var i: Self.I
+    var i: Self.Antiscalar
     
     
     #------ Initialize ------#
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0, i:0}
+        return Self{s:0, i:Self.Antiscalar{s:0}}
     
     @always_inline
     fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s, i:0}
+        return Self{s:s, i:Self.Antiscalar{s:0}}
     
     @always_inline
-    fn __init__(i: Self.I) -> Self:
+    fn __init__(i: Self.Antiscalar) -> Self:
         return Self{s:0, i:i}
     
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.I) -> Self:
+    fn __init__(s: Self.Scalar, i: Self.Scalar) -> Self:
+        return Self{s:s, i:Self.Antiscalar{s:i}}
+
+    @always_inline
+    fn __init__(s: Self.Scalar, i: Self.Antiscalar) -> Self:
         return Self{s:s, i:i}
     
     @always_inline
     fn __init__(m: Self.Unit) -> Self:
-        return Self{s:m.s.__int__(), i:Self.I(m.i)}
+        return Self{s:m.s.value, i:m.i}
     
     @always_inline
     fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s.__int__(), i:0}
+        return Self{s:s.__int__(), i:Self.Antiscalar{s:0}}
     
     @always_inline
-    fn __init__(i: Self.Unit.I) -> Self:
-        return Self{s:0, i:Self.I(i)}
+    fn __init__(i: Self.Unit.Antiscalar) -> Self:
+        return Self{s:0, i:i}
     
     @always_inline
-    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.I) -> Self:
-        return Self{s:s.__int__(), i:Self.I(i)}
+    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.Scalar) -> Self:
+        return Self{s:s.__int__(), i:Self.Antiscalar{s:i.value}}
+
+    @always_inline
+    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.Antiscalar) -> Self:
+        return Self{s:s.__int__(), i:i}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s == 0 and self.i == Self.I()
+        return self.s == 0 and self.i == Self.Antiscalar{s:0}
     
     
     #------ Formatting ------#
@@ -129,7 +138,7 @@ struct IntH[sq: Int]:
         return Self(self.s<<other, self.i)
     
     @always_inline
-    fn __lshift__(self, other: Self.I) -> Self:
+    fn __lshift__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.i<<other)
     
     @always_inline
@@ -141,7 +150,7 @@ struct IntH[sq: Int]:
         return Self(self.s>>other, self.i)
     
     @always_inline
-    fn __rshift__(self, other: Self.I) -> Self:
+    fn __rshift__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.i>>other)
     
     @always_inline
@@ -156,7 +165,7 @@ struct IntH[sq: Int]:
         return Self(self.s + other, self.i)
     
     @always_inline
-    fn __add__(self, other: Self.I) -> Self:
+    fn __add__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.i + other)
     
     @always_inline
@@ -168,7 +177,7 @@ struct IntH[sq: Int]:
         return Self(self.s - other, self.i)
     
     @always_inline
-    fn __sub__(self, other: Self.I) -> Self:
+    fn __sub__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.i - other)
     
     @always_inline
@@ -180,7 +189,7 @@ struct IntH[sq: Int]:
         return Self(self.s*other, self.i*other)
     
     @always_inline
-    fn __mul__(self, other: Self.I) -> Self:
+    fn __mul__(self, other: Self.Antiscalar) -> Self:
         return Self(self.i*other, self.s*other)
     
     @always_inline
@@ -192,7 +201,7 @@ struct IntH[sq: Int]:
         return Self.Fraction(self) * (1/other).value
     
     @always_inline
-    fn __truediv__(self, other: Self.I) -> Self.Fraction:
+    fn __truediv__(self, other: Self.Antiscalar) -> Self.Fraction:
         return self * (1/other)
     
     @always_inline
@@ -204,7 +213,7 @@ struct IntH[sq: Int]:
         return Self(self.s//other, self.i//other)
     
     @always_inline
-    fn __floordiv__(self, other: Self.I) -> Self:
+    fn __floordiv__(self, other: Self.Antiscalar) -> Self:
         return Self(self.i//other, self.s//other)
     
     @always_inline
@@ -219,7 +228,7 @@ struct IntH[sq: Int]:
         return other<<self.s
     
     @always_inline
-    fn __rlshift__(self, other: Self.I) -> Self.I:
+    fn __rlshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return other<<self.i
     
     @always_inline
@@ -231,7 +240,7 @@ struct IntH[sq: Int]:
         return  other>>self.s
     
     @always_inline
-    fn __rrshift__(self, other: Self.I) -> Self.I:
+    fn __rrshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return other>>self.i
     
     @always_inline
@@ -246,7 +255,7 @@ struct IntH[sq: Int]:
         return Self(other + self.s, self.i)
     
     @always_inline
-    fn __radd__(self, other: Self.I) -> Self:
+    fn __radd__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, other + self.i)
     
     @always_inline
@@ -258,7 +267,7 @@ struct IntH[sq: Int]:
         return Self(other - self.s, -self.i)
     
     @always_inline
-    fn __rsub__(self, other: Self.I) -> Self:
+    fn __rsub__(self, other: Self.Antiscalar) -> Self:
         return Self(-self.s, other - self.i)
     
     @always_inline
@@ -270,7 +279,7 @@ struct IntH[sq: Int]:
         return Self(other*self.s, other*self.i)
     
     @always_inline
-    fn __rmul__(self, other: Self.I) -> Self:
+    fn __rmul__(self, other: Self.Antiscalar) -> Self:
         return Self(other*self.i, other*self.s)
     
     @always_inline
@@ -282,7 +291,7 @@ struct IntH[sq: Int]:
         return Self.Fraction(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i)).value
     
     @always_inline
-    fn __rtruediv__(self, other: Self.I) -> Self.Fraction:
+    fn __rtruediv__(self, other: Self.Antiscalar) -> Self.Fraction:
         return Self(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i))
     
     @always_inline
@@ -294,7 +303,7 @@ struct IntH[sq: Int]:
         return (Self(self.s, -self.i)*other) // (self.s*self.s - self.i*self.i)
     
     @always_inline
-    fn __rfloordiv__(self, other: Self.I) -> Self:
+    fn __rfloordiv__(self, other: Self.Antiscalar) -> Self:
         return (Self(self.s, -self.i)*other) // (self.s*self.s - self.i*self.i)
     
     @always_inline
@@ -309,7 +318,7 @@ struct IntH[sq: Int]:
         self = self<<other
     
     @always_inline
-    fn __ilshift__(inout self, other: Self.I):
+    fn __ilshift__(inout self, other: Self.Antiscalar):
         self = self<<other
     
     @always_inline
@@ -321,7 +330,7 @@ struct IntH[sq: Int]:
         self = self>>other
     
     @always_inline
-    fn __irshift__(inout self, other: Self.I):
+    fn __irshift__(inout self, other: Self.Antiscalar):
         self = self>>other
     
     @always_inline
@@ -336,7 +345,7 @@ struct IntH[sq: Int]:
         self = self + other
     
     @always_inline
-    fn __iadd__(inout self, other: Self.I):
+    fn __iadd__(inout self, other: Self.Antiscalar):
         self = self + other
     
     @always_inline
@@ -348,7 +357,7 @@ struct IntH[sq: Int]:
         self = self - other
     
     @always_inline
-    fn __isub__(inout self, other: Self.I):
+    fn __isub__(inout self, other: Self.Antiscalar):
         self = self - other
     
     @always_inline
@@ -360,7 +369,7 @@ struct IntH[sq: Int]:
         self = self*other
     
     @always_inline
-    fn __imul__(inout self, other: Self.I):
+    fn __imul__(inout self, other: Self.Antiscalar):
         self = self*other
     
     @always_inline
@@ -372,7 +381,7 @@ struct IntH[sq: Int]:
         self = self//other
     
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.I):
+    fn __ifloordiv__(inout self, other: Self.Antiscalar):
         self = self//other
     
     @always_inline
@@ -387,34 +396,26 @@ struct IntH[sq: Int]:
 @register_passable("trivial")
 struct IntH_i[sq: Int]:
     
-    alias Unit = Self.Multivector.Unit.I
-    alias Fraction = FloatH[sq].I
+    alias Unit = Self.Multivector.Unit.Antiscalar
+    alias Fraction = FloatH[sq].Antiscalar
     #---- Discrete = Self
     
     alias Multivector = IntH[sq]
     alias Scalar = Int
-    #---- I = Self
+    #---- Antiscalar = Self
     
     var s: Self.Scalar
     
     
     #------ Initialize ------#
-    
+
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0}
-    
-    @always_inline
-    fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s}
-    
+        return Self{s:1}
+
     @always_inline
     fn __init__(x: Self.Unit) -> Self:
         return Self{s:x.s.__int__()}
-    
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s.__int__()}
     
     
     #------ To ------#
@@ -434,7 +435,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __neg__(self) -> Self:
-        return Self(-self.s)
+        return -self.s * Self{s:1}
     
     @always_inline
     fn __lt__(self, other: Self) -> Bool:  
@@ -465,7 +466,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __invert__(self) -> Self:
-        return Self(~self.s)
+        return Self{s:~self.s}
     
     @always_inline
     fn __lshift__(self, other: Self.Scalar) -> Self:
@@ -473,11 +474,11 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __lshift__(self, other: Self) -> Self:
-        return Self(self.s<<other.s)
+        return Self{s:self.s<<other.s}
     
     @always_inline
     fn __lshift__(self, other: Self.Multivector) -> Self:
-        return Self(self.s<<other.i.s)
+        return Self{s:self.s<<other.i.s}
     
     @always_inline
     fn __rshift__(self, other: Self.Scalar) -> Self:
@@ -485,11 +486,11 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rshift__(self, other: Self) -> Self:
-        return Self(self.s>>other.s)
+        return Self{s:self.s>>other.s}
     
     @always_inline
     fn __rshift__(self, other: Self.Multivector) -> Self:
-        return Self(self.s>>other.i.s)
+        return Self{s:self.s>>other.i.s}
     
     
     #------ Arithmetic ------#
@@ -500,7 +501,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s)
+        return Self{s:self.s + other.s}
     
     @always_inline
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
@@ -512,7 +513,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
-        return Self(self.s - other.s)
+        return Self{s:self.s - other.s}
     
     @always_inline
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
@@ -520,7 +521,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self(self.s*other)
+        return Self{s:self.s*other}
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
@@ -540,7 +541,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self.Fraction:
-        return Self.Fraction((self.s/other))
+        return Self.Fraction{s:(self.s/other).value}
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Fraction.Scalar:
@@ -552,7 +553,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s//other)
+        return Self{s:self.s//other}
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
@@ -571,7 +572,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rlshift__(self, other: Self) -> Self:
-        return Self(other.s<<self.s)
+        return Self{s:other.s<<self.s}
     
     @always_inline
     fn __rlshift__(self, other: Self.Multivector) -> Self.Multivector:
@@ -583,7 +584,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rrshift__(self, other: Self) -> Self:
-        return Self(other.s>>self.s)
+        return Self{s:other.s>>self.s}
     
     @always_inline
     fn __rrshift__(self, other: Self.Multivector) -> Self.Multivector:
@@ -598,7 +599,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s)
+        return Self{s:other.s + self.s}
     
     @always_inline
     fn __radd__(self, other: Self.Multivector) -> Self.Multivector:
@@ -610,7 +611,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self(other.s - self.s)
+        return Self{s:other.s - self.s}
     
     @always_inline
     fn __rsub__(self, other: Self.Multivector) -> Self.Multivector:
@@ -618,7 +619,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self(other*self.s)
+        return Self{s:other*self.s}
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
@@ -638,7 +639,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self.Fraction:
-        return Self.Fraction((other/self.s))
+        return Self.Fraction{s:(other/self.s).value}
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Fraction.Scalar:
@@ -650,7 +651,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Scalar) -> Self:
-        return Self(other//self.s)
+        return Self{s:other//self.s}
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:

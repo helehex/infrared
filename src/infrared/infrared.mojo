@@ -15,16 +15,16 @@ fn select[dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: SIMD[dt,sw]
     return _select(cond, false_case, true_case)
 
 @always_inline
-fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: HSIMD[sq,dt,sw].I, true_case: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return select(cond, false_case.s, true_case.s)
+fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: HSIMD[sq,dt,sw].Antiscalar, true_case: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Antiscalar:
+    return select(cond, false_case.s, true_case.s) * HSIMD[sq,dt,sw].I
 
 @always_inline
-fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: SIMD[dt,sw], true_case: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw]:
-    return select(cond, false_case, 0) + select(cond, HSIMD[sq,dt,sw].I(0), true_case)
+fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: SIMD[dt,sw], true_case: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw]:
+    return select(cond, false_case, 0) + select(cond, 0, true_case)
 
 @always_inline
-fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: HSIMD[sq,dt,sw].I, true_case: SIMD[dt,sw]) -> HSIMD[sq,dt,sw]:
-    return select(cond, 0, true_case) + select(cond, false_case, HSIMD[sq,dt,sw].I(0))
+fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: HSIMD[sq,dt,sw].Antiscalar, true_case: SIMD[dt,sw]) -> HSIMD[sq,dt,sw]:
+    return select(cond, 0, true_case) + select(cond, false_case, 0)
 
 @always_inline
 fn select[sq: Int, dt: DType, sw: Int](cond: SIMD[DType.bool,sw], false_case: HSIMD[sq,dt,sw], true_case: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
@@ -109,18 +109,18 @@ fn min[dt: DType, sw: Int](a: SIMD[dt,sw], b: SIMD[dt,sw]) -> SIMD[dt,sw]:
 #--- min antiscalar
 # IntH.I
 @always_inline
-fn min[sq: Int](a: IntH[sq].I, b: IntH[sq].I) -> IntH[sq].I:
-    return min(a.s, b.s)
+fn min[sq: Int](a: IntH[sq].Antiscalar, b: IntH[sq].Antiscalar) -> IntH[sq].Antiscalar:
+    return min(a.s, b.s) * IntH[sq].I
 
 # FloatH.I
 @always_inline
-fn min[sq: Int](a: FloatH[sq].I, b: FloatH[sq].I) -> FloatH[sq].I:
-    return min(a.s, b.s)
+fn min[sq: Int](a: FloatH[sq].Antiscalar, b: FloatH[sq].Antiscalar) -> FloatH[sq].Antiscalar:
+    return min(a.s, b.s) * FloatH[sq].I
 
 # HSIMD.I
 @always_inline
-fn min[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].I, b: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return min(a.s, b.s)
+fn min[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].Antiscalar, b: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Antiscalar:
+    return min(a.s, b.s) * HSIMD[sq,dt,sw].I
 
 #--- min coefficient within a multivector
 # IntH
@@ -154,12 +154,6 @@ fn min_compose[sq: Int](a: FloatH[sq], b: FloatH[sq]) -> FloatH[sq]:
 fn min_compose[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw], b: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
     return min(a.s, b.s) + min(a.i, b.i)
 
-'''
-@always_inline
-def min_basis[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]):
-    return HSIMD[sq,dt,sw].Basis[index_of_min_coef]
-'''
-
 
 
 
@@ -187,18 +181,18 @@ fn max[dt: DType, sw: Int](a: SIMD[dt,sw], b: SIMD[dt,sw]) -> SIMD[dt,sw]:
 #--- max antiscalar
 # IntH.I
 @always_inline
-fn max[sq: Int](a: IntH[sq].I, b: IntH[sq].I) -> IntH[sq].I:
-    return max(a.s, b.s)
+fn max[sq: Int](a: IntH[sq].Antiscalar, b: IntH[sq].Antiscalar) -> IntH[sq].Antiscalar:
+    return max(a.s, b.s) * IntH[sq].I
 
 # FloatH.I
 @always_inline
-fn max[sq: Int](a: FloatH[sq].I, b: FloatH[sq].I) -> FloatH[sq].I:
-    return max(a.s, b.s)
+fn max[sq: Int](a: FloatH[sq].Antiscalar, b: FloatH[sq].Antiscalar) -> FloatH[sq].Antiscalar:
+    return max(a.s, b.s) * FloatH[sq].I
 
 # HSIMD.I
 @always_inline
-fn max[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].I, b: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return max(a.s, b.s)
+fn max[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].Antiscalar, b: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Antiscalar:
+    return max(a.s, b.s) * HSIMD[sq,dt,sw].I
 
 #--- max coefficient within a multivector
 # IntH
@@ -233,6 +227,12 @@ fn max_compose[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw], b: HSIMD[sq,dt,s
     return max(a.s, b.s) + max(a.i, b.i)
 
 
+'''
+@always_inline
+def min_basis[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]):
+    return HSIMD[sq,dt,sw].Basis[index_of_min_coef]
+'''
+
 
 #------ abs ------#
 #---
@@ -247,8 +247,8 @@ fn abs[dt: DType, sw: Int](s: SIMD[dt,sw]) -> SIMD[dt,sw]:
     return _abs(s)
 
 @always_inline
-fn abs[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return abs(i.s)
+fn abs[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Antiscalar:
+    return abs(i.s) * HSIMD[sq,dt,sw].I
 
 @always_inline
 fn abs[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
@@ -270,8 +270,8 @@ fn sign[dt: DType, sw: Int](s: SIMD[dt,sw]) -> SIMD[dt,sw]:
     return s/abs(s)
 
 @always_inline
-fn sign[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return sign(i.s)
+fn sign[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Antiscalar:
+    return sign(i.s) * HSIMD[sq,dt,sw].I
 
 @always_inline
 fn sign[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
@@ -292,8 +292,8 @@ fn arg[dt: DType, sw: Int](s: SIMD[dt,sw]) -> SIMD[dt,sw]:
     return (1 - sign(s))*hfpi
 
 @always_inline
-fn arg[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].I) -> HSIMD[sq,dt,sw].I:
-    return arg(i.s)
+fn arg[sq: Int, dt: DType, sw: Int](i: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Antiscalar:
+    return arg(i.s) * HSIMD[sq,dt,sw].I
 
 @always_inline
 fn arg[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
