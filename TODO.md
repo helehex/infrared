@@ -9,8 +9,10 @@
   - try get rid of functions marked with redundant
   - may rename alias type `I` to `Antiscalar`
     - then rename Hybrid types `i` value, to `a`
-    - then add `alias i: Antiscalar = Antiscalar(1)` to Hybrid types
+    - then add `alias i: Antiscalar = Antiscalar{s:1}` to Hybrid types
     - then maybe get rid of implicit conversion from `Scalar` to `Antiscalar` (causing some artifacts)
+    - **tried this in hx0 branch, isn't quite working**
+    - may create implicit coef structs to fix this.
   - use float in sq parameterization, instead of int
     - FloatH defines an alias type which represents the discrete type of similar signature (IntH),
     - Just changing FloatH's sq parameter to be a Float type causes the discrete counterpart to be uncertain
