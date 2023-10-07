@@ -9,80 +9,41 @@ from infrared import min, max, min_coef, max_coef, symbol
 @register_passable("trivial")
 struct FloatH[sq: Int]:
     
-    alias Unit = HSIMD[sq,DType.float64,1]
-    #---- Fraction = Self
-    alias Discrete = IntH[sq]
+    alias Coef = FloatLiteral
+
+    alias Unit      = HSIMD[sq,DType.float64,1]
+    #---- Fraction  = Self
+    alias Discrete  = IntH[sq]
     
-    #---- Multivector = Self
-    alias Scalar = FloatLiteral
-    alias Antiscalar = FloatH_i[sq]
-    alias I = Self.Antiscalar()
+    #---- Multivector  = Self
+    alias Scalar       = FloatH_s[sq]
+    alias Antiscalar   = FloatH_a[sq]
     
     var s: Self.Scalar
-    var i: Self.Antiscalar
+    var a: Self.Antiscalar
     
     
     #------ Initialize ------#
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0, i:Self.Antiscalar{s:0}}
+        return Self{s:0, a:0}
     
     @always_inline
     fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s, i:Self.Antiscalar{s:0}}
+        return Self{s:s, a:0}
     
     @always_inline
-    fn __init__(i: Self.Antiscalar) -> Self:
-        return Self{s:0, i:i}
+    fn __init__(a: Self.Antiscalar) -> Self:
+        return Self{s:0, a:a}
     
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.Scalar) -> Self:
-        return Self{s:s, i:Self.Antiscalar{s:i}}
+    fn __init__(s: Self.Scalar, a: Self.Scalar) -> Self:
+        return Self{s:s, a:a}
 
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.Antiscalar) -> Self:
-        return Self{s:s, i:i}
-    
-    @always_inline
-    fn __init__(m: Self.Discrete) -> Self:
-        return Self{s:m.s, i:m.i}
-    
-    @always_inline
-    fn __init__(s: Self.Discrete.Scalar) -> Self:
-        return Self{s:s, i:Self.Antiscalar{s:0}}
-    
-    @always_inline
-    fn __init__(i: Self.Discrete.Antiscalar) -> Self:
-        return Self{s:0, i:i}
-    
-    @always_inline
-    fn __init__(s: Self.Discrete.Scalar, i: Self.Discrete.Scalar) -> Self:
-        return Self{s:s, i:Self.Antiscalar{s:i}}
-
-    @always_inline
-    fn __init__(s: Self.Discrete.Scalar, i: Self.Discrete.Antiscalar) -> Self:
-        return Self{s:s, i:i}
-    
-    @always_inline
-    fn __init__(m: Self.Unit) -> Self:
-        return Self{s:m.s.value, i:m.i}
-    
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s.value, i:Self.Antiscalar{s:0}}
-    
-    @always_inline
-    fn __init__(i: Self.Unit.Antiscalar) -> Self:
-        return Self{s:0, i:i}
-    
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.Scalar) -> Self:
-        return Self{s:s.value, i:Self.Antiscalar{s:i.value}}
-
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.Antiscalar) -> Self:
-        return Self{s:s.value, i:i}
+    fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
+        return Self{s:s, a:a}
     
     
     #------ To ------#

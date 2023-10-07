@@ -112,7 +112,11 @@ struct IntH[sq: Int]:
 
     @always_inline
     fn dual(self) -> Self:
-        return Self(self.a.c)
+        return Self(self.a.c, self.s.c)
+
+    @always_inline
+    fn dual_conj(self) -> Self:
+        return self.dual().conjugate()
 
     @always_inline
     fn mag(self) -> Self.Coef:
@@ -154,10 +158,6 @@ struct IntH[sq: Int]:
     @always_inline
     fn dot_coef(self, other: Self) -> Self.Coef:
         return self.s.c*other.s.c + self.a.c*other.a.c
-
-    @always_inline
-    fn wedge(self, other: Self) -> Self:
-        return Self(self.s*other.s, self.s*other.a - self.a*other.s)
 
     @always_inline
     fn wedge(self, other: Self) -> Self:
