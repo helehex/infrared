@@ -1,5 +1,24 @@
 from infrared.hybrid import IntH, FloatH, HSIMD
 
+fn _str(): print()
+fn _str(a: Int): print(a)
+fn _str(a: FloatLiteral): print(a)
+fn _str(a: String): print(a)
+fn _str[dt: DType, sw: Int](a: SIMD[dt,sw]): print(a)
+
+fn _str[sq: Int](a: FloatH[sq]): print(a.__str__())
+fn _str[sq: Int](a: FloatH[sq].Scalar): print(a.__str__())  
+fn _str[sq: Int](a: FloatH[sq].Antiscalar): print(a.__str__())  
+
+fn _str[sq: Int](a: IntH[sq]): print(a.__str__())
+fn _str[sq: Int](a: IntH[sq].Scalar): print(a.__str__())
+fn _str[sq: Int](a: IntH[sq].Antiscalar): print(a.__str__())
+
+
+fn _str[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw]): print(a.__str__())
+fn _str[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].Scalar): print(a.__str__())
+fn _str[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].Antiscalar): print(a.__str__())
+
 fn _print(): print()
 fn _print(a: Int): print(a)
 fn _print(a: FloatLiteral): print(a)

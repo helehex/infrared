@@ -6,15 +6,14 @@ from infrared import min, max, min_coef, max_coef, symbol
 @register_passable("trivial")
 struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
+    alias Single = SIMD[dt,1]
+    alias Unit = HSIMD[sq,dt,1]
     alias Discrete = IntH[sq]
     alias Fraction = FloatH[sq]
-    alias Coef = SIMD[dt,1]
-    alias Unit = HSIMD[sq,dt,1]
     
     #---- Multivector = Self
     alias Scalar = SIMD[dt,sw]
     alias Antiscalar = HSIMD_i[sq,dt,sw]
-    alias I = Self.Antiscalar()
     
     var s: Self.Scalar
     var i: Self.Antiscalar

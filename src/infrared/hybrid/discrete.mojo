@@ -1,5 +1,5 @@
 from infrared.hybrid import FloatH, HSIMD
-from infrared import min, max, min_coef, max_coef, symbol
+from infrared import sqrt, min, max, min_coef, max_coef, symbol
 
 
 
@@ -9,98 +9,78 @@ from infrared import min, max, min_coef, max_coef, symbol
 @register_passable("trivial")
 struct IntH[sq: Int]:
     
-    alias Unit = HSIMD[sq,DType.int64,1]
-    alias Fraction = FloatH[sq]
-    #---- Discrete = Self
+    alias Coef = Int
+
+    alias Unit      = HSIMD[sq,DType.int64,1]
+    alias Fraction  = FloatH[sq]
+    #---- Discrete  = Self
     
-    #---- Multivector = Self
-    alias Scalar = Int
-    alias Antiscalar = IntH_i[sq]
-    alias I = Self.Antiscalar()
-    
+    #---- Multivector  = Self
+    alias Scalar       = IntH_s[sq]
+    alias Antiscalar   = IntH_a[sq]
+
     var s: Self.Scalar
-    var i: Self.Antiscalar
+    var a: Self.Antiscalar
     
     
     #------ Initialize ------#
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0, i:Self.Antiscalar{s:0}}
+        return Self{s:0, a:0}
     
     @always_inline
     fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s, i:Self.Antiscalar{s:0}}
+        return Self{s:s, a:0}
     
     @always_inline
-    fn __init__(i: Self.Antiscalar) -> Self:
-        return Self{s:0, i:i}
+    fn __init__(a: Self.Antiscalar) -> Self:
+        return Self{s:0, a:a}
     
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.Scalar) -> Self:
-        return Self{s:s, i:Self.Antiscalar{s:i}}
+    fn __init__(s: Self.Scalar, a: Self.Scalar) -> Self:
+        return Self{s:s, a:a}
 
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.Antiscalar) -> Self:
-        return Self{s:s, i:i}
-    
-    @always_inline
-    fn __init__(m: Self.Unit) -> Self:
-        return Self{s:m.s.value, i:m.i}
-    
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s.__int__(), i:Self.Antiscalar{s:0}}
-    
-    @always_inline
-    fn __init__(i: Self.Unit.Antiscalar) -> Self:
-        return Self{s:0, i:i}
-    
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.Scalar) -> Self:
-        return Self{s:s.__int__(), i:Self.Antiscalar{s:i.value}}
-
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar, i: Self.Unit.Antiscalar) -> Self:
-        return Self{s:s.__int__(), i:i}
+    fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
+        return Self{s:s, a:a}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s == 0 and self.i == Self.Antiscalar{s:0}
+        return self.s and self.a
     
     
     #------ Formatting ------#
     
     fn __str__(self) -> String:
-        return String(self.s) + " + " + self.i.__str__()
+        return self.s.__str__() + " + " + self.a.__str__()
     
     
     #------ Get / Set ------#
     
-    # name may change; currently with GSIMD: Coef means a length 1 SIMD, Scalar means a length sw SIMD, but the get_coef function returns a Scalar type... possibley reverse indexing, or reverse aliases
     @always_inline
-    fn get_coef(self, index: Int) -> Self.Scalar: 
-        if index == 0: return self.s
-        if index == 1: return self.i.s
+    fn get_coef(self, index: Int) -> Self.Coef: 
+        if index == 0: return self.s.c
+        if index == 1: return self.a.c
         return 0
     
     @always_inline
-    fn set_coef(inout self, index: Int, coef: Self.Scalar):
-        if index == 0: self.s = coef
-        if index == 1: self.i.s = coef
+    fn set_coef(inout self, index: Int, coef: Self.Coef):
+        if index == 0: self.s.c = coef
+        if index == 1: self.a.c = coef
     
     
     #------ Min / Max ------#
     
     @always_inline
-    fn min_coef(self) -> Self.Scalar:
+    fn min_coef(self) -> Self.Coef:
         return min_coef(self)
     
     @always_inline
-    fn max_coef(self) -> Self.Scalar:
+    fn max_coef(self) -> Self.Coef:
         return max_coef(self)
     
     @always_inline
@@ -116,89 +96,146 @@ struct IntH[sq: Int]:
     
     @always_inline
     fn __neg__(self) -> Self:
-        return Self(-self.s, -self.i)
-    
+        return Self(-self.s, -self.a)
+
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
-        return self.s == other.s and self.i == other.i
+        return self.s == other.s and self.a == other.a
     
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
-        return self.s != other.s or self.i != other.i
+        return self.s != other.s or self.a != other.a
+
+    @always_inline
+    fn conjugate(self) -> Self:
+        return Self(self.s, -self.a)
+
+    @always_inline
+    fn dual(self) -> Self:
+        return Self(self.a.c)
+
+    @always_inline
+    fn mag(self) -> Self.Coef:
+        return self.dot(self)
+
+    @always_inline
+    fn mag_conj(self) -> Self.Coef:
+        return self.dot_conj(self)
+
+    @always_inline
+    fn mag_coef(self) -> Self.Coef:
+        return self.dot_coef(self)
+
+    @always_inline
+    fn norm(self) -> Self.Coef:
+        return sqrt(self.mag())
+
+    @always_inline
+    fn norm_conj(self) -> Self.Coef:
+        return sqrt(self.mag_conj())
+
+    @always_inline
+    fn norm_coef(self) -> Self.Coef:
+        return sqrt(self.mag_coef())
+
+    
+
+
+    #------ Product ------#
+
+    @always_inline
+    fn dot(self, other: Self) -> Self.Coef:
+        return self.s*other.s + self.a*other.a
+
+    @always_inline
+    fn dot_conj(self, other: Self) -> Self.Coef:
+        return self.dot(other.conjugate())
+
+    @always_inline
+    fn dot_coef(self, other: Self) -> Self.Coef:
+        return self.s.c*other.s.c + self.a.c*other.a.c
+
+    @always_inline
+    fn wedge(self, other: Self) -> Self:
+        return Self(self.s*other.s, self.s*other.a - self.a*other.s)
+
+    @always_inline
+    fn wedge(self, other: Self) -> Self:
+        return Self(self.s*other.s, self.s*other.a - self.a*other.s)
     
     
     #------ Bit ------#
     
     @always_inline
     fn __invert__(self) -> Self:
-        return Self(~self.s, ~self.i)
+        return Self(~self.s, ~self.a)
     
     @always_inline
     fn __lshift__(self, other: Self.Scalar) -> Self:
-        return Self(self.s<<other, self.i)
+        return Self(self.s<<other, self.a)
     
     @always_inline
     fn __lshift__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i<<other)
+        return Self(self.s, self.a<<other)
     
     @always_inline
     fn __lshift__(self, other: Self) -> Self:
-        return Self(self.s<<other.s, self.i<<other.i)
+        return Self(self.s<<other.s, self.a<<other.a)
     
     @always_inline
     fn __rshift__(self, other: Self.Scalar) -> Self:
-        return Self(self.s>>other, self.i)
+        return Self(self.s>>other, self.a)
     
     @always_inline
     fn __rshift__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i>>other)
+        return Self(self.s, self.a>>other)
     
     @always_inline
     fn __rshift__(self, other: Self) -> Self:
-        return Self(self.s>>other.s, self.i>>other.i)
+        return Self(self.s>>other.s, self.a>>other.a)
     
     
     #------ Arithmetic ------#
     
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self:
-        return Self(self.s + other, self.i)
+        return Self(self.s + other, self.a)
     
     @always_inline
     fn __add__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i + other)
+        return Self(self.s, self.a + other)
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s, self.i + other.i)
+        return Self(self.s + other.s, self.a + other.a)
 
     @always_inline
     fn __sub__(self, other: Self.Scalar) -> Self:
-        return Self(self.s - other, self.i)
+        return Self(self.s - other, self.a)
     
     @always_inline
     fn __sub__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i - other)
+        return Self(self.s, self.a - other)
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
-        return Self(self.s - other.s, self.i - other.i)
+        return Self(self.s - other.s, self.a - other.a)
     
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self(self.s*other, self.i*other)
+        return Self(self.s*other, self.a*other)
     
     @always_inline
     fn __mul__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.i*other, self.s*other)
+        return Self(self.a*other, self.s*other)
     
     @always_inline
     fn __mul__(self, other: Self) -> Self:
-        return Self(self.s*other.s + self.i*other.i, self.i*other.s + self.s*other.i)
+        return Self(self.s*other.s + self.a*other.a, self.a*other.s + self.s*other.a)
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self.Fraction:
-        return Self.Fraction(self) * (1/other).value
+        return Self.Fraction(self) * (1/other)
     
     @always_inline
     fn __truediv__(self, other: Self.Antiscalar) -> Self.Fraction:
@@ -206,19 +243,19 @@ struct IntH[sq: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Fraction:
-        return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) / (other.s*other.s - other.i*other.i)
+        return Self(self.s*other.s - self.a*other.a, self.a*other.s - self.s*other.a) / (other.s*other.s - other.a*other.a)
     
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s//other, self.i//other)
+        return Self(self.s//other, self.a//other)
     
     @always_inline
     fn __floordiv__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.i//other, self.s//other)
+        return Self(self.a//other, self.s//other)
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self:
-        return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) // (other.s*other.s - other.i*other.i)
+        return Self(self.s*other.s - self.a*other.a, self.a*other.s - self.s*other.a) // (other.s*other.s - other.a*other.a)
     
     
     #------ Reverse Bit ------#
@@ -229,11 +266,11 @@ struct IntH[sq: Int]:
     
     @always_inline
     fn __rlshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return other<<self.i
+        return other<<self.a
     
     @always_inline
     fn __rlshift__(self, other: Self) -> Self:
-        return Self(other.s<<self.s, other.i<<self.i)
+        return Self(other.s<<self.s, other.a<<self.a)
     
     @always_inline
     fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
@@ -241,58 +278,58 @@ struct IntH[sq: Int]:
     
     @always_inline
     fn __rrshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return other>>self.i
+        return other>>self.a
     
     @always_inline
     fn __rrshift__(self, other: Self) -> Self:
-        return Self(other.s>>self.s, other.i>>self.i)
+        return Self(other.s>>self.s, other.a>>self.a)
     
     
     #------ Reverse Arithmetic ------#
     
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self:
-        return Self(other + self.s, self.i)
+        return Self(other + self.s, self.a)
     
     @always_inline
     fn __radd__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, other + self.i)
+        return Self(self.s, other + self.a)
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s, other.i + self.i)
+        return Self(other.s + self.s, other.a + self.a)
     
     @always_inline
     fn __rsub__(self, other: Self.Scalar) -> Self:
-        return Self(other - self.s, -self.i)
+        return Self(other - self.s, -self.a)
     
     @always_inline
     fn __rsub__(self, other: Self.Antiscalar) -> Self:
-        return Self(-self.s, other - self.i)
+        return Self(-self.s, other - self.a)
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self(other.s - self.s, other.i - self.i)
+        return Self(other.s - self.s, other.a - self.a)
 
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self(other*self.s, other*self.i)
+        return Self(other*self.s, other*self.a)
     
     @always_inline
     fn __rmul__(self, other: Self.Antiscalar) -> Self:
-        return Self(other*self.i, other*self.s)
+        return Self(other*self.a, other*self.s)
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self:
-        return Self(other.s*self.s + other.i*self.i, other.s*self.i + other.i*self.s)
+        return Self(other.s*self.s + other.a*self.a, other.s*self.a + other.a*self.s)
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self.Fraction:
-        return Self.Fraction(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i)).value
+        return Self.Fraction(self.s, -self.a) * (other/(self.s*self.s - self.a*self.a)).value
     
     @always_inline
     fn __rtruediv__(self, other: Self.Antiscalar) -> Self.Fraction:
-        return Self(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i))
+        return Self(self.s, -self.a) * (other/(self.s*self.s - self.a*self.a))
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Fraction:
@@ -387,42 +424,73 @@ struct IntH[sq: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
-        
-        
-        
-        
-#------ I ------#
-#---        
+
+
+
+
+#----- Scalar ------#
+#---
 @register_passable("trivial")
-struct IntH_i[sq: Int]:
+struct IntH_s[sq: Int]:
     
-    alias Unit = Self.Multivector.Unit.Antiscalar
-    alias Fraction = FloatH[sq].Antiscalar
+    alias Coef = Int
+
+    alias Unit = HSIMD_a[sq,DType.int64,1]
+    alias Fraction = FloatH_a[sq]
     #---- Discrete = Self
     
     alias Multivector = IntH[sq]
-    alias Scalar = Int
-    #---- Antiscalar = Self
-    
-    var s: Self.Scalar
-    
-    
-    #------ Initialize ------#
+    #---- Scalar = Self
+    alias Antiscalar = IntH_a[sq]
 
     @always_inline
     fn __init__() -> Self:
         return Self{s:1}
 
     @always_inline
-    fn __init__(x: Self.Unit) -> Self:
+    fn __init__(s: Self.Coef) -> Self:
         return Self{s:x.s.__int__()}
+
+    @always_inline
+    fn __init__(s: Self.Unit) -> Self:
+        return Self{s:x.s.__int__()}
+        
+        
+        
+#------ Antiscalar ------#
+#---        
+@register_passable("trivial")
+struct IntH_a[sq: Int]:
+    
+    alias Coef = Int
+
+    alias Unit = HSIMD_a[sq,DType.int64,1]
+    alias Fraction = FloatH_a[sq]
+    #---- Discrete = Self
+    
+    alias Multivector = IntH[sq]
+    alias Scalar = IntH_s[sq]
+    #---- Antiscalar = Self
+    
+    var c: Self.Coef
+    
+    
+    #------ Initialize ------#
+
+    @always_inline
+    fn __init__() -> Self:
+        return Self{c:1}
+
+    @always_inline
+    fn __init__(a: Self.Scalar) -> Self:
+        return Self{c:a.c}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s == 0
+        return self.c == 0
     
     
     #------ Formatting ------#
@@ -525,15 +593,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s*other.s
-        elif sq == -1:
-            return -self.s*other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s*other.s)
+        return sq*(self.s*other.s)
     
     @always_inline
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
@@ -623,15 +683,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:            
-            return other.s*self.s
-        elif sq == -1:
-            return -other.s*self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s*self.s)
+        return sq*(other.s*self.s)
     
     @always_inline
     fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
