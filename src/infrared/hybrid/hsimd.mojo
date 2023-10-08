@@ -1,5 +1,10 @@
-from infrared.hybrid import IntH, FloatH
-from infrared import min, max, min_coef, max_coef, symbol
+from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
+from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
+#from infrared import min, max, min_coef, max_coef
+from infrared import symbol
+
+
+
 
 #------------ Hybrid SIMD ------------#
 #---
@@ -18,7 +23,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     alias Antiscalar   = HSIMD_a[sq,dt,sw]
     
     var s: Self.Scalar
-    var i: Self.Antiscalar
+    var a: Self.Antiscalar
     
     
     #------ Initialize ------#
@@ -36,27 +41,37 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self{s:0,a:a}
     
     @always_inline
-    fn __init__(s: Self.Scalar, i: Self.Scalar) -> Self:
+    fn __init__(s: Self.Scalar, a: Self.Scalar) -> Self:
         return Self{s:s,a:a}
 
     @always_inline
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
         return Self{s:s,a:a}
+
+    @always_inline
+    fn __init__(d: Self.Discrete) -> Self:
+        return Self{s:d.s,a:d.a}
+
+    @always_inline
+    fn __init__(f: Self.Fraction) -> Self:
+        return Self{s:f.s,a:f.a}
+
+
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s.__bool__() and self.i
+        return self.s and self.a
     
     @always_inline
     fn cast[target: DType](self) -> HSIMD[sq,target,sw]:
-        return HSIMD[sq,target,sw](self.s.cast[target](), self.i.cast[target]())
+        return HSIMD[sq,target,sw](self.s.cast[target](), self.a.cast[target]())
 
     @always_inline
     fn to_discrete(self) -> Self.Discrete:
-        return Self.Discrete(self.s.to_int(), self.i.to_discrete())
+        return Self.Discrete(self.s.to_discrete(), self.a.to_discrete())
     
     
     #------ Formatting ------#
@@ -64,44 +79,44 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     fn __str__(self) -> String:
         @parameter
         if sw == 1:
-            return String(self.s[0]) + " + " + self.i[0].__str__()
+            return self.s[0].__str__() + " + " + self.a[0].__str__()
         else:
-            var s: String = ""
-            for index in range(sw): s += self[index].__str__() + "\n"
-            return s
+            var result: String = ""
+            for index in range(sw): result += self[index].__str__() + "\n"
+            return result
     
     
     #------ Get / Set ------#
     
     @always_inline
     fn __getitem__(self, index: Int) -> Self.Unit:
-        return Self.Unit(self.s[index], self.i[index])
+        return Self.Unit(self.s[index], self.a[index])
     
     @always_inline
     fn __setitem__(inout self, index: Int, item: Self.Unit):
         self.s[index] = item.s
-        self.i[index] = item.i
+        self.a[index] = item.a
     
     @always_inline
-    fn get_coef(self, index: Int) -> Self.Scalar: 
-        if index == 0: return self.s
-        if index == 1: return self.i.s
+    fn get_coef(self, index: Int) -> Self.Coef: 
+        if index == 0: return self.s.c
+        if index == 1: return self.a.c
         return 0
     
     @always_inline
-    fn set_coef(inout self, index: Int, coef: Self.Scalar):
-        if index == 0: self.s = coef
-        if index == 1: self.i.s = coef
+    fn set_coef(inout self, index: Int, coef: Self.Coef):
+        if index == 0: self.s.c = coef
+        if index == 1: self.a.c = coef
         
-        
+    '''
     #------ Min / Max ------#
     
     @always_inline
-    fn min_coef(self) -> Self.Scalar:
+    fn min_coef(self) -> Self.Coef:
         return min_coef(self)
     
     @always_inline
-    fn max_coef(self) -> Self.Scalar:
+    fn max_coef(self) -> Self.Coef:
         return max_coef(self)
     
     @always_inline
@@ -114,36 +129,36 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     # reduce_coefficient reduces across every coefficient present
     @always_inline
-    fn reduce_max_coef(self) -> Self.Coef:
-        return max(self.s.reduce_max(), self.i.reduce_max().s)
+    fn reduce_max_coef(self) -> Self.Single:
+        return max(self.s.reduce_max().c, self.a.reduce_max().c)
     
     @always_inline
-    fn reduce_min_coef(self) -> Self.Coef:
-        return min(self.s.reduce_min(), self.i.reduce_min().s)
+    fn reduce_min_coef(self) -> Self.Single:
+        return min(self.s.reduce_min().c, self.a.reduce_min().c)
     
     # reduce_compose treats each basis channel independently, then uses those to constuct a new multivector
     @always_inline
     fn reduce_max_compose(self) -> Self.Unit:
-        return Self.Unit(self.s.reduce_max(), self.i.reduce_max())
+        return Self.Unit(self.s.reduce_max(), self.a.reduce_max())
     
     @always_inline
     fn reduce_min_compose(self) -> Self.Unit:
-        return Self.Unit(self.s.reduce_min(), self.i.reduce_min())
-    
+        return Self.Unit(self.s.reduce_min(), self.a.reduce_min())
+    '''
     
     #------ Operators ------#
     
     @always_inline
     fn __neg__(self) -> Self:
-        return Self(-self.s, -self.i)
+        return Self(-self.s, -self.a)
     
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
-        return self.s == other.s and self.i == other.i
+        return self.s == other.s and self.a == other.a
     
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
-        return self.s != other.s or self.i != other.i
+        return self.s != other.s or self.a != other.a
 
     @always_inline
     fn __len__(self) -> Int:
@@ -154,75 +169,51 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn splat(self, other: Self.Unit.Scalar) -> Self:
-        return Self(other, self.i)
-    
-    @always_inline
-    fn splat(self, other: Self.Fraction.Scalar) -> Self:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete.Scalar) -> Self:
-        return self.splat(other)
+        return Self(other, self.a)
     
     @always_inline
     fn splat(self, other: Self.Unit.Antiscalar) -> Self:
         return Self(self.s, other)
     
     @always_inline
-    fn splat(self, other: Self.Fraction.Antiscalar) -> Self:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete.Antiscalar) -> Self:
-        return self.splat(other)
-    
-    @always_inline
     fn splat(self, other: Self.Unit) -> Self:
-        return Self(other.s, other.i)
-    
-    @always_inline
-    fn splat(self, other: Self.Fraction) -> Self:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete) -> Self:
-        return self.splat(other)
+        return Self(other.s, other.a)
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self:
-        return Self(self.s.fma(mul,acc), self.i*mul)
+        return Self(self.s.fma(mul,acc), self.a*mul)
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self.Antiscalar) -> Self:
-        return Self(self.s*mul, self.i.fma(mul,acc))
+        return Self(self.s*mul, self.a.fma(mul,acc))
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self) -> Self:
-        return Self(self.s.fma(mul,acc.s), self.i.fma(mul,acc.i))
+        return Self(self.s.fma(mul,acc.s), self.a.fma(mul,acc.a))
     
     @always_inline
     fn fma(self, mul: Self.Antiscalar, acc: Self.Scalar) -> Self:
-        return Self(self.i.fma(mul,acc), self.s*mul)
+        return Self(self.a.fma(mul,acc), self.s*mul)
     
     @always_inline
     fn fma(self, mul: Self.Antiscalar, acc: Self.Antiscalar) -> Self:
-        return Self(self.i*mul, self.s.fma(mul.s,acc.s))
+        return Self(self.a*mul, self.s.fma(mul.s,acc.s))
     
     @always_inline
     fn fma(self, mul: Self.Antiscalar, acc: Self) -> Self:
-        return Self(self.i.fma(mul,acc.s), self.s.fma(mul.s,acc.i.s))
+        return Self(self.a.fma(mul,acc.s), self.s.fma(mul.s,acc.a.s))
     
     @always_inline
     fn fma(self, mul: Self, acc: Self.Scalar) -> Self:
-        return Self(self.s.fma(mul.s, self.i.fma(mul.i,acc)), self.i.fma(mul.s, self.s*mul.i))
+        return Self(self.s.fma(mul.s, self.a.fma(mul.a,acc)), self.a.fma(mul.s, self.s*mul.i))
     
     @always_inline
     fn fma(self, mul: Self, acc: Self.Antiscalar) -> Self:
-        return Self(self.s.fma(mul.s, self.i*mul.i), self.i.fma(mul.s, Self.Antiscalar{s:self.s.fma(mul.i.s,acc.s)}))
+        return Self(self.s.fma(mul.s, self.a*mul.a), self.a.fma(mul.s, self.s.fma(mul.a.c,acc.s)))
     
     @always_inline
     fn fma(self, mul: Self, acc: Self) -> Self:
-        return Self(self.s.fma(mul.s, self.i.fma(mul.i,acc.s)), self.i.fma(mul.s, Self.Antiscalar{s:self.s.fma(mul.i.s,acc.i.s)}))
+        return Self(self.s.fma(mul.s, self.a.fma(mul.a,acc.s)), self.a.fma(mul.s, self.s.fma(mul.a.c,acc.a.c)))
     '''
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
@@ -234,393 +225,185 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     '''
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD[sq,dt,slice_width]:
-        return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.i.slice[slice_width](offset))
+        return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.a.slice[slice_width](offset))
 
     @always_inline
     fn rotate_left[shift: Int](self) -> Self:
-        return Self(self.s.rotate_left[shift](), self.i.rotate_left[shift]())
+        return Self(self.s.rotate_left[shift](), self.a.rotate_left[shift]())
     
     @always_inline
     fn rotate_right[shift: Int](self) -> Self:
-        return Self(self.s.rotate_right[shift](), self.i.rotate_right[shift]())
+        return Self(self.s.rotate_right[shift](), self.a.rotate_right[shift]())
     
     @always_inline
     fn shift_left[shift: Int](self) -> Self:
-        return Self(self.s.shift_left[shift](), self.i.shift_left[shift]())
+        return Self(self.s.shift_left[shift](), self.a.shift_left[shift]())
     
     @always_inline
     fn shift_right[shift: Int](self) -> Self:
-        return Self(self.s.shift_right[shift](), self.i.shift_right[shift]())
+        return Self(self.s.shift_right[shift](), self.a.shift_right[shift]())
     
     
     #------ Arithmetic ------#
     
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self:
-        return Self(self.s + other, self.i)
-    
-    @always_inline
-    fn __add__(self, other: Self.Fraction.Scalar) -> Self:
-        return self + other
-    
-    @always_inline
-    fn __add__(self, other: Self.Discrete.Scalar) -> Self:
-        return self + other
+        return Self(self.s + other, self.a)
     
     @always_inline
     fn __add__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i + other)
-    
-    @always_inline
-    fn __add__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return self + other
-    
-    @always_inline
-    fn __add__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return self + other
+        return Self(self.s, self.a + other)
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s, self.i + other.i)
+        return Self(self.s + other.s, self.a + other.a)
 
     @always_inline
     fn __sub__(self, other: Self.Scalar) -> Self:
-        return Self(self.s - other, self.i)
-    
-    @always_inline
-    fn __sub__(self, other: Self.Fraction.Scalar) -> Self:
-        return self - other
-    
-    @always_inline
-    fn __sub__(self, other: Self.Discrete.Scalar) -> Self:
-        return self - other
+        return Self(self.s - other, self.a)
     
     @always_inline
     fn __sub__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i - other)
-    
-    @always_inline
-    fn __sub__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return self - other
-    
-    @always_inline
-    fn __sub__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return self - other
+        return Self(self.s, self.a - other)
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
-        return Self(self.s - other.s, self.i - other.i)
+        return Self(self.s - other.s, self.a - other.a)
     
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self(self.s*other, self.i*other)
-    
-    @always_inline
-    fn __mul__(self, other: Self.Fraction.Scalar) -> Self:
-        return self*other
-    
-    @always_inline
-    fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
-        return self*other
+        return Self(self.s*other, self.a*other)
     
     @always_inline
     fn __mul__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.i*other, self.s*other)
-    
-    @always_inline
-    fn __mul__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return self*other
-    
-    @always_inline
-    fn __mul__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return self*other
+        return Self(self.a*other, self.s*other)
     
     @always_inline
     fn __mul__(self, other: Self) -> Self:
-        return Self(self.s.fma(other.s, self.i*other.i), self.i.fma(other.s, self.s*other.i))
+        return Self(self.s.fma(other.s, self.a*other.a), self.a.fma(other.s, self.s*other.a))
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self:
         return self * (1/other)
     
     @always_inline
-    fn __truediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self/other
-    
-    @always_inline
-    fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self/other
-    
-    @always_inline
     fn __truediv__(self, other: Self.Antiscalar) -> Self:
         return self * (1/other)
     
     @always_inline
-    fn __truediv__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return self/other
-    
-    @always_inline
-    fn __truediv__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return self/other
-    
-    @always_inline
     fn __truediv__(self, other: Self) -> Self:
-        return Self(self.s.fma(other.s, -self.i*other.i), self.i.fma(other.s, -self.s*other.i)) / other.s.fma(other.s, -other.i*other.i)
+        return Self(self.s.fma(other.s, -self.a*other.a), self.a.fma(other.s, -self.s*other.a)) / other.s.fma(other.s, -other.a*other.a)
     
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s//other, self.i//other)
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self//other
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self//other
+        return Self(self.s//other, self.a//other)
     
     @always_inline
     fn __floordiv__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.i//other, self.s//other)
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return self//other
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return self//other
+        return Self(self.a//other, self.s//other)
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self:
-        return Self(self.s.fma(other.s, -self.i*other.i), self.i.fma(other.s, -self.s*other.i)) // other.s.fma(other.s, -other.i*other.i)
+        return Self(self.s.fma(other.s, -self.a*other.a), self.a.fma(other.s, -self.s*other.a)) // other.s.fma(other.s, -other.a*other.a)
     
     
     #------ Reverse Arithmetic ------#
     
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self:
-        return Self(other + self.s, self.i)
-    
-    @always_inline
-    fn __radd__(self, other: Self.Fraction.Scalar) -> Self:
-        return other + self
-    
-    @always_inline
-    fn __radd__(self, other: Self.Discrete.Scalar) -> Self:
-        return other + self
+        return Self(other + self.s, self.a)
     
     @always_inline
     fn __radd__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, other + self.i)
-    
-    @always_inline
-    fn __radd__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return other + self
-    
-    @always_inline
-    fn __radd__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return other + self
+        return Self(self.s, other + self.a)
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s, other.i + self.i)
+        return Self(other.s + self.s, other.a + self.a)
     
     @always_inline
     fn __rsub__(self, other: Self.Scalar) -> Self:
-        return Self(other - self.s, -self.i)
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Fraction.Scalar) -> Self:
-        return other - self
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Discrete.Scalar) -> Self:
-        return other - self
+        return Self(other - self.s, -self.a)
     
     @always_inline
     fn __rsub__(self, other: Self.Antiscalar) -> Self:
-        return Self(-self.s, other - self.i)
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return other - self
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return other - self
-    
+        return Self(-self.s, other - self.a)
+
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self(other.s - self.s, other.i - self.i)
+        return Self(other.s - self.s, other.a - self.a)
 
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self(other*self.s, other*self.i)
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Fraction.Scalar) -> Self:
-        return other*self
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return other*self
-    
+        return Self(other*self.s, other*self.a)
+
     @always_inline
     fn __rmul__(self, other: Self.Antiscalar) -> Self:
-        return Self(other*self.i, other*self.s)
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return other*self
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return other*self
-    
+        return Self(other*self.a, other*self.s)
+
     @always_inline
     fn __rmul__(self, other: Self) -> Self:
-        return Self(other.s.fma(self.s, other.i*self.i), other.s.fma(self.i.s, other.i.s*self.s))
+        return Self(other.s.fma(self.s, other.a*self.a), other.s.fma(self.a.c, other.a.c*self.s))
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s, -self.i) * (other/self.s.fma(self.s, -self.i*self.i))
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return other/self
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return other/self
-    
+        return Self(self.s, -self.a) * (other/self.s.fma(self.s, -self.a*self.a))
+
     @always_inline
     fn __rtruediv__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, -self.i) * (other/(self.s.fma(self.s, -self.i*self.i)))
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return other/self
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return other/self
-    
+        return Self(self.s, -self.a) * (other/(self.s.fma(self.s, -self.a*self.a)))
+
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self:
-        return Self(other.s.fma(self.s, -other.i*self.i), other.i.fma(self.s, -other.s*self.i)) / self.s.fma(self.s, -self.i*self.i)
+        return Self(other.s.fma(self.s, -other.a*self.a), other.a.fma(self.s, -other.s*self.a)) / self.s.fma(self.s, -self.a*self.a)
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Scalar) -> Self:
-        return (Self(self.s, -self.i)*other) // self.s.fma(self.s, -self.i*self.i)
-    
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return other//self
-    
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return other//self
-    
+        return (Self(self.s, -self.a)*other) // self.s.fma(self.s, -self.a*self.a)
+
     @always_inline
     fn __rfloordiv__(self, other: Self.Antiscalar) -> Self:
-        return (Self(self.s, -self.i)*other) // self.s.fma(self.s, -self.i*self.i)
-    
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Fraction.Antiscalar) -> Self:
-        return other//self
-    
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete.Antiscalar) -> Self:
-        return other//self
-    
+        return (Self(self.s, -self.a)*other) // self.s.fma(self.s, -self.a*self.a)
+
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self:
-        return Self(other.s.fma(self.s, -other.i*self.i), other.i.fma(self.s, -other.s*self.i)) // self.s.fma(self.s, -self.i*self.i)
+        return Self(other.s.fma(self.s, -other.a*self.a), other.a.fma(self.s, -other.s*self.a)) // self.s.fma(self.s, -self.a*self.a)
     
     
     #------ Internal Arithmetic ------#
     
     @always_inline
     fn __iadd__(inout self, other: Self.Scalar):
-        self = self + other
-        
-    @always_inline
-    fn __iadd__(inout self, other: Self.Fraction.Scalar):
-        self = self + other
-        
-    @always_inline
-    fn __iadd__(inout self, other: Self.Discrete.Scalar):
-        self = self + other
-    
+        self = self+other
+
     @always_inline
     fn __iadd__(inout self, other: Self.Antiscalar):
-        self = self + other
-        
-    @always_inline
-    fn __iadd__(inout self, other: Self.Fraction.Antiscalar):
-        self = self + other
-        
-    @always_inline
-    fn __iadd__(inout self, other: Self.Discrete.Antiscalar):
-        self = self + other
-    
+        self = self+other
+
     @always_inline
     fn __iadd__(inout self, other: Self):
-        self = self + other
+        self = self+other
         
     @always_inline
     fn __isub__(inout self, other: Self.Scalar):
-        self = self - other
-        
-    @always_inline
-    fn __isub__(inout self, other: Self.Fraction.Scalar):
-        self = self - other
-        
-    @always_inline
-    fn __isub__(inout self, other: Self.Discrete.Scalar):
-        self = self - other
-    
+        self = self-other
+
     @always_inline
     fn __isub__(inout self, other: Self.Antiscalar):
-        self = self - other
-        
-    @always_inline
-    fn __isub__(inout self, other: Self.Fraction.Antiscalar):
-        self = self - other
-        
-    @always_inline
-    fn __isub__(inout self, other: Self.Discrete.Antiscalar):
-        self = self - other
-    
+        self = self-other
+
     @always_inline
     fn __isub__(inout self, other: Self):
-        self = self - other
+        self = self-other
         
     @always_inline
     fn __imul__(inout self, other: Self.Scalar):
         self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Fraction.Scalar):
-        self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Discrete.Scalar):
-        self = self*other
-    
+
     @always_inline
     fn __imul__(inout self, other: Self.Antiscalar):
         self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Fraction.Antiscalar):
-        self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Discrete.Antiscalar):
-        self = self*other
-    
+
     @always_inline
     fn __imul__(inout self, other: Self):
         self = self*other
@@ -628,27 +411,11 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __itruediv__(inout self, other: Self.Scalar):
         self = self/other
-        
-    @always_inline
-    fn __itruediv__(inout self, other: Self.Fraction.Scalar):
-        self = self/other
-        
-    @always_inline
-    fn __itruediv__(inout self, other: Self.Discrete.Scalar):
-        self = self/other
-    
+
     @always_inline
     fn __itruediv__(inout self, other: Self.Antiscalar):
         self = self/other
-        
-    @always_inline
-    fn __itruediv__(inout self, other: Self.Fraction.Antiscalar):
-        self = self/other
-        
-    @always_inline
-    fn __itruediv__(inout self, other: Self.Discrete.Antiscalar):
-        self = self/other
-    
+
     @always_inline
     fn __itruediv__(inout self, other: Self):
         self = self/other
@@ -656,83 +423,89 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self.Scalar):
         self = self//other
-        
-    @always_inline
-    fn __ifloordiv__(inout self, other: Self.Fraction.Scalar):
-        self = self//other
-        
-    @always_inline
-    fn __ifloordiv__(inout self, other: Self.Discrete.Scalar):
-        self = self//other
-    
+
     @always_inline
     fn __ifloordiv__(inout self, other: Self.Antiscalar):
         self = self//other
-        
-    @always_inline
-    fn __ifloordiv__(inout self, other: Self.Fraction.Antiscalar):
-        self = self//other
-        
-    @always_inline
-    fn __ifloordiv__(inout self, other: Self.Discrete.Antiscalar):
-        self = self//other
-    
+
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
     
     
-    
-    
-#------ I ------#
+
+#------ Scalar ------#
 #---
 @register_passable("trivial")
-struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
+struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     
-    alias Fraction = FloatH[sq].Antiscalar
-    alias Discrete = IntH[sq].Antiscalar
-    alias Coef = SIMD[dt,1]
-    alias Unit = HSIMD_i[sq,dt,1]
+    alias Coef = SIMD[dt,sw]
+
+    alias Single    = SIMD[dt,1]
+    alias Unit      = HSIMD_s[sq,dt,1]
+    alias Fraction  = FloatH[sq].Scalar
+    alias Discrete  = IntH[sq].Scalar
     
-    alias Multivector = HSIMD[sq,dt,sw]
-    alias Scalar = SIMD[dt,sw]
-    #---- Antiscalar = Self
+    alias Multivector  = HSIMD[sq,dt,sw]
+    #---- Scalar       = Self
+    alias Antiscalar   = HSIMD_a[sq,dt,sw]
+
     
-    var s: Self.Scalar
+    var c: Self.Coef
     
     
     #------ Initialize ------#
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:1}
+        return Self{c:1}
 
     @always_inline
-    fn __init__(i: Self.Fraction) -> Self:
-        return Self{s:i.s}
-    
+    fn __init__(c: Self.Coef) -> Self:
+        return Self{c:c}
+
     @always_inline
-    fn __init__(i: Self.Discrete) -> Self:
-        return Self{s:i.s}
-    
+    fn __init__(d: Self.Discrete) -> Self:
+        return Self{c:d.c}
+
+    @always_inline
+    fn __init__(f: Self.Fraction) -> Self:
+        return Self{c:f.c}
+
     @always_inline
     fn __init__(u: Self.Unit) -> Self:
-        return Self{s:u.s}
+        return Self{c:u.c}
+
+    @always_inline
+    fn __init__(c: Self.Discrete.Coef) -> Self:
+        return Self{c:c}
+
+    @always_inline
+    fn __init__(c: Self.Fraction.Coef) -> Self:
+        return Self{c:c}
+
+    @always_inline
+    fn __init__(c: Self.Unit.Coef) -> Self:
+        return Self{c:c}
+
+    @always_inline
+    fn __init__(c: IntLiteral) -> Self:
+        return Self{c:c}
 
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s.__bool__()
+        return self.c.__bool__()
     
     @always_inline
-    fn cast[target: DType](self) -> HSIMD_i[sq,target,sw]:
-        return HSIMD_i[sq,target,sw]{s:self.s.cast[target]()}
+    fn cast[target: DType](self) -> HSIMD_s[sq,target,sw]:
+        return self.c.cast[target]()
 
     @always_inline
     fn to_discrete(self) -> Self.Discrete:
-        return Self.Discrete{s:self.s.to_int()}
+        return self.c.to_int()
     
     
     #------ Formatting ------#
@@ -740,24 +513,24 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     fn __str__(self) -> String:
         @parameter
         if sw == 1:
-            return String(self.s[0]) + symbol[sq]()
+            return String(self.c[0]) + symbol[sq]()
         else:
-            var s: String = ""
-            for index in range(sw): s += self[index].__str__() + "\n"
-            return s
+            var result: String = ""
+            for index in range(sw): result += self[index].__str__() + "\n"
+            return result
     
     
     #------ Get / Set ------#
     
     @always_inline
     fn __getitem__(self, index: Int) -> Self.Unit:
-        return Self.Unit{s:self.s[index]}
+        return self.c[index]
     
     @always_inline
     fn __setitem__(inout self, index: Int, item: Self.Unit):
-        self.s[index] = item.s
+        self.c[index] = item.c
     
-    
+    '''
     #------ Min / Max ------#
     
     @always_inline
@@ -770,42 +543,42 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn reduce_max(self) -> Self.Unit:
-        return Self.Unit{s:self.s.reduce_max()}
+        return self.c.reduce_max()
     
     @always_inline
     fn reduce_min(self) -> Self.Unit:
-        return Self.Unit{s:self.s.reduce_min()}
-    
+        return self.c.reduce_min()
+    '''
     
     #------ Operators ------#
     
     @always_inline
     fn __neg__(self) -> Self:
-        return Self{s:-self.s}
+        return -self.c
     
     @always_inline
     fn __lt__(self, other: Self) -> Bool:  
-        return self.s < other.s
+        return self.c < other.c
     
     @always_inline
     fn __le__(self, other: Self) -> Bool:
-        return self.s <= other.s
+        return self.c <= other.c
     
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
-        return self.s == other.s
+        return self.c == other.c
     
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
-        return self.s != other.s
+        return self.c != other.c
     
     @always_inline
     fn __gt__(self, other: Self) -> Bool:
-        return self.s > other.s
+        return self.c > other.c
     
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
-        return self.s >= other.s
+        return self.c >= other.c
 
     @always_inline
     fn __len__(self) -> Int:
@@ -815,28 +588,12 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     #------ SIMD ------#
     
     @always_inline
-    fn splat(self, other: Self.Unit.Scalar) -> Self.Multivector:
-        return Self.Multivector(other, self)
-    
-    @always_inline
-    fn splat(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-         return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Unit) -> Self:
+    fn splat(self, other: Self.Unit) -> Self.Multivector:
         return Self(other)
     
     @always_inline
-    fn splat(self, other: Self.Fraction) -> Self:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete) -> Self:
-        return self.splat(other)
+    fn splat(self, other: Self.Unit.Antiscalar) -> Self:
+        return Self.Multivector(other, self)
     
     @always_inline
     fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
@@ -892,23 +649,23 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     '''
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
-        return HSIMD_i[sq,dt,slice_width]{s:self.s.slice[slice_width](offset)}
+        return self.c.slice[slice_width](offset)
 
     @always_inline
     fn rotate_left[shift: Int](self) -> Self:
-        return Self{s:self.s.rotate_left[shift]()}
+        return self.c.rotate_left[shift]()
     
     @always_inline
     fn rotate_right[shift: Int](self) -> Self:
-        return Self{s:self.s.rotate_right[shift]()}
+        return self.c.rotate_right[shift]()
     
     @always_inline
     fn shift_left[shift: Int](self) -> Self:
-        return Self{s:self.s.shift_left[shift]()}
+        return self.c.shift_left[shift]()
     
     @always_inline
     fn shift_right[shift: Int](self) -> Self:
-        return Self{s:self.s.shift_right[shift]()}
+        return self.c.shift_right[shift]()
     
     
     #------ Arithmetic ------#
@@ -918,52 +675,20 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
         return Self.Multivector(other, self)
     
     @always_inline
-    fn __add__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return self + other
-    
-    @always_inline
-    fn __add__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self + other
-    
-    @always_inline
     fn __add__(self, other: Self) -> Self:
-        return Self{s:self.s + other.s}
-    
-    @always_inline
-    fn __add__(self, other: Self.Fraction) -> Self:
-        return self + other
-    
-    @always_inline
-    fn __add__(self, other: Self.Discrete) -> Self:
-        return self + other
+        return self.c + other.c
     
     @always_inline
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, self + other.i)
+        return Self.Multivector(other.s, self + other.a)
     
     @always_inline
     fn __sub__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(-other, self)
     
     @always_inline
-    fn __sub__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return self - other
-    
-    @always_inline
-    fn __sub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self - other
-    
-    @always_inline
     fn __sub__(self, other: Self) -> Self:
-        return Self{s:self.s - other.s}
-    
-    @always_inline
-    fn __sub__(self, other: Self.Fraction) -> Self:
-        return self - other
-    
-    @always_inline
-    fn __sub__(self, other: Self.Discrete) -> Self:
-        return self - other
+        return self.c - other.c
     
     @always_inline
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
@@ -971,95 +696,39 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s*other}
-    
-    @always_inline
-    fn __mul__(self, other: Self.Fraction.Scalar) -> Self:
-        return self*other
-    
-    @always_inline
-    fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
-        return self*other
+        return self.c*other
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s*other.s
-        elif sq == -1:
-            return -self.s*other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s*other.s)
-    
-    @always_inline
-    fn __mul__(self, other: Self.Fraction) -> Self.Scalar:
-        return self*other
-    
-    @always_inline
-    fn __mul__(self, other: Self.Discrete) -> Self.Scalar:
-        return self*other
+        return sq*(self.c*other.s)
     
     @always_inline
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(self*other.i, self*other.s)
+        return Self.Multivector(self*other.a, self*other.s)
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s/other}
-    
-    @always_inline
-    fn __truediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self/other
-    
-    @always_inline
-    fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self/other
+        return self.c/other
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Scalar:
-        return self.s/other.s
-    
-    @always_inline
-    fn __truediv__(self, other: Self.Fraction) -> Self.Scalar:
-        return self/other
-    
-    @always_inline
-    fn __truediv__(self, other: Self.Discrete) -> Self.Scalar:
-        return self/other
+        return self.c/other.c
     
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, -other.i) * (self/(other.s*other.s - other.i*other.i))
+        return Self.Multivector(other.s, -other.a) * (self/(other.s*other.s - other.a*other.a))
     
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s//other}
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return self//other
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self//other
+        return self.c//other
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
-        return self.s//other.s
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Fraction) -> Self.Scalar:
-        return self//other
-    
-    @always_inline
-    fn __floordiv__(self, other: Self.Discrete) -> Self.Scalar:
-        return self//other
+        return self.c//other.c
     
     @always_inline
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
-        return (self*other) // (other.s*other.s - other.i*other.i)
+        return (self*other) // (other.s*other.s - other.a*other.a)
     
     
     #------ Reverse Arithmetic ------#
@@ -1078,107 +747,43 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self{s:other.s + self.s}
-    
-    @always_inline
-    fn __radd__(self, other: Self.Fraction) -> Self:
-        return other + self
-    
-    @always_inline
-    fn __radd__(self, other: Self.Discrete) -> Self:
-        return other + self
+        return other.a + self.a
     
     @always_inline
     fn __radd__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i + self)
+        return Self.Multivector(other.s, other.a + self)
     
     @always_inline
     fn __rsub__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, -self)
     
     @always_inline
-    fn __rsub__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
-        return other - self
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return other - self
-    
-    @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self{s:other.s - self.s}
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Fraction) -> Self:
-        return other - self
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Discrete) -> Self:
-        return other - self
+        return other.c - self.c
     
     @always_inline
     fn __rsub__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i - self)
+        return Self.Multivector(other.s, other.a - self)
     
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self{s:other*self.s}
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Fraction.Scalar) -> Self:
-        return other*self
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return other*self
+        return other*self.c
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s*self.s
-        elif sq == -1:
-            return -other.s*self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s*self.s)
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Fraction) -> Self.Scalar:
-        return other*self
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Discrete) -> Self.Scalar:
-        return other*self
+        return sq*(other.s*self.s)
     
     @always_inline
     fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.i*self, other.s*self)
+        return Self.Multivector(other.a*self, other.s*self)
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self:
-        return Self{s:other/self.s}
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Fraction.Scalar) -> Self:
-        return other/self
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return other/self
+        return other/self.s
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Scalar:
         return other.s/self.s
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Fraction) -> Self.Scalar:
-        return other/self
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Discrete) -> Self.Scalar:
-        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
@@ -1186,31 +791,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Scalar) -> Self:
-        return Self{s:other//self.s}
-    
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Fraction.Scalar) -> Self:
-        return other//self
-    
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return other//self
+        return other//self.c
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:
-        return other.s//self.s
-        
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Fraction) -> Self.Scalar:
-         return other//self
-        
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete) -> Self.Scalar:
-         return other//self
+        return other.c//self.c
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.i//self, other.s//self)
+        return Self.Multivector(other.a//self, other.s//self)
     
     
     #------ Internal Arithmetic ------#
@@ -1218,13 +807,368 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __iadd__(inout self, other: Self):
         self = self + other
+    
+    @always_inline
+    fn __isub__(inout self, other: Self):
+        self = self - other
         
     @always_inline
-    fn __iadd__(inout self, other: Self.Fraction):
-        self = self + other
+    fn __imul__(inout self, other: Self.Antiscalar):
+        self = self*other
         
     @always_inline
-    fn __iadd__(inout self, other: Self.Discrete):
+    fn __itruediv__(inout self, other: Self.Antiscalar):
+        self = self/other
+        
+    @always_inline
+    fn __ifloordiv__(inout self, other: Self.Antiscalar):
+        self = self//other    
+
+
+
+#------ Antiscalar ------#
+#---
+@register_passable("trivial")
+struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
+    
+    alias Coef = SIMD[dt,sw]
+
+    alias Single    = SIMD[dt,1]
+    alias Unit      = HSIMD_a[sq,dt,1]
+    alias Fraction  = FloatH[sq].Antiscalar
+    alias Discrete  = IntH[sq].Antiscalar
+    
+    alias Multivector  = HSIMD[sq,dt,sw]
+    alias Scalar       = HSIMD_s[sq,dt,sw]
+    #---- Antiscalar   = Self
+    
+    var c: Self.Coef
+    
+    
+    #------ Initialize ------#
+    
+    @always_inline
+    fn __init__() -> Self:
+        return Self{c:1}
+
+    @always_inline
+    fn __init__(s: Self.Scalar) -> Self:
+        return Self{c:s.c}
+
+    
+    #------ To ------#
+    
+    @always_inline
+    fn __bool__(self) -> Bool:
+        return self.c.__bool__()
+    
+    @always_inline
+    fn cast[target: DType](self) -> HSIMD_a[sq,target,sw]:
+        return self.c.cast[target]()
+
+    @always_inline
+    fn to_discrete(self) -> Self.Discrete:
+        return self.c.to_int()
+    
+    
+    #------ Formatting ------#
+    
+    fn __str__(self) -> String:
+        @parameter
+        if sw == 1:
+            return String(self.c[0]) + symbol[sq]()
+        else:
+            var result: String = ""
+            for index in range(sw): result += self[index].__str__() + "\n"
+            return result
+    
+    
+    #------ Get / Set ------#
+    
+    @always_inline
+    fn __getitem__(self, index: Int) -> Self.Unit:
+        return self.c[index]
+    
+    @always_inline
+    fn __setitem__(inout self, index: Int, item: Self.Unit):
+        self.c[index] = item.c
+    
+    '''
+    #------ Min / Max ------#
+    
+    @always_inline
+    fn min(self, other: Self) -> Self:
+        return min(self, other)
+    
+    @always_inline
+    fn max(self, other: Self) -> Self:
+        return max(self, other)
+    
+    @always_inline
+    fn reduce_max(self) -> Self.Unit:
+        return self.c.reduce_max()
+    
+    @always_inline
+    fn reduce_min(self) -> Self.Unit:
+        return self.c.reduce_min()
+    '''
+    
+    #------ Operators ------#
+    
+    @always_inline
+    fn __neg__(self) -> Self:
+        return -self.c
+    
+    @always_inline
+    fn __lt__(self, other: Self) -> Bool:  
+        return self.c < other.c
+    
+    @always_inline
+    fn __le__(self, other: Self) -> Bool:
+        return self.c <= other.c
+    
+    @always_inline
+    fn __eq__(self, other: Self) -> Bool:
+        return self.c == other.c
+    
+    @always_inline
+    fn __ne__(self, other: Self) -> Bool:
+        return self.c != other.c
+    
+    @always_inline
+    fn __gt__(self, other: Self) -> Bool:
+        return self.c > other.c
+    
+    @always_inline
+    fn __ge__(self, other: Self) -> Bool:
+        return self.c >= other.c
+
+    @always_inline
+    fn __len__(self) -> Int:
+        return sw
+    
+    
+    #------ SIMD ------#
+    
+    @always_inline
+    fn splat(self, other: Self.Unit.Scalar) -> Self.Multivector:
+        return Self.Multivector(other, self)
+    
+    @always_inline
+    fn splat(self, other: Self.Unit) -> Self:
+        return Self(other)
+    
+    @always_inline
+    fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.s, self)
+    
+    @always_inline
+    fn splat(self, other: Self.Fraction.Multivector) -> Self.Multivector:
+        return self.splat(other)
+    
+    @always_inline
+    fn splat(self, other: Self.Discrete.Multivector) -> Self.Multivector:
+        return self.splat(other)
+    
+    @always_inline
+    fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self.Multivector:
+        return self*mul + acc
+    
+    @always_inline
+    fn fma(self, mul: Self.Scalar, acc: Self) -> Self:
+        return Self{s:self.s.fma(mul,acc.s)}
+    
+    @always_inline
+    fn fma(self, mul: Self, acc: Self.Scalar) -> Self.Scalar:
+        @parameter
+        if sq == 1:
+            return self.s.fma(mul.s,acc)
+        elif sq == -1:
+            return self.s.fma(-mul.s,acc)
+        elif sq == 0:
+            return acc
+        else:
+            return self.s.fma(sq*mul.s,acc)
+    
+    @always_inline
+    fn fma(self, mul: Self, acc: Self) -> Self.Multivector:
+        @parameter
+        if sq == 1:
+            return self*mul + acc
+        elif sq == -1:
+            return -self*mul + acc
+        elif sq == 0:
+            return acc
+        else:
+            return sq*(self*mul) + acc
+    '''
+    @always_inline
+    fn shuffle[*mask: Int](self) -> Self:
+        return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
+    
+    @always_inline
+    fn shuffle[*mask: Int](self, other: Self) -> Self:
+        return Self(self.s.shuffle[mask](other.s))
+    '''
+    @always_inline
+    fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
+        return self.c.slice[slice_width](offset)
+
+    @always_inline
+    fn rotate_left[shift: Int](self) -> Self:
+        return self.c.rotate_left[shift]()
+    
+    @always_inline
+    fn rotate_right[shift: Int](self) -> Self:
+        return self.c.rotate_right[shift]()
+    
+    @always_inline
+    fn shift_left[shift: Int](self) -> Self:
+        return self.c.shift_left[shift]()
+    
+    @always_inline
+    fn shift_right[shift: Int](self) -> Self:
+        return self.c.shift_right[shift]()
+    
+    
+    #------ Arithmetic ------#
+    
+    @always_inline
+    fn __add__(self, other: Self.Scalar) -> Self.Multivector:
+        return Self.Multivector(other, self)
+    
+    @always_inline
+    fn __add__(self, other: Self) -> Self:
+        return self.c + other.c
+    
+    @always_inline
+    fn __add__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.s, self + other.a)
+    
+    @always_inline
+    fn __sub__(self, other: Self.Scalar) -> Self.Multivector:
+        return Self.Multivector(-other, self)
+    
+    @always_inline
+    fn __sub__(self, other: Self) -> Self:
+        return self.c - other.c
+    
+    @always_inline
+    fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(-other.s, self - other.i)
+    
+    @always_inline
+    fn __mul__(self, other: Self.Scalar) -> Self:
+        return self.c*other
+    
+    @always_inline
+    fn __mul__(self, other: Self) -> Self.Scalar:
+        return sq*(self.c*other.s)
+    
+    @always_inline
+    fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(self*other.a, self*other.s)
+    
+    @always_inline
+    fn __truediv__(self, other: Self.Scalar) -> Self:
+        return self.c/other
+    
+    @always_inline
+    fn __truediv__(self, other: Self) -> Self.Scalar:
+        return self.c/other.c
+    
+    @always_inline
+    fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.s, -other.a) * (self/(other.s*other.s - other.a*other.a))
+    
+    @always_inline
+    fn __floordiv__(self, other: Self.Scalar) -> Self:
+        return self.c//other
+    
+    @always_inline
+    fn __floordiv__(self, other: Self) -> Self.Scalar:
+        return self.c//other.c
+    
+    @always_inline
+    fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
+        return (self*other) // (other.s*other.s - other.a*other.a)
+    
+    
+    #------ Reverse Arithmetic ------#
+    
+    @always_inline
+    fn __radd__(self, other: Self.Scalar) -> Self.Multivector:
+        return Self.Multivector(other, self)
+    
+    @always_inline
+    fn __radd__(self, other: Self.Fraction.Scalar) -> Self.Multivector:
+        return other + self
+    
+    @always_inline
+    fn __radd__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
+        return other + self
+    
+    @always_inline
+    fn __radd__(self, other: Self) -> Self:
+        return other.a + self.a
+    
+    @always_inline
+    fn __radd__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.s, other.a + self)
+    
+    @always_inline
+    fn __rsub__(self, other: Self.Scalar) -> Self.Multivector:
+        return Self.Multivector(other, -self)
+    
+    @always_inline
+    fn __rsub__(self, other: Self) -> Self:
+        return other.c - self.c
+    
+    @always_inline
+    fn __rsub__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.s, other.a - self)
+    
+    @always_inline
+    fn __rmul__(self, other: Self.Scalar) -> Self:
+        return other*self.c
+    
+    @always_inline
+    fn __rmul__(self, other: Self) -> Self.Scalar:
+        return sq*(other.s*self.s)
+    
+    @always_inline
+    fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.a*self, other.s*self)
+    
+    @always_inline
+    fn __rtruediv__(self, other: Self.Scalar) -> Self:
+        return other/self.s
+    
+    @always_inline
+    fn __rtruediv__(self, other: Self) -> Self.Scalar:
+        return other.s/self.s
+    
+    @always_inline
+    fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
+        return other * (1/self)
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Scalar) -> Self:
+        return other//self.c
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self) -> Self.Scalar:
+        return other.c//self.c
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(other.a//self, other.s//self)
+    
+    
+    #------ Internal Arithmetic ------#
+    
+    @always_inline
+    fn __iadd__(inout self, other: Self):
         self = self + other
     
     @always_inline
@@ -1232,23 +1176,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
         self = self - other
         
     @always_inline
-    fn __isub__(inout self, other: Self.Fraction):
-        self = self - other
-        
-    @always_inline
-    fn __isub__(inout self, other: Self.Discrete):
-        self = self - other
-        
-    @always_inline
     fn __imul__(inout self, other: Self.Scalar):
-        self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Fraction.Scalar):
-        self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Discrete.Scalar):
         self = self*other
         
     @always_inline
@@ -1256,21 +1184,5 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
         self = self/other
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Fraction.Scalar):
-        self = self/other
-        
-    @always_inline
-    fn __itruediv__(inout self, other: Self.Discrete.Scalar):
-        self = self/other
-        
-    @always_inline
     fn __ifloordiv__(inout self, other: Self.Scalar):
-        self = self//other
-        
-    @always_inline
-    fn __ifloordiv__(inout self, other: Self.Fraction.Scalar):
-        self = self//other
-        
-    @always_inline
-    fn __ifloordiv__(inout self, other: Self.Discrete.Scalar):
         self = self//other

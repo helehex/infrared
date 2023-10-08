@@ -1,5 +1,7 @@
-from infrared.hybrid import IntH, HSIMD
-from infrared import min, max, min_coef, max_coef, symbol
+from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
+from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
+#from infrared import min, max, min_coef, max_coef
+from infrared import symbol
 
 
 
@@ -44,48 +46,52 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
         return Self{s:s, a:a}
+
+    @always_inline
+    fn __init__(u: Self.Unit) -> Self:
+        return Self{s:u.s, a:u.a}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s == 0 and self.i == Self.Antiscalar{s:0}
+        return self.s and self.a
     
     @always_inline
     fn to_discrete(self) -> Self.Discrete:
-        return Self.Discrete(self.s.__int__(), self.i.to_discrete())
+        return Self.Discrete(self.s.to_discrete(), self.a.to_discrete())
     
     
     #------ Formatting ------#
     
     fn __str__(self) -> String:
-        return String(self.s) + " + " + self.i.__str__()
+        return self.s.__str__() + " + " + self.a.__str__()
     
     
     #------ Get / Set ------#
     
     # name may change; currently with GSIMD: Coef means a length 1 SIMD, Scalar means a length sw SIMD, but the get_coef function returns a Scalar type... possibley reverse indexing, or reverse aliases
     @always_inline
-    fn get_coef(self, index: Int) -> Self.Scalar: 
-        if index == 0: return self.s
-        if index == 1: return self.i.s
+    fn get_coef(self, index: Int) -> Self.Coef: 
+        if index == 0: return self.s.c
+        if index == 1: return self.a.c
         return 0
     
     @always_inline
-    fn set_coef(inout self, index: Int, coef: Self.Scalar):
-        if index == 0: self.s = coef
-        if index == 1: self.i.s = coef
+    fn set_coef(inout self, index: Int, coef: Self.Coef):
+        if index == 0: self.s.c = coef
+        if index == 1: self.a.c = coef
     
-    
+    '''
     #------ Min / Max ------#
     
     @always_inline
-    fn min_coef(self) -> Self.Scalar:
+    fn min_coef(self) -> Self.Coef:
         return min_coef(self)
     
     @always_inline
-    fn max_coef(self) -> Self.Scalar:
+    fn max_coef(self) -> Self.Coef:
         return max_coef(self)
     
     @always_inline
@@ -95,7 +101,7 @@ struct FloatH[sq: Int]:
     @always_inline
     fn max_compose(self, other: Self) -> Self:
         return max_compose(self, other)
-    
+    '''
     
     #------ Operators ------#
 
@@ -358,13 +364,49 @@ struct FloatH[sq: Int]:
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
         
-        
+
+
+#----- Float Scalar ------#
+#---
+@register_passable("trivial")
+struct FloatH_s[sq: Int]:
+    
+    alias Coef = FloatLiteral
+
+    alias Unit      = HSIMD_s[sq,DType.float64,1]
+    #---- Fraction  = Self
+    alias Discrete  = IntH_s[sq]
+    
+    alias Multivector  = FloatH[sq]
+    #---- Scalar       = Self
+    alias Antiscalar   = FloatH_a[sq]
+
+
+    var c: Self.Coef
+
+
+    @always_inline
+    fn __init__() -> Self:
+        return Self{c:1}
+
+    @always_inline
+    fn __init__(c: Self.Coef) -> Self:
+        return Self{c:c}
+
+    @always_inline
+    fn __init__(d: Self.Discrete) -> Self:
+        return Self{c:d.c}
+
+    @always_inline
+    fn __init__(a: Self.Unit) -> Self:
+        return Self{c:a.c.__int__()}
+
         
         
 #------ Float I ------#
 #---
 @register_passable("trivial")
-struct FloatH_i[sq: Int]:
+struct FloatH_a[sq: Int]:
     
     alias Unit = Self.Multivector.Unit.Antiscalar
     #---- Fraction = Self

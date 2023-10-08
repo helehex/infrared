@@ -3,7 +3,7 @@ from infrared.sequences import hfpi
 
 
 
-
+'''
 #------------ select ------------#
 #---
 #--- simd conditional select
@@ -227,11 +227,6 @@ fn max_compose[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw], b: HSIMD[sq,dt,s
     return max(a.s, b.s) + max(a.i, b.i)
 
 
-'''
-@always_inline
-def min_basis[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]):
-    return HSIMD[sq,dt,sw].Basis[index_of_min_coef]
-'''
 
 
 #------ abs ------#
@@ -346,6 +341,12 @@ fn mulsign[nels: Int, dt: DType, sw: Int, *pat: Int](o: StaticTuple[nels, SIMD[d
 
 
 
+'''
+'''
+@always_inline
+def min_basis[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]):
+    return HSIMD[sq,dt,sw].Basis[index_of_min_coef]
+'''
 '''
 #--- set sign
 from math import copysign as _copysign
