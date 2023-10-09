@@ -1,10 +1,6 @@
 def main():
 
-    # run a bunch of times and sometimes it works
-    # try getting rid of HyplexInt import
-
     from infrared.hybrid import Hyplex, HyplexInt, Hyplex64, HSIMD, x
-    #from infrared.hybrid import Hyplex64, HSIMD
     from infrared import print_
 
     #alias x = HyplexInt.Antiscalar(1)
