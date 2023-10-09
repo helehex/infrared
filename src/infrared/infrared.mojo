@@ -1,6 +1,8 @@
 from infrared.hybrid import IntH, FloatH, HSIMD
 from infrared.sequences import hfpi
 
+alias Float = FloatLiteral
+
 
 
 '''
@@ -66,12 +68,12 @@ fn mul[dt: DType, sw: Int](a: SIMD[dt,sw], b: SIMD[dt,sw]) -> SIMD[dt,sw]:
 from math import sqrt as _sqrt
 
 @always_inline # mock
-fn sqrt[dt: DType, sw: Int](Int) -> FloatLiteral:
+fn sqrt(o: Int) -> Float:
     return _sqrt(o)
 
 @always_inline # mock
-fn sqrt[dt: DType, sw: Int](o: SIMD[dt,sw]) -> SIMD[dt,sw]:
-    return _sqrt(o)
+fn sqrt(o: Float) -> Float:
+    return _sqrt(Float64(o)).value
 
 @always_inline # mock
 fn sqrt[dt: DType, sw: Int](o: SIMD[dt,sw]) -> SIMD[dt,sw]:

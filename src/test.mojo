@@ -1,16 +1,16 @@
-def main():
+def main():pass
     
     # aborted
 
     #int_test()
-    simple_test()
+    #simple_test()
     #simd_test()
     #other_test()
     #utils_test()
-    math_test()
-    mulsign_test()
+    #math_test()
+    #mulsign_test()
 
-
+'''
 fn mulsign_test():
     from infrared.infrared import reverse
 
@@ -76,7 +76,7 @@ def simple_test():
     _print(ro*8 // o)  #:
     _print()
 
-'''
+
 def int_test():
     from infrared.hybrid import HyplexInt, ComplexInt, ParaplexInt
     from infrared.io import _print

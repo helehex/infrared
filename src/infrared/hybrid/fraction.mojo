@@ -1,7 +1,10 @@
 from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
 from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
+from infrared.hush import _Float
 #from infrared import min, max, min_coef, max_coef
 from infrared import symbol
+
+alias Float = FloatLiteral
 
 
 
@@ -11,7 +14,7 @@ from infrared import symbol
 @register_passable("trivial")
 struct FloatH[sq: Int]:
     
-    alias Coef = FloatLiteral
+    alias Coef = Float
 
     alias Unit      = HSIMD[sq,DType.float64,1]
     #---- Fraction  = Self
@@ -21,6 +24,7 @@ struct FloatH[sq: Int]:
     alias Scalar       = FloatH_s[sq]
     alias Antiscalar   = FloatH_a[sq]
     
+
     var s: Self.Scalar
     var a: Self.Antiscalar
     
@@ -29,11 +33,11 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0, a:0}
+        return Self{s:0, a:Self.Antiscalar(Self.Scalar(0))}
     
     @always_inline
     fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s, a:0}
+        return Self{s:s, a:Self.Antiscalar(0)}
     
     @always_inline
     fn __init__(a: Self.Antiscalar) -> Self:
@@ -48,15 +52,19 @@ struct FloatH[sq: Int]:
         return Self{s:s, a:a}
 
     @always_inline
-    fn __init__(u: Self.Unit) -> Self:
-        return Self{s:u.s, a:u.a}
+    fn __init__(m: Self.Discrete) -> Self:
+        return Self{s:m.s, a:m.a}
+
+    @always_inline
+    fn __init__(m: Self.Unit) -> Self:
+        return Self{s:m.s, a:m.a}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s and self.a
+        return self.s.__bool__() and self.a.__bool__()
     
     @always_inline
     fn to_discrete(self) -> Self.Discrete:
@@ -107,17 +115,17 @@ struct FloatH[sq: Int]:
 
     @always_inline
     fn __neg__(self) -> Self:
-        return Self(-self.s, -self.i)
+        return Self(-self.s, -self.a)
     
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
-        return self.s == other.s and self.i == other.i
+        return self.s == other.s and self.a == other.a
     
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
-        return self.s != other.s or self.i != other.i
+        return self.s != other.s or self.a != other.a
     
-    
+    '''
     #------ Arithmetic ------#
     
     @always_inline
@@ -363,7 +371,7 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
-        
+    ''' 
 
 
 #----- Float Scalar ------#
@@ -371,7 +379,7 @@ struct FloatH[sq: Int]:
 @register_passable("trivial")
 struct FloatH_s[sq: Int]:
     
-    alias Coef = FloatLiteral
+    alias Coef = Float
 
     alias Unit      = HSIMD_s[sq,DType.float64,1]
     #---- Fraction  = Self
@@ -380,11 +388,13 @@ struct FloatH_s[sq: Int]:
     alias Multivector  = FloatH[sq]
     #---- Scalar       = Self
     alias Antiscalar   = FloatH_a[sq]
-
+    
 
     var c: Self.Coef
 
 
+    #------ Initialize ------#
+    
     @always_inline
     fn __init__() -> Self:
         return Self{c:1}
@@ -394,12 +404,72 @@ struct FloatH_s[sq: Int]:
         return Self{c:c}
 
     @always_inline
-    fn __init__(d: Self.Discrete) -> Self:
-        return Self{c:d.c}
+    fn __init__(c: Self.Discrete.Lit) -> Self:
+        return Self{c:c}
 
     @always_inline
-    fn __init__(a: Self.Unit) -> Self:
-        return Self{c:a.c.__int__()}
+    fn __init__(c: Self.Discrete.Coef) -> Self:
+        return Self{c:c}
+
+    @always_inline
+    fn __init__(c: Self.Unit.Coef) -> Self:
+        return Self{c:c.value}
+
+    @always_inline
+    fn __init__(s: Self.Discrete) -> Self:
+        return Self{c:s.c}
+
+    @always_inline
+    fn __init__(s: Self.Unit) -> Self:
+        return Self{c:s.c.value}
+    
+    
+    #------ To ------#
+    
+    @always_inline
+    fn __bool__(self) -> Bool:
+        return self.c == 0
+    
+    @always_inline
+    fn to_discrete(self) -> Self.Discrete.Coef:
+        return self.c.__int__()
+    
+    
+    #------ Formatting ------#
+    
+    fn __str__(self) -> String:
+        return String(self.c) + symbol[sq]()
+
+    
+    #------ Operators ------#
+    
+    @always_inline
+    fn __neg__(self) -> Self.Coef:
+        return -self.c
+    
+    @always_inline
+    fn __lt__(self, other: Self) -> Bool:  
+        return self.c < other.c
+    
+    @always_inline
+    fn __le__(self, other: Self) -> Bool:
+        return self.c <= other.c
+    
+    @always_inline
+    fn __eq__(self, other: Self) -> Bool:
+        return self.c == other.c
+    
+    @always_inline
+    fn __ne__(self, other: Self) -> Bool:
+        return self.c != other.c
+    
+    @always_inline
+    fn __gt__(self, other: Self) -> Bool:
+        return self.c > other.c
+    
+    @always_inline
+    fn __ge__(self, other: Self) -> Bool:
+        return self.c >= other.c
 
         
         
@@ -408,80 +478,87 @@ struct FloatH_s[sq: Int]:
 @register_passable("trivial")
 struct FloatH_a[sq: Int]:
     
-    alias Unit = Self.Multivector.Unit.Antiscalar
-    #---- Fraction = Self
-    alias Discrete = IntH[sq].Antiscalar
+    alias Coef = Float
+
+    alias Unit      = HSIMD_a[sq,DType.float64,1]
+    #---- Fraction  = Self
+    alias Discrete  = IntH_a[sq]
     
-    alias Multivector = FloatH[sq]
-    alias Scalar = FloatLiteral
-    #---- Antiscalar = Self
+    alias Multivector  = FloatH[sq]
+    alias Scalar       = FloatH_s[sq]
+    #---- Antiscalar   = Self
     
-    var s: Self.Scalar
+
+    var c: Self.Coef
     
     
     #------ Initialize ------#
 
     @always_inline
     fn __init__() -> Self:
-        return Self{s:1}
+        return Self{c:1}
 
     @always_inline
-    fn __init__(i: Self.Discrete) -> Self:
-        return Self{s:i.s}
-    
+    fn __init__(s: Self.Scalar) -> Self:
+        return Self{c:s.c}
+
     @always_inline
-    fn __init__(i: Self.Unit) -> Self:
-        return Self{s:i.s.value}
+    fn __init__(a: Self.Discrete) -> Self:
+        return Self{c:a.c}
+
+    @always_inline
+    fn __init__(a: Self.Unit) -> Self:
+        return Self{c:a.c.value}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s == 0
+        return self.c == 0
     
     @always_inline
     fn to_discrete(self) -> Self.Discrete:
-        return Self.Discrete{s:self.s.__int__()}
+        return Self.Discrete(self.c.__int__())
     
     
     #------ Formatting ------#
     
     fn __str__(self) -> String:
-        return String(self.s) + symbol[sq]()
+        return String(self.c) + symbol[sq]()
 
     
     #------ Operators ------#
     
     @always_inline
     fn __neg__(self) -> Self:
-        return Self{s:-self.s}
+        return Self(-self.c)
     
     @always_inline
     fn __lt__(self, other: Self) -> Bool:  
-        return self.s < other.s
+        return self.c < other.c
     
     @always_inline
     fn __le__(self, other: Self) -> Bool:
-        return self.s <= other.s
+        return self.c <= other.c
     
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
-        return self.s == other.s
+        return self.c == other.c
     
     @always_inline
     fn __ne__(self, other: Self) -> Bool:
-        return self.s != other.s
+        return self.c != other.c
     
     @always_inline
     fn __gt__(self, other: Self) -> Bool:
-        return self.s > other.s
+        return self.c > other.c
     
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
-        return self.s >= other.s
+        return self.c >= other.c
     
-    
+    '''
     #------ Arithmetic ------#
     
     @always_inline
@@ -686,3 +763,4 @@ struct FloatH_a[sq: Int]:
     @always_inline
     fn __itruediv__(inout self, other: Self.Scalar):
         self = self/other
+    '''

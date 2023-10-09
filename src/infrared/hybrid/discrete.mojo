@@ -12,6 +12,7 @@ from infrared import symbol, sqrt
 @register_passable("trivial")
 struct IntH[sq: Int]:
     
+    alias Lit = IntLiteral
     alias Coef = Int
 
     alias Unit      = HSIMD[sq,DType.int64,1]
@@ -47,13 +48,17 @@ struct IntH[sq: Int]:
     @always_inline
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
         return Self{s:s, a:a}
+
+    @always_inline
+    fn __init__(m: Self.Unit) -> Self:
+        return Self{s:m.s,a:m.a}
     
     
     #------ To ------#
     
     @always_inline
     fn __bool__(self) -> Bool:
-        return self.s and self.a
+        return self.s.__bool__() and self.a.__bool__()
     
     
     #------ Formatting ------#
@@ -94,7 +99,7 @@ struct IntH[sq: Int]:
     fn max_compose(self, other: Self) -> Self:
         return max_compose(self, other)
     '''
-    
+    '''
     #------ Operators ------#
     
     @always_inline
@@ -126,11 +131,11 @@ struct IntH[sq: Int]:
         return self.dot(self.conj())
 
     @always_inline
-    fn norm(self) -> Self.Fraction:
+    fn norm(self) -> Self.Fraction.Coef:
         return sqrt(self.mags())
 
     @always_inline
-    fn norm_conj(self) -> Self.Fraction:
+    fn norm_conj(self) -> Self.Fraction.Coef:
         return sqrt(self.mags_conj())
 
 
@@ -155,7 +160,7 @@ struct IntH[sq: Int]:
         return self.dot(other.conj())
     
 
-
+    '''
     '''
     #------ Bit ------#
     
@@ -187,7 +192,7 @@ struct IntH[sq: Int]:
     fn __rshift__(self, other: Self) -> Self:
         return Self(self.s>>other.s, self.a>>other.a)
     '''
-    
+    '''
     #------ Arithmetic ------#
     
     @always_inline
@@ -249,7 +254,7 @@ struct IntH[sq: Int]:
     @always_inline
     fn __floordiv__(self, other: Self) -> Self:
         return Self(self.dot_conj(other), self.ant_conj(other)) // other.mags_conj()
-    
+    '''
     '''
     #------ Reverse Bit ------#
     
@@ -277,7 +282,7 @@ struct IntH[sq: Int]:
     fn __rrshift__(self, other: Self) -> Self:
         return Self(other.s>>self.s, other.a>>self.a)
     '''
-    
+    '''
     #------ Reverse Arithmetic ------#
     
     @always_inline
@@ -339,7 +344,7 @@ struct IntH[sq: Int]:
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self:
         return Self(other.dot_conj(self), other.ant_conj(self)) // self.mags_conj()
-    
+    '''
     '''
     #------ Internal Bit ------#
     
@@ -367,7 +372,7 @@ struct IntH[sq: Int]:
     fn __irshift__(inout self, other: Self):
         self = self>>other
     '''
-    
+    '''
     #------ Internal Arithmetic ------#
 
     @always_inline
@@ -417,15 +422,16 @@ struct IntH[sq: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
+    '''
 
 
 
-
-#----- Scalar ------#
+#----- Int Scalar ------#
 #---
 @register_passable("trivial")
 struct IntH_s[sq: Int]:
     
+    alias Lit = IntLiteral
     alias Coef = Int
 
     alias Unit      = HSIMD_s[sq,DType.int64,1]
@@ -447,12 +453,20 @@ struct IntH_s[sq: Int]:
         return Self{c:1}
 
     @always_inline
+    fn __init__(c: Self.Lit) -> Self:
+        return Self{c:c}
+
+    @always_inline
     fn __init__(c: Self.Coef) -> Self:
         return Self{c:c}
 
     @always_inline
     fn __init__(c: Self.Unit.Coef) -> Self:
         return Self{c:c.value}
+
+    @always_inline
+    fn __init__(s: Self.Unit) -> Self:
+        return Self{c:s.c.value}
 
 
     #------ To ------#
@@ -509,7 +523,7 @@ struct IntH_s[sq: Int]:
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
-
+    '''
     #------ Arithmetic ------#
     
     @always_inline
@@ -542,36 +556,36 @@ struct IntH_s[sq: Int]:
     
     @always_inline
     fn __mul__(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return sq*(self.s*other.s)
+        return Self.Antiscalar(self.c*other.c)
     
     @always_inline
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(self*other.i, self*other.s)
     
     @always_inline
-    fn __truediv__(self, other: Self.Scalar) -> Self.Fraction:
-        return Self.Fraction{s:(self.s/other).value}
+    fn __truediv__(self, other: Self) -> Self.Fraction:
+        return (self.c/other).value
     
     @always_inline
-    fn __truediv__(self, other: Self) -> Self.Fraction.Scalar:
-        return (self.s/other.s).value
+    fn __truediv__(self, other: Self.Antiscalar) -> Self.Fraction.Antiscalar:
+        return (self.c/other.c).value
     
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Fraction.Multivector:
-        return Self.Multivector(other.s, -other.i) * (self/(other.s*other.s - other.i*other.i))
+        return Self.Multivector(other.s, -other.a) * (self/(other.s*other.s - other.a*other.a))
     
     @always_inline
-    fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s//other}
+    fn __floordiv__(self, other: Self) -> Self:
+        return self.c//other.c
     
     @always_inline
-    fn __floordiv__(self, other: Self) -> Self.Scalar:
-        return self.s//other.s
+    fn __floordiv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c//other.c)
     
     @always_inline
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
-        return (self*other) // (other.s*other.s - other.i*other.i)
-        
+        return (self*other) // (other.s*other.s - other.a*other.a)
+   '''     
         
         
 #------ Antiscalar ------#
@@ -579,6 +593,7 @@ struct IntH_s[sq: Int]:
 @register_passable("trivial")
 struct IntH_a[sq: Int]:
     
+    alias Lit = IntLiteral
     alias Coef = Int
 
     alias Unit      = HSIMD_a[sq,DType.int64,1]
@@ -600,12 +615,12 @@ struct IntH_a[sq: Int]:
         return Self{c:1}
 
     @always_inline
-    fn __init__(t: Tuple[Self.Coef]) -> Self:
-        return Self{c:t.get[0,Self.Coef]()}
+    fn __init__(c: Self.Scalar) -> Self:
+        return Self{c:c.c}
 
     @always_inline
-    fn __init__(t: Tuple[Self.Unit.Coef]) -> Self:
-        return Self{c:t.get[0,Self.Unit.Coef]().value}
+    fn __init__(a: Self.Unit) -> Self:
+        return Self{c:a.c.value}
     
     
     #------ To ------#
@@ -624,9 +639,9 @@ struct IntH_a[sq: Int]:
     #------ Get / Set ------#
     
     @always_inline
-    fn get_coef(self, index: Int) -> Self: 
-        if index == 1: return Self(self.c)
-        return Self(0)
+    fn get_coef(self, index: Int) -> Self.Coef: 
+        if index == 1: return self.c
+        return 0
     
     @always_inline
     fn set_coef(inout self, index: Int, coef: Self.Coef):
@@ -694,7 +709,7 @@ struct IntH_a[sq: Int]:
     fn __rshift__(self, other: Self.Multivector) -> Self:
         return self.c>>other.a.c
     '''
-    
+    '''
     #------ Arithmetic ------#
     
     @always_inline
@@ -735,7 +750,7 @@ struct IntH_a[sq: Int]:
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self.Fraction:
-        return Self.Fraction((self.c/other.c).value)
+        return (self.c/other.c).value
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Fraction.Scalar.Coef:
@@ -892,3 +907,4 @@ struct IntH_a[sq: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self.Scalar):
         self = self//other
+    '''
