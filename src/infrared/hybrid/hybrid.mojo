@@ -1,6 +1,6 @@
-from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
-from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
-from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
+from infrared.hybrid.discrete import IntH
+from infrared.hybrid.fraction import FloatH
+from infrared.hybrid.hsimd import HSIMD
 
 
 
@@ -12,7 +12,7 @@ from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
 #------ x*x = 1
 #------ (currently an alias of FloatH[1]; x = a, a*a=1)
 #---
-alias x     = IntH_a[1]()
+alias x = IntH[1].Antiscalar()
 alias G1      = FloatH[1]
 alias FloatG1 = FloatH[1]
 alias IntG1     = IntH[1]
@@ -29,7 +29,7 @@ alias Int64G1   = HSIMD[1,DType.int64,1]
 #------ i*i = -1
 #------ (currently an alias of FloatH[-1]; i = a, a*a=-1)
 #---
-alias i      = IntH_a[-1]()
+alias i = IntH[-1].Antiscalar()
 alias G01      = FloatH[-1]
 alias FloatG01 = FloatH[-1]
 alias IntG01     = IntH[-1]
@@ -46,7 +46,7 @@ alias Int64G01   = HSIMD[-1,DType.int64,1]
 #------ o*o = 0
 #------ (currently an alias of FloatH[0]; o = a, a*a=0)
 #---
-alias o       = IntH_a[0]()
+alias o = IntH[0].Antiscalar()
 alias G001      = FloatH[0]
 alias FloatG001 = FloatH[0]
 alias IntG001     = IntH[0]

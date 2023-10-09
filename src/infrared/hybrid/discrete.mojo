@@ -1,5 +1,5 @@
-from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
-from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
+from infrared.hybrid.fraction import FloatH
+from infrared.hybrid.hsimd import HSIMD
 #from infrared import min, max, min_coef, max_coef
 from infrared import symbol, sqrt
 
@@ -471,8 +471,8 @@ struct IntH_s[sq: Int]:
     alias Coef = Int
 
     #---- Discrete  = Self
-    alias Fraction  = FloatH_s[sq]
-    alias Unit      = HSIMD_s[sq,DType.int64,1]
+    alias Fraction  = FloatH[sq].Scalar
+    alias Unit      = HSIMD[sq,DType.int64,1].Scalar
     
     alias Multivector  = IntH[sq]
     #---- Scalar       = Self
@@ -722,8 +722,8 @@ struct IntH_a[sq: Int]:
     alias Coef = Int
 
     #---- Discrete  = Self
-    alias Fraction  = FloatH_a[sq]
-    alias Unit      = HSIMD_a[sq,DType.int64,1]
+    alias Fraction  = FloatH[sq].Antiscalar
+    alias Unit      = HSIMD[sq,DType.int64,1].Antiscalar
 
     alias Multivector  = IntH[sq]
     alias Scalar       = IntH_s[sq]

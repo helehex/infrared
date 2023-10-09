@@ -1,6 +1,4 @@
-from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
-from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
-from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
+from infrared.hybrid import IntH, FloatH, HSIMD
 
 fn print_(): print()
 fn print_(o: Int): print(o)
