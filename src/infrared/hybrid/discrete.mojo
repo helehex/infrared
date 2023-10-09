@@ -1,21 +1,9 @@
 from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
 from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
+from infrared.hush import _Int
 #from infrared import min, max, min_coef, max_coef
 from infrared import symbol, sqrt
 
-
-@value
-@register_passable("trivial")
-struct Int_:
-    var c: Int
-
-    @always_inline
-    fn __init__(c: Int) -> Self:
-        return Self{c:c}
-
-    @always_inline
-    fn __init__(c: SIMD[DType.int64,1]) -> Self:
-        return Self{c:c.value}
 
 
 
@@ -139,11 +127,11 @@ struct IntH[sq: Int]:
 
     @always_inline
     fn norm(self) -> Self.Fraction:
-        return sqrt(self.mag())
+        return sqrt(self.mags())
 
     @always_inline
     fn norm_conj(self) -> Self.Fraction:
-        return sqrt(self.mag_conj())
+        return sqrt(self.mags_conj())
 
 
 
