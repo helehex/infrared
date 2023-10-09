@@ -11,7 +11,6 @@ from infrared import symbol, sqrt
 @register_passable("trivial")
 struct IntH[sq: Int]:
     
-    alias Lit = IntLiteral
     alias Coef = Int
 
     alias Unit      = HSIMD[sq,DType.int64,1]
@@ -46,7 +45,7 @@ struct IntH[sq: Int]:
     fn __init__(s: Self.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
 
-    @always_inline # HSIMD Scalar
+    @always_inline # HSIMD Unit Scalar
     fn __init__(s: Self.Unit.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
     
@@ -54,7 +53,7 @@ struct IntH[sq: Int]:
     fn __init__(a: Self.Antiscalar) -> Self:
         return Self{s:0, a:a}
 
-    @always_inline # HSIMD Antiscalar
+    @always_inline # HSIMD Unit Antiscalar
     fn __init__(a: Self.Unit.Antiscalar) -> Self:
         return Self{s:0, a:a}
 
@@ -450,7 +449,6 @@ struct IntH[sq: Int]:
 @register_passable("trivial")
 struct IntH_s[sq: Int]:
     
-    alias Lit = IntLiteral
     alias Coef = Int
 
     alias Unit      = HSIMD_s[sq,DType.int64,1]
@@ -470,10 +468,6 @@ struct IntH_s[sq: Int]:
     @always_inline
     fn __init__() -> Self:
         return Self{c:1}
-
-    @always_inline
-    fn __init__(c: Self.Lit) -> Self:
-        return Self{c:c}
 
     @always_inline
     fn __init__(c: Self.Coef) -> Self:
@@ -612,7 +606,6 @@ struct IntH_s[sq: Int]:
 @register_passable("trivial")
 struct IntH_a[sq: Int]:
     
-    alias Lit = IntLiteral
     alias Coef = Int
 
     alias Unit      = HSIMD_a[sq,DType.int64,1]

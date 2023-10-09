@@ -13,7 +13,6 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     alias Coef = SIMD[dt,sw]
 
-    alias Single    = SIMD[dt,1]
     alias Unit      = HSIMD[sq,dt,1]
     alias Discrete  = IntH[sq]
     alias Fraction  = FloatH[sq]
@@ -472,10 +471,9 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     
     alias Coef = SIMD[dt,sw]
 
-    alias Single    = SIMD[dt,1]
+    alias Discrete  = IntH_s[sq]
+    alias Fraction  = FloatH_s[sq]
     alias Unit      = HSIMD_s[sq,dt,1]
-    alias Fraction  = FloatH[sq].Scalar
-    alias Discrete  = IntH[sq].Scalar
     
     alias Multivector  = HSIMD[sq,dt,sw]
     #---- Scalar       = Self
@@ -493,10 +491,6 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
 
     @always_inline
     fn __init__(c: Self.Coef) -> Self:
-        return Self{c:c}
-
-    @always_inline
-    fn __init__(c: Self.Discrete.Lit) -> Self:
         return Self{c:c}
 
     @always_inline
@@ -859,10 +853,10 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     
     alias Coef = SIMD[dt,sw]
 
-    alias Single    = SIMD[dt,1]
+    alias Discrete  = IntH_a[sq]
+    alias Fraction  = FloatH_a[sq]
     alias Unit      = HSIMD_a[sq,dt,1]
-    alias Fraction  = FloatH[sq].Antiscalar
-    alias Discrete  = IntH[sq].Antiscalar
+
     
     alias Multivector  = HSIMD[sq,dt,sw]
     alias Scalar       = HSIMD_s[sq,dt,sw]

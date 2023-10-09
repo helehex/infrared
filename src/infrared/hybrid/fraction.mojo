@@ -44,7 +44,7 @@ struct FloatH[sq: Int]:
     fn __init__(s: Self.Discrete.Coef) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
 
-    @always_inline # HSIMD Coefficient
+    @always_inline # HSIMD Unit Coefficient
     fn __init__(s: Self.Unit.Coef) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
 
@@ -432,10 +432,6 @@ struct FloatH_s[sq: Int]:
 
     @always_inline
     fn __init__(c: Self.Coef) -> Self:
-        return Self{c:c}
-
-    @always_inline
-    fn __init__(c: Self.Discrete.Lit) -> Self:
         return Self{c:c}
 
     @always_inline

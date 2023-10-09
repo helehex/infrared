@@ -1,16 +1,19 @@
 from infrared.hybrid import IntH, FloatH, HSIMD
 
-fn _print(): print()
-fn _print(a: Int): print(a)
-fn _print(a: FloatLiteral): print(a)
-fn _print(a: String): print(a)
-fn _print[sq: Int](a: FloatH[sq]): print(a.__str__())
-fn _print[sq: Int](a: FloatH[sq].Antiscalar): print(a.__str__())  
-fn _print[sq: Int](a: IntH[sq]): print(a.__str__())
-fn _print[sq: Int](a: IntH[sq].Antiscalar): print(a.__str__())
-fn _print[dt: DType, sw: Int](a: SIMD[dt,sw]): print(a)
-fn _print[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw]): print(a.__str__())
-fn _print[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].Antiscalar): print(a.__str__())
+fn print_(): print()
+fn print_(a: Int): print(a)
+fn print_(a: FloatLiteral): print(a)
+fn print_(a: String): print(a)
+fn print_[dt: DType, sw: Int](a: SIMD[dt,sw]): print(a)
+
+fn print_[sq: Int](a: FloatH[sq]): print(a.__str__())
+fn print_[sq: Int](a: FloatH[sq].Antiscalar): print(a.__str__())  
+
+fn print_[sq: Int](a: IntH[sq]): print(a.__str__())
+fn print_[sq: Int](a: IntH[sq].Antiscalar): print(a.__str__())
+
+fn print_[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw]): print(a.__str__())
+fn print_[sq: Int, dt: DType, sw: Int](a: HSIMD[sq,dt,sw].Antiscalar): print(a.__str__())
 
 # get the symbol for formatting
 fn symbol[sq: Int]() -> String:

@@ -1,13 +1,15 @@
 def main():
-    from infrared.hybrid import Hyplex, Hyplex32, Hyplex64, HyplexInt, HSIMD, x
-    from infrared.io import _print
+    from infrared.hybrid import Hyplex, HyplexInt, x
+    from infrared import print_
+
+    #alias x = HyplexInt.Antiscalar(1)
 
     let a: Hyplex = 5
     let b: HyplexInt = x
     #let c: Hyplex64 = 10
     #let d: HSIMD[1,DType.float64,8] = 7
-    _print(a)
-    _print(b)
+    print_(a)
+    print_(b)
     #_print(c)
     #_print(d)
     
