@@ -3,20 +3,20 @@ def main():
     # run a bunch of times and sometimes it works
     # try getting rid of HyplexInt import
 
-    from infrared.hybrid import Hyplex, HyplexInt#, x
+    from infrared.hybrid import Hyplex, HyplexInt, Hyplex64, HSIMD, x
     #from infrared.hybrid import Hyplex64, HSIMD
     from infrared import print_
 
     #alias x = HyplexInt.Antiscalar(1)
 
     let a: Hyplex = 5
-    #let b: HyplexInt = x
-    #let c: Hyplex64 = 10
-    #let d: HSIMD[1,DType.int64,8] = 6
+    let b: HyplexInt = x
+    let c: Hyplex64 = 10
+    let d: HSIMD[1,DType.int64,8] = 6
     print_(a)
-    #print_(b)
-    #print_(c)
-    #print_(d)
+    print_(b)
+    print_(c)
+    print_(d)
     
     # aborted
 
