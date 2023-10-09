@@ -4,29 +4,39 @@ from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
 from infrared import symbol, sqrt
 
 
+'''
+@register_passable("trivial")
+struct LitIntH[sq: Int]:
+'''
 
 
-#------------ Hybrid Int ------------#
+#------------ Int Hybrid ------------#
+#---
 #---
 @register_passable("trivial")
 struct IntH[sq: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = Int
 
-    alias Unit      = HSIMD[sq,DType.int64,1]
-    alias Fraction  = FloatH[sq]
     #---- Discrete  = Self
+    alias Fraction  = FloatH[sq]
+    alias Unit      = HSIMD[sq,DType.int64,1]
     
     #---- Multivector  = Self
     alias Scalar       = IntH_s[sq]
     alias Antiscalar   = IntH_a[sq]
 
+
+    #------< Data >------#
+    #
     var s: Self.Scalar
     var a: Self.Antiscalar
     
     
-    #------ Initialize ------#
-    
+    #------( Initialize )------#
+    #
     @always_inline
     fn __init__() -> Self:
         return Self{s:0, a:Self.Antiscalar(0)}
@@ -67,26 +77,26 @@ struct IntH[sq: Int]:
     fn __init__(s1: Self.Scalar, s2: Self.Scalar) -> Self:
         return Self{s:s1, a:Self.Antiscalar(s2.c)}
 
-    @always_inline # Elements
+    @always_inline # Grades
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
         return Self{s:s, a:a}
 
     
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.s.__bool__() and self.a.__bool__()
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
         return self.s.__str__() + " + " + self.a.__str__()
     
     
-    #------ Get / Set ------#
-    
+    #------( Get / Set )------#
+    #
     @always_inline
     fn get_coef(self, index: Int) -> Self.Coef: 
         if index == 0: return self.s.c
@@ -99,8 +109,8 @@ struct IntH[sq: Int]:
         if index == 1: self.a.c = coef
     
     '''
-    #------ Min / Max ------#
-    
+    #------( Min / Max )------#
+    #
     @always_inline
     fn min_coef(self) -> Self.Coef:
         return min_coef(self)
@@ -117,9 +127,9 @@ struct IntH[sq: Int]:
     fn max_compose(self, other: Self) -> Self:
         return max_compose(self, other)
     '''
-    '''
-    #------ Operators ------#
     
+    #------( Operators )------#
+    #
     @always_inline
     fn __neg__(self) -> Self:
         return Self(-self.s, -self.a)
@@ -134,85 +144,91 @@ struct IntH[sq: Int]:
 
     @always_inline
     fn conj(self) -> Self:
-        return Self(self.s, -self.a)
+        return Self(self.s.c, -self.a.c)
 
     @always_inline
     fn dual(self) -> Self:
         return Self(self.a.c, self.s.c)
 
     @always_inline
-    fn mags(self) -> Self.Coef:
+    fn mags(self) -> Self.Scalar:
         return self.dot(self)
 
     @always_inline
-    fn mags_conj(self) -> Self.Coef:
+    fn mags_conj(self) -> Self.Scalar:
         return self.dot(self.conj())
 
     @always_inline
-    fn norm(self) -> Self.Fraction.Coef:
+    fn norm(self) -> Self.Fraction.Scalar:
         return sqrt(self.mags())
 
     @always_inline
-    fn norm_conj(self) -> Self.Fraction.Coef:
+    fn norm_conj(self) -> Self.Fraction.Scalar:
         return sqrt(self.mags_conj())
 
-
-
-
-    #------ Products ------#
+    
+    #------( Products )------#
+    #
+    @always_inline
+    fn dot(self, other: Self.Scalar) -> Self.Scalar:
+        return self.s.dot(other)
 
     @always_inline
-    fn dot(self, other: Self) -> Self.Coef:
-        return self.s*other.s + self.a*other.a
+    fn dot(self, other: Self.Antiscalar) -> Self.Scalar:
+        return self.a.dot(other)
 
     @always_inline
-    fn dot_conj(self, other: Self) -> Self.Coef:
-        return self.dot(other.conj())
+    fn ant(self, other: Self.Scalar) -> Self.Antiscalar:
+        return self.a.ant(other)
+
+    @always_inline
+    fn ant(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return self.s.ant(other)
 
     @always_inline
     fn ant(self, other: Self) -> Self.Antiscalar:
-        return self.s*other.a + self.a*other.s
+        return self.s.ant(other.a) + self.a.ant(other.s)
 
     @always_inline
-    fn ant_conj(self, other: Self) -> Self.Coef:
-        return self.dot(other.conj())
-    
+    fn dot(self, other: Self) -> Self.Scalar:
+        return self.s.dot(other.s) + self.a.dot(other.a)
 
-    '''
-    '''
-    #------ Bit ------#
+    #--- Conjugate Products
+    #
+    @always_inline
+    fn dot_conj(self, other: Self.Scalar) -> Self.Scalar:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn dot_conj(self, other: Self.Antiscalar) -> Self.Scalar:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn dot_conj(self, other: Self) -> Self.Scalar:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self.Scalar) -> Self.Antiscalar:
+        return self.ant(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return self.ant(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self) -> Self.Antiscalar:
+        return self.ant(other.conj())
     
+    
+    #------( Bit )------#
+    #
     @always_inline
     fn __invert__(self) -> Self:
         return Self(~self.s, ~self.a)
+
     
-    @always_inline
-    fn __lshift__(self, other: Self.Scalar) -> Self:
-        return Self(self.s<<other, self.a)
-    
-    @always_inline
-    fn __lshift__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.a<<other)
-    
-    @always_inline
-    fn __lshift__(self, other: Self) -> Self:
-        return Self(self.s<<other.s, self.a<<other.a)
-    
-    @always_inline
-    fn __rshift__(self, other: Self.Scalar) -> Self:
-        return Self(self.s>>other, self.a)
-    
-    @always_inline
-    fn __rshift__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.a>>other)
-    
-    @always_inline
-    fn __rshift__(self, other: Self) -> Self:
-        return Self(self.s>>other.s, self.a>>other.a)
-    '''
-    '''
-    #------ Arithmetic ------#
-    
+    #------( Arithmetic )------#
+    #
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self:
         return Self(self.s + other, self.a)
@@ -236,7 +252,7 @@ struct IntH[sq: Int]:
     @always_inline
     fn __sub__(self, other: Self) -> Self:
         return Self(self.s - other.s, self.a - other.a)
-    
+    '''
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
         return Self(self.s*other, self.a*other)
@@ -274,8 +290,8 @@ struct IntH[sq: Int]:
         return Self(self.dot_conj(other), self.ant_conj(other)) // other.mags_conj()
     '''
     '''
-    #------ Reverse Bit ------#
-    
+    #------( Reverse Bit )------#
+    #
     @always_inline
     fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
         return other<<self.s
@@ -301,8 +317,8 @@ struct IntH[sq: Int]:
         return Self(other.s>>self.s, other.a>>self.a)
     '''
     '''
-    #------ Reverse Arithmetic ------#
-    
+    #------( Reverse Arithmetic )------#
+    #
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self:
         return Self(other + self.s, self.a)
@@ -364,8 +380,8 @@ struct IntH[sq: Int]:
         return Self(other.dot_conj(self), other.ant_conj(self)) // self.mags_conj()
     '''
     '''
-    #------ Internal Bit ------#
-    
+    #------( Internal Bit )------#
+    #
     @always_inline
     fn __ilshift__(inout self, other: Self.Scalar):
         self = self<<other
@@ -391,8 +407,8 @@ struct IntH[sq: Int]:
         self = self>>other
     '''
     '''
-    #------ Internal Arithmetic ------#
-
+    #------( Internal Arithmetic )------#
+    #
     @always_inline
     fn __iadd__(inout self, other: Self.Scalar):
         self = self + other
@@ -444,59 +460,68 @@ struct IntH[sq: Int]:
 
 
 
-#----- Int Scalar ------#
+#----------- Int Scalar ------------#
+#---
 #---
 @register_passable("trivial")
 struct IntH_s[sq: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = Int
 
-    alias Unit      = HSIMD_s[sq,DType.int64,1]
-    alias Fraction  = FloatH_s[sq]
     #---- Discrete  = Self
+    alias Fraction  = FloatH_s[sq]
+    alias Unit      = HSIMD_s[sq,DType.int64,1]
     
     alias Multivector  = IntH[sq]
     #---- Scalar       = Self
     alias Antiscalar   = IntH_a[sq]
 
 
+    #------< Data >------#
+    #
     var c: Self.Coef
     
     
-    #------ Initialize ------#
-
-    @always_inline
+    #------( Initialize )------#
+    #
+    @always_inline # Identity
     fn __init__() -> Self:
         return Self{c:1}
 
-    @always_inline
+    #--- Coef
+    #
+    @always_inline # Discrete Coefficient
     fn __init__(c: Self.Coef) -> Self:
         return Self{c:c}
 
-    @always_inline
+    @always_inline # HSIMD Unit Coefficient
     fn __init__(c: Self.Unit.Coef) -> Self:
         return Self{c:c.value}
 
-    @always_inline
+    #--- Scalar
+    #
+    @always_inline # HSIMD Unit Scalar
     fn __init__(s: Self.Unit) -> Self:
         return Self{c:s.c.value}
 
 
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.c == 0
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
         return String(self.c)
 
 
-    #------ Get / Set ------#
-    
+    #------( Get / Set )------#
+    #
     @always_inline
     fn get_coef(self, index: Int) -> Self.Coef: 
         if index == 0: return self.c
@@ -507,10 +532,10 @@ struct IntH_s[sq: Int]:
         if index == 0: self.c = coef
     
     
-    #------ Operators ------#
-    
+    #------( Operators )------#
+    #
     @always_inline
-    fn __neg__(self) -> Self.Coef:
+    fn __neg__(self) -> Self:
         return -self.c
     
     @always_inline
@@ -536,11 +561,96 @@ struct IntH_s[sq: Int]:
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
-    '''
-    #------ Arithmetic ------#
-    
+
     @always_inline
-    fn __add__(self, other: Self) -> Self.Coef:
+    fn conj(self) -> Self:
+        return self.c
+
+    @always_inline
+    fn dual(self) -> Self:
+        return 0
+
+    @always_inline
+    fn mags(self) -> Self:
+        return self.dot(self)
+
+    @always_inline
+    fn mags_conj(self) -> Self:
+        return self.dot(self.conj())
+
+    @always_inline
+    fn norm(self) -> Self.Fraction:
+        return sqrt(self.mags())
+
+    @always_inline
+    fn norm_conj(self) -> Self.Fraction:
+        return sqrt(self.mags_conj())
+
+    
+    #------( Products )------#
+    #
+    @always_inline
+    fn dot(self, other: Self) -> Self:
+        return self.c*other.c
+
+    @always_inline
+    fn dot(self, other: Self.Antiscalar) -> Self:
+        return 0
+
+    @always_inline
+    fn dot(self, other: Self.Multivector) -> Self:
+        return self.c*other.s.c
+
+    @always_inline
+    fn ant(self, other: Self) -> Self.Antiscalar:
+        return Self.Antiscalar(0)
+
+    @always_inline
+    fn ant(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c*other.c)
+
+    @always_inline
+    fn ant(self, other: Self.Multivector) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c*other.a.c)
+
+    #--- Conjugate Products
+    #
+    @always_inline
+    fn dot_conj(self, other: Self) -> Self:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn dot_conj(self, other: Self.Antiscalar) -> Self:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn dot_conj(self, other: Self.Multivector) -> Self:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self) -> Self.Antiscalar:
+        return self.ant(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return self.ant(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self.Multivector) -> Self.Antiscalar:
+        return self.ant(other.conj())
+    
+
+    #------( Bit )------#
+    #
+    @always_inline
+    fn __invert__(self) -> Self:
+        return ~self.c
+    
+    
+    #------( Arithmetic )------#
+    #
+    @always_inline
+    fn __add__(self, other: Self) -> Self:
         return self.c + other.c
     
     @always_inline
@@ -552,7 +662,7 @@ struct IntH_s[sq: Int]:
         return Self.Multivector(self + other.s, other.a)
     
     @always_inline
-    fn __sub__(self, other: Self) -> Self.Coef:
+    fn __sub__(self, other: Self) -> Self:
         return self.c - other.c
     
     @always_inline
@@ -562,7 +672,7 @@ struct IntH_s[sq: Int]:
     @always_inline
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(self - other.s, -other.a)
-    
+    '''
     @always_inline
     fn __mul__(self, other: Self) -> Self.Coef:
         return self.c*other.c
@@ -601,55 +711,64 @@ struct IntH_s[sq: Int]:
    '''     
         
         
-#------ Antiscalar ------#
-#---        
+#------------ Int Antiscalar ------------#
+#---
+#---       
 @register_passable("trivial")
 struct IntH_a[sq: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = Int
 
-    alias Unit      = HSIMD_a[sq,DType.int64,1]
-    alias Fraction  = FloatH_a[sq]
     #---- Discrete  = Self
-    
+    alias Fraction  = FloatH_a[sq]
+    alias Unit      = HSIMD_a[sq,DType.int64,1]
+
     alias Multivector  = IntH[sq]
     alias Scalar       = IntH_s[sq]
     #---- Antiscalar   = Self
     
 
+    #------< Data >------#
+    #
     var c: Self.Coef
     
     
-    #------ Initialize ------#
-
+    #------( Initialize )------#
+    #
     @always_inline
     fn __init__() -> Self:
         return Self{c:1}
 
-    @always_inline
+    #--- Scalar
+    #
+    @always_inline # Discrete Scalar
     fn __init__(c: Self.Scalar) -> Self:
         return Self{c:c.c}
 
-    @always_inline
+    #--- Antiscalar
+    #
+    @always_inline # HSIMD Unit Antiscalar
     fn __init__(a: Self.Unit) -> Self:
         return Self{c:a.c.value}
     
     
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.c == 0
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
         return String(self.c) + symbol[sq]()
 
 
-    #------ Get / Set ------#
-    
+    #------( Get / Set )------#
+    #
     @always_inline
     fn get_coef(self, index: Int) -> Self.Coef: 
         if index == 1: return self.c
@@ -660,8 +779,8 @@ struct IntH_a[sq: Int]:
         if index == 1: self.c = coef
     
     
-    #------ Operators ------#
-    
+    #------( Operators )------#
+    #
     @always_inline
     fn __neg__(self) -> Self:
         return Self(-self.c)
@@ -689,41 +808,94 @@ struct IntH_a[sq: Int]:
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
+
+    @always_inline
+    fn conj(self) -> Self:
+        return Self(-self.c)
+
+    @always_inline
+    fn dual(self) -> Self:
+        return Self(0)
+
+    @always_inline
+    fn mags(self) -> Self.Scalar:
+        return self.dot(self)
+
+    @always_inline
+    fn mags_conj(self) -> Self.Scalar:
+        return self.dot(self.conj())
+
+    @always_inline
+    fn norm(self) -> Self.Fraction.Scalar:
+        return sqrt(self.mags())
+
+    @always_inline
+    fn norm_conj(self) -> Self.Fraction.Scalar:
+        return sqrt(self.mags_conj())
+
     
-    '''
-    #------ Bit ------#
+    #------( Products )------#
+    #
+    @always_inline
+    fn dot(self, other: Self.Scalar) -> Self.Scalar:
+        return 0
+
+    @always_inline
+    fn dot(self, other: Self) -> Self.Scalar:
+        return self.c*other.c
+
+    @always_inline
+    fn dot(self, other: Self.Multivector) -> Self.Scalar:
+        return self.c*other.a.c
+
+    @always_inline
+    fn ant(self, other: Self.Scalar) -> Self:
+        return Self(self.c*other.c)
+
+    @always_inline
+    fn ant(self, other: Self) -> Self:
+        return Self(0)
+
+    @always_inline
+    fn ant(self, other: Self.Multivector) -> Self:
+        return Self(self.c*other.s.c)
+
+    #--- Conjugate Product
+    #
+    @always_inline
+    fn dot_conj(self, other: Self.Scalar) -> Self.Scalar:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn dot_conj(self, other: Self) -> Self.Scalar:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn dot_conj(self, other: Self.Multivector) -> Self.Scalar:
+        return self.dot(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self.Scalar) -> Self:
+        return self.ant(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self) -> Self:
+        return self.ant(other.conj())
+
+    @always_inline
+    fn ant_conj(self, other: Self.Multivector) -> Self:
+        return self.ant(other.conj())
     
+    
+    #------( Bit )------#
+    #
     @always_inline
     fn __invert__(self) -> Self:
         return Self(~self.c)
     
-    @always_inline
-    fn __lshift__(self, other: Self.Scalar) -> Self:
-        return self.c
     
-    @always_inline
-    fn __lshift__(self, other: Self) -> Self:
-        return self.c<<other.c
-    
-    @always_inline
-    fn __lshift__(self, other: Self.Multivector) -> Self:
-        return self.c<<other.a.c
-    
-    @always_inline
-    fn __rshift__(self, other: Self.Scalar) -> Self:
-        return self.c
-    
-    @always_inline
-    fn __rshift__(self, other: Self) -> Self:
-        return self.c>>other.c
-    
-    @always_inline
-    fn __rshift__(self, other: Self.Multivector) -> Self:
-        return self.c>>other.a.c
-    '''
-    '''
-    #------ Arithmetic ------#
-    
+    #------( Arithmetic )------#
+    #
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
@@ -747,7 +919,7 @@ struct IntH_a[sq: Int]:
     @always_inline
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(-other.s, self - other.a)
-    
+    '''
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
         return Self(self.c*other.c)
@@ -785,8 +957,8 @@ struct IntH_a[sq: Int]:
         return (self*other) // (other.s*other.s - other.i*other.i)
     
     
-    #------ Reverse Bit ------#
-    
+    #------( Reverse Bit )------#
+    #
     @always_inline
     fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
         return other
@@ -812,8 +984,8 @@ struct IntH_a[sq: Int]:
         return Self.Multivector(other.s, other.i.s>>self.s)
     
     
-    #------ Reverse Arithmetic ------#
-    
+    #------( Reverse Arithmetic )------#
+    #
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
@@ -875,8 +1047,8 @@ struct IntH_a[sq: Int]:
         return Self.Multivector(other.i//self, other.s//self)
     
     
-    #------ Internal Bit ------#
-    
+    #------( Internal Bit )------#
+    #
     @always_inline
     fn __ilshift__(inout self, other: Self.Scalar):
         self = self<<other
@@ -902,8 +1074,8 @@ struct IntH_a[sq: Int]:
         self = self>>other
     
     
-    #------ Internal Arithmetic ------#
-    
+    #------( Internal Arithmetic )------#
+    #
     @always_inline
     fn __iadd__(inout self, other: Self):
         self = self+other

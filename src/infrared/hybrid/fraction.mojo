@@ -8,28 +8,33 @@ alias Float = FloatLiteral
 
 
 
-#------------ Hybrid Float ------------#
+#------------ Float Hybrid ------------#
+#---
 #---
 @register_passable("trivial")
 struct FloatH[sq: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = Float
 
-    alias Unit      = HSIMD[sq,DType.float64,1]
-    #---- Fraction  = Self
     alias Discrete  = IntH[sq]
-    
+    #---- Fraction  = Self
+    alias Unit      = HSIMD[sq,DType.float64,1]
+
     #---- Multivector  = Self
     alias Scalar       = FloatH_s[sq]
     alias Antiscalar   = FloatH_a[sq]
     
 
+    #------< Data >------#
+    #
     var s: Self.Scalar
     var a: Self.Antiscalar
     
     
-    #------ Initialize ------#
-    
+    #------( Initialize )------#
+    #
     @always_inline
     fn __init__() -> Self:
         return Self{s:0, a:Self.Antiscalar(0)}
@@ -86,13 +91,13 @@ struct FloatH[sq: Int]:
     fn __init__(s1: Self.Scalar, s2: Self.Scalar) -> Self:
         return Self{s:s1, a:s2}
 
-    @always_inline # Elements
+    @always_inline # Grades
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
         return Self{s:s, a:a}
     
     
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.s.__bool__() and self.a.__bool__()
@@ -102,14 +107,14 @@ struct FloatH[sq: Int]:
         return Self.Discrete(self.s.to_discrete(), self.a.to_discrete())
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
         return self.s.__str__() + " + " + self.a.__str__()
     
     
-    #------ Get / Set ------#
-    
+    #------( Get / Set )------#
+    #
     # name may change; currently with GSIMD: Coef means a length 1 SIMD, Scalar means a length sw SIMD, but the get_coef function returns a Scalar type... possibley reverse indexing, or reverse aliases
     @always_inline
     fn get_coef(self, index: Int) -> Self.Coef: 
@@ -123,8 +128,8 @@ struct FloatH[sq: Int]:
         if index == 1: self.a.c = coef
     
     '''
-    #------ Min / Max ------#
-    
+    #------( Min / Max )------#
+    #
     @always_inline
     fn min_coef(self) -> Self.Coef:
         return min_coef(self)
@@ -142,8 +147,8 @@ struct FloatH[sq: Int]:
         return max_compose(self, other)
     '''
     
-    #------ Operators ------#
-
+    #------( Operators )------#
+    #
     @always_inline
     fn __neg__(self) -> Self:
         return Self(-self.s, -self.a)
@@ -157,8 +162,8 @@ struct FloatH[sq: Int]:
         return self.s != other.s or self.a != other.a
     
     '''
-    #------ Arithmetic ------#
-    
+    #------( Arithmetic )------#
+    #
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self:
         return Self(self.s + other, self.i)
@@ -240,8 +245,8 @@ struct FloatH[sq: Int]:
         return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) // (other.s*other.s - other.i*other.i)
     
     
-    #------ Reverse Arithmetic ------#
-    
+    #------( Reverse Arithmetic )------#
+    #
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self:
         return Self(other + self.s, self.i)
@@ -325,8 +330,8 @@ struct FloatH[sq: Int]:
         return Self(other.s*self.s - other.i*self.i, other.i*self.s - other.s*self.i) // (self.s*self.s - self.i*self.i)
     
     
-    #------ Internal Arithmetic ------#
-    
+    #------( Internal Arithmetic )------#
+    #
     @always_inline
     fn __iadd__(inout self, other: Self.Scalar):
         self = self + other
@@ -405,31 +410,38 @@ struct FloatH[sq: Int]:
     ''' 
 
 
-#----- Float Scalar ------#
+#----------- Float Scalar ------------#
+#---
 #---
 @register_passable("trivial")
 struct FloatH_s[sq: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = Float
 
-    alias Unit      = HSIMD_s[sq,DType.float64,1]
-    #---- Fraction  = Self
     alias Discrete  = IntH_s[sq]
+    #---- Fraction  = Self
+    alias Unit      = HSIMD_s[sq,DType.float64,1]
     
     alias Multivector  = FloatH[sq]
     #---- Scalar       = Self
     alias Antiscalar   = FloatH_a[sq]
     
 
+    #------< Data >------#
+    #
     var c: Self.Coef
 
 
-    #------ Initialize ------#
-    
-    @always_inline
+    #------( Initialize )------#
+    #
+    @always_inline # Identity
     fn __init__() -> Self:
         return Self{c:1}
 
+    #--- Coefficient
+    #
     @always_inline
     fn __init__(c: Self.Coef) -> Self:
         return Self{c:c}
@@ -442,6 +454,8 @@ struct FloatH_s[sq: Int]:
     fn __init__(c: Self.Unit.Coef) -> Self:
         return Self{c:c.value}
 
+    #--- Scalar
+    #
     @always_inline
     fn __init__(s: Self.Discrete) -> Self:
         return Self{c:s.c}
@@ -451,8 +465,8 @@ struct FloatH_s[sq: Int]:
         return Self{c:s.c.value}
     
     
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.c == 0
@@ -462,14 +476,14 @@ struct FloatH_s[sq: Int]:
         return self.c.__int__()
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
-        return String(self.c) + symbol[sq]()
+        return String(self.c)
 
     
-    #------ Operators ------#
-    
+    #------( Operators )------#
+    #
     @always_inline
     fn __neg__(self) -> Self.Coef:
         return -self.c
@@ -500,35 +514,44 @@ struct FloatH_s[sq: Int]:
 
         
         
-#------ Float I ------#
+#------------ Float Antiscalar ------------#
+#---
 #---
 @register_passable("trivial")
 struct FloatH_a[sq: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = Float
 
-    alias Unit      = HSIMD_a[sq,DType.float64,1]
-    #---- Fraction  = Self
     alias Discrete  = IntH_a[sq]
+    #---- Fraction  = Self
+    alias Unit      = HSIMD_a[sq,DType.float64,1]
     
     alias Multivector  = FloatH[sq]
     alias Scalar       = FloatH_s[sq]
     #---- Antiscalar   = Self
     
 
+    #------< Data >------#
+    #
     var c: Self.Coef
     
     
-    #------ Initialize ------#
-
-    @always_inline
+    #------( Initialize )------#
+    #
+    @always_inline # Identity
     fn __init__() -> Self:
         return Self{c:1}
 
+    #--- Scalar
+    #
     @always_inline
     fn __init__(s: Self.Scalar) -> Self:
         return Self{c:s.c}
 
+    #--- Antiscalar
+    #
     @always_inline
     fn __init__(a: Self.Discrete) -> Self:
         return Self{c:a.c}
@@ -538,8 +561,8 @@ struct FloatH_a[sq: Int]:
         return Self{c:a.c.value}
     
     
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.c == 0
@@ -549,14 +572,14 @@ struct FloatH_a[sq: Int]:
         return Self.Discrete(self.c.__int__())
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
         return String(self.c) + symbol[sq]()
 
     
-    #------ Operators ------#
-    
+    #------( Operators )------#
+    #
     @always_inline
     fn __neg__(self) -> Self:
         return Self(-self.c)
@@ -586,8 +609,8 @@ struct FloatH_a[sq: Int]:
         return self.c >= other.c
     
     '''
-    #------ Arithmetic ------#
-    
+    #------( Arithmetic )------#
+    #
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
@@ -678,7 +701,7 @@ struct FloatH_a[sq: Int]:
         return Self.Multivector(-other.i*self // d, other.s*self // d)
     
     
-    #------ Reverse Arithmetic ------#
+    #------( Reverse Arithmetic )------#
     
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self.Multivector:
@@ -769,7 +792,7 @@ struct FloatH_a[sq: Int]:
         return Self.Multivector(other.i//self, other.s//self)
     
     
-    #------ Internal Arithmetic ------#
+    #------( Internal Arithmetic )------#
     
     @always_inline
     fn __iadd__(inout self, other: Self):

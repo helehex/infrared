@@ -11,22 +11,27 @@ from infrared import symbol, sqrt
 @register_passable("trivial")
 struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
+    #------[ Alias ]------#
+    #
     alias Coef = SIMD[dt,sw]
 
-    alias Unit      = HSIMD[sq,dt,1]
     alias Discrete  = IntH[sq]
     alias Fraction  = FloatH[sq]
+    alias Unit      = HSIMD[sq,dt,1]
     
     #---- Multivector  = Self
     alias Scalar       = HSIMD_s[sq,dt,sw]
     alias Antiscalar   = HSIMD_a[sq,dt,sw]
     
+
+    #------< Data >------#
+    #
     var s: Self.Scalar
     var a: Self.Antiscalar
     
     
-    #------ Initialize ------#
-    
+    #------( Initialize )------#
+    #
     @always_inline
     fn __init__() -> Self:
         return Self{s:0, a:Self.Antiscalar(0)}
@@ -78,17 +83,18 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self{s:m.s, a:m.a}
     
     #--- Explicit
-    @always_inline
+    #
+    @always_inline # Scalars
     fn __init__(s: Self.Scalar, a: Self.Scalar) -> Self:
         return Self{s:s, a:a}
 
-    @always_inline
+    @always_inline # Grades
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
         return Self{s:s, a:a}
 
     
-    #------ To ------#
-    
+    #------( To )------#
+    #
     @always_inline
     fn __bool__(self) -> Bool:
         return self.s.__bool__() and self.a.__bool__()
@@ -102,8 +108,8 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         return Self.Discrete(self.s.to_discrete(), self.a.to_discrete())
     
     
-    #------ Formatting ------#
-    
+    #------( Formatting )------#
+    #
     fn __str__(self) -> String:
         @parameter
         if sw == 1:
@@ -115,7 +121,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     
     #------ Get / Set ------#
-    
+    #
     @always_inline
     fn __getitem__(self, index: Int) -> Self.Unit:
         return Self.Unit(self.s[index], self.a[index])
@@ -530,7 +536,7 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     fn __str__(self) -> String:
         @parameter
         if sw == 1:
-            return String(self.c[0]) + symbol[sq]()
+            return String(self.c[0])
         else:
             var result: String = ""
             for index in range(sw): result += self[index].__str__() + "\n"
