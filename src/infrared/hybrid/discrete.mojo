@@ -224,7 +224,7 @@ struct IntH[sq: Int]:
     #
     @always_inline
     fn __invert__(self) -> Self:
-        return Self(~self.s, ~self.a)
+        return Self(~self.s.c, ~self.a.c)
 
     
     #------( Arithmetic )------#
@@ -643,8 +643,8 @@ struct IntH_s[sq: Int]:
     #------( Bit )------#
     #
     @always_inline
-    fn __invert__(self) -> Self:
-        return ~self.c
+    fn __invert__(self) -> Self.Multivector:
+        return Self.Multivector(~self.c, Self.Antiscalar(~0))
     
     
     #------( Arithmetic )------#
@@ -890,8 +890,8 @@ struct IntH_a[sq: Int]:
     #------( Bit )------#
     #
     @always_inline
-    fn __invert__(self) -> Self:
-        return Self(~self.c)
+    fn __invert__(self) -> Self.Multivector:
+        return Self.Multivector(~0, ~self.c)
     
     
     #------( Arithmetic )------#

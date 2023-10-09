@@ -472,7 +472,7 @@ struct FloatH_s[sq: Int]:
         return self.c == 0
     
     @always_inline
-    fn to_discrete(self) -> Self.Discrete.Coef:
+    fn to_discrete(self) -> Self.Discrete:
         return self.c.__int__()
     
     
@@ -485,7 +485,7 @@ struct FloatH_s[sq: Int]:
     #------( Operators )------#
     #
     @always_inline
-    fn __neg__(self) -> Self.Coef:
+    fn __neg__(self) -> Self:
         return -self.c
     
     @always_inline
