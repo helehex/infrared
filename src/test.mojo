@@ -1,4 +1,9 @@
-def main():pass
+def main():
+    from infrared.hybrid import Hyplex, HyplexInt, x
+    from infrared.io import _print
+
+    let a: Hyplex = x
+    _print(a)
     
     # aborted
 

@@ -7,6 +7,7 @@ from infrared.hybrid import IntH, FloatH, HSIMD
 #------ x*x = 1
 #------ (currently an alias of FloatH[1]; x = i, i*i=1)
 #---
+alias x = G1.Antiscalar(1)
 alias G1      = FloatH[1]
 alias FloatG1 = FloatH[1]
 alias IntG1     = IntH[1]
@@ -23,6 +24,7 @@ alias Int64G1   = HSIMD[1,DType.int64,1]
 #------ i*i = -1
 #------ (currently an alias of FloatH[-1])
 #---
+alias i = G01.Antiscalar(1)
 alias G01      = FloatH[-1]
 alias FloatG01 = FloatH[-1]
 alias IntG01     = IntH[-1]
@@ -39,6 +41,7 @@ alias Int64G01   = HSIMD[-1,DType.int64,1]
 #------ o*o = 1
 #------ (currently an alias of FloatH[0]; o = i, i*i=0)
 #---
+alias o = G001.Antiscalar(1)
 alias G001      = FloatH[0]
 alias FloatG001 = FloatH[0]
 alias IntG001     = IntH[0]

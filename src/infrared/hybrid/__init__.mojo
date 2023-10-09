@@ -12,6 +12,8 @@ from .hybrid import IntG1 as HyplexInt
 from .hybrid import IntG01 as ComplexInt
 from .hybrid import IntG001 as ParaplexInt
 
+from .hybrid import x, i, o
+
 from .hybrid import Float32G1 as Hyplex32
 from .hybrid import Float64G1 as Hyplex64
 from .hybrid import Float32G01 as Complex32

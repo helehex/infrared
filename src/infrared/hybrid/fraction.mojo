@@ -1,6 +1,5 @@
 from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
 from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
-from infrared.hush import _Float
 #from infrared import min, max, min_coef, max_coef
 from infrared import symbol
 
@@ -33,31 +32,63 @@ struct FloatH[sq: Int]:
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0, a:Self.Antiscalar(Self.Scalar(0))}
+        return Self{s:0, a:Self.Antiscalar(0)}
     
-    @always_inline
+    #--- Implicit
+    #
+    @always_inline # Fractional Coefficient
+    fn __init__(s: Self.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Discrete Coefficient
+    fn __init__(s: Self.Discrete.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # HSIMD Coefficient
+    fn __init__(s: Self.Unit.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Fractional Scalar
     fn __init__(s: Self.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Discrete Scalar
+    fn __init__(s: Self.Discrete.Scalar) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # HSIMD Unit Scalar
+    fn __init__(s: Self.Unit.Scalar) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
     
-    @always_inline
+    @always_inline # Fractional Antiscalar
     fn __init__(a: Self.Antiscalar) -> Self:
         return Self{s:0, a:a}
-    
-    @always_inline
-    fn __init__(s: Self.Scalar, a: Self.Scalar) -> Self:
-        return Self{s:s, a:a}
 
-    @always_inline
-    fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
-        return Self{s:s, a:a}
+    @always_inline # Discrete Antiscalar
+    fn __init__(a: Self.Discrete.Antiscalar) -> Self:
+        return Self{s:0, a:a}
 
-    @always_inline
+    @always_inline # HSIMD Unit Antiscalar
+    fn __init__(a: Self.Unit.Antiscalar) -> Self:
+        return Self{s:0, a:a}
+
+    @always_inline # Discrete Multivector
     fn __init__(m: Self.Discrete) -> Self:
         return Self{s:m.s, a:m.a}
 
-    @always_inline
+    @always_inline # HSIMD Unit Multivector
     fn __init__(m: Self.Unit) -> Self:
         return Self{s:m.s, a:m.a}
+    
+    #--- Explicit
+    #
+    @always_inline # Scalars
+    fn __init__(s1: Self.Scalar, s2: Self.Scalar) -> Self:
+        return Self{s:s1, a:s2}
+
+    @always_inline # Elements
+    fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
+        return Self{s:s, a:a}
     
     
     #------ To ------#

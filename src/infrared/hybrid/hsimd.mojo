@@ -1,7 +1,7 @@
 from infrared.hybrid.discrete import IntH, IntH_s, IntH_a
 from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
 #from infrared import min, max, min_coef, max_coef
-from infrared import symbol
+from infrared import symbol, sqrt
 
 
 

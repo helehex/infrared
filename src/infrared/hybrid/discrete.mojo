@@ -1,6 +1,5 @@
 from infrared.hybrid.fraction import FloatH, FloatH_s, FloatH_a
 from infrared.hybrid.hsimd import HSIMD, HSIMD_s, HSIMD_a
-from infrared.hush import _Int
 #from infrared import min, max, min_coef, max_coef
 from infrared import symbol, sqrt
 
@@ -33,26 +32,46 @@ struct IntH[sq: Int]:
     fn __init__() -> Self:
         return Self{s:0, a:Self.Antiscalar(0)}
     
-    @always_inline
+    #--- Implicit
+    #
+    @always_inline # Discrete Coefficient
+    fn __init__(s: Self.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # HSIMD Unit Coefficient
+    fn __init__(s: Self.Unit.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Discrete Scalar
     fn __init__(s: Self.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # HSIMD Scalar
+    fn __init__(s: Self.Unit.Scalar) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
     
-    @always_inline
+    @always_inline # Discrete Antiscalar
     fn __init__(a: Self.Antiscalar) -> Self:
         return Self{s:0, a:a}
-    
-    @always_inline
-    fn __init__(s1: Self.Scalar, s2: Self.Scalar) -> Self:
-        return Self{s:s1, a:Self.Antiscalar(s2.c)}
 
-    @always_inline
-    fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
-        return Self{s:s, a:a}
+    @always_inline # HSIMD Antiscalar
+    fn __init__(a: Self.Unit.Antiscalar) -> Self:
+        return Self{s:0, a:a}
 
-    @always_inline
+    @always_inline # HSIMD Unit Multivector
     fn __init__(m: Self.Unit) -> Self:
         return Self{s:m.s,a:m.a}
     
+    #--- Explicit
+    #
+    @always_inline # Scalars
+    fn __init__(s1: Self.Scalar, s2: Self.Scalar) -> Self:
+        return Self{s:s1, a:Self.Antiscalar(s2.c)}
+
+    @always_inline # Elements
+    fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
+        return Self{s:s, a:a}
+
     
     #------ To ------#
     
