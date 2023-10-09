@@ -1,9 +1,15 @@
 def main():
-    from infrared.hybrid import Hyplex, HyplexInt, x
+    from infrared.hybrid import Hyplex, Hyplex32, Hyplex64, HyplexInt, HSIMD, x
     from infrared.io import _print
 
-    let a: Hyplex = x
+    let a: Hyplex = 5
+    let b: HyplexInt = x
+    #let c: Hyplex64 = 10
+    #let d: HSIMD[1,DType.float64,8] = 7
     _print(a)
+    _print(b)
+    #_print(c)
+    #_print(d)
     
     # aborted
 

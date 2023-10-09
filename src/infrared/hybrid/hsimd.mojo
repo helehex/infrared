@@ -30,34 +30,63 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __init__() -> Self:
-        return Self{s:0,a:Self.Antiscalar(0)}
+        return Self{s:0, a:Self.Antiscalar(0)}
     
-    @always_inline
+    #--- Implicit
+    #
+    @always_inline # HSIMD Coefficient
+    fn __init__(s: Self.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Discrete Coefficient
+    fn __init__(s: Self.Discrete.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Fractional Coefficient
+    fn __init__(s: Self.Fraction.Coef) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # HSIMD Scalar
     fn __init__(s: Self.Scalar) -> Self:
-        return Self{s:s,a:Self.Antiscalar(0)}
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Discrete Scalar
+    fn __init__(s: Self.Discrete.Scalar) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
+
+    @always_inline # Fractional Scalar
+    fn __init__(s: Self.Fraction.Scalar) -> Self:
+        return Self{s:s, a:Self.Antiscalar(0)}
     
-    @always_inline
+    @always_inline # HSIMD Antiscalar
     fn __init__(a: Self.Antiscalar) -> Self:
-        return Self{s:0,a:a}
+        return Self{s:0, a:a}
+
+    @always_inline # Discrete Antiscalar
+    fn __init__(a: Self.Discrete.Antiscalar) -> Self:
+        return Self{s:0, a:a}
+
+    @always_inline # Fractional Antiscalar
+    fn __init__(a: Self.Fraction.Antiscalar) -> Self:
+        return Self{s:0, a:a}
+
+    @always_inline # Discrete Multivector
+    fn __init__(m: Self.Discrete) -> Self:
+        return Self{s:m.s, a:m.a}
+
+    @always_inline # Fractional Multivector
+    fn __init__(m: Self.Fraction) -> Self:
+        return Self{s:m.s, a:m.a}
     
+    #--- Explicit
     @always_inline
     fn __init__(s: Self.Scalar, a: Self.Scalar) -> Self:
-        return Self{s:s,a:a}
+        return Self{s:s, a:a}
 
     @always_inline
     fn __init__(s: Self.Scalar, a: Self.Antiscalar) -> Self:
-        return Self{s:s,a:a}
+        return Self{s:s, a:a}
 
-    @always_inline
-    fn __init__(d: Self.Discrete) -> Self:
-        return Self{s:d.s,a:d.a}
-
-    @always_inline
-    fn __init__(f: Self.Fraction) -> Self:
-        return Self{s:f.s,a:f.a}
-
-
-    
     
     #------ To ------#
     
