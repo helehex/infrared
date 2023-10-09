@@ -1,4 +1,8 @@
 def main():
+
+    # run a bunch of times and sometimes it works
+    # try getting rid of HyplexInt import
+
     from infrared.hybrid import Hyplex, HyplexInt#, x
     #from infrared.hybrid import Hyplex64, HSIMD
     from infrared import print_
