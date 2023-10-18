@@ -142,7 +142,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         if index == 0: self.s.c = coef
         if index == 1: self.a.c = coef
         
-    '''
+    """
     #------ Min / Max ------#
     
     @always_inline
@@ -178,7 +178,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn reduce_min_compose(self) -> Self.Unit:
         return Self.Unit(self.s.reduce_min(), self.a.reduce_min())
-    '''
+    """
     
     #------ Operators ------#
     
@@ -198,7 +198,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     fn __len__(self) -> Int:
         return sw
     
-    '''
+    """
     #------ SIMD ------#
     
     @always_inline
@@ -248,8 +248,8 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn fma(self, mul: Self, acc: Self) -> Self:
         return Self(self.s.fma(mul.s, self.a.fma(mul.a,acc.s)), self.a.fma(mul.s, self.s.fma(mul.a.c,acc.a.c)))
-    '''
-    '''
+    """
+    """
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
         return Self(self.s.shuffle[mask](), self.x.shuffle[mask]()) #  <---- passing variadic parameters?
@@ -257,8 +257,8 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn shuffle[*mask: Int](self, other: Self) -> Self:
         return Self(self.s.shuffle[mask](other.s), self.x.shuffle[mask](other.x))
-    '''
-    '''
+    """
+    """
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD[sq,dt,slice_width]:
         return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.a.slice[slice_width](offset))
@@ -467,7 +467,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
-    '''
+    """
     
 
 #------ Scalar ------#
@@ -553,7 +553,7 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     fn __setitem__(inout self, index: Int, item: Self.Unit):
         self.c[index] = item.c
     
-    '''
+    """
     #------ Min / Max ------#
     
     @always_inline
@@ -571,7 +571,7 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn reduce_min(self) -> Self.Unit:
         return self.c.reduce_min()
-    '''
+    """
     
     #------ Operators ------#
     
@@ -607,7 +607,7 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     fn __len__(self) -> Int:
         return sw
     
-    '''
+    """
     #------ SIMD ------#
     
     @always_inline
@@ -661,8 +661,8 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
             return acc
         else:
             return sq*(self*mul) + acc
-    '''
-    '''
+    """
+    """
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
         return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
@@ -670,8 +670,8 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn shuffle[*mask: Int](self, other: Self) -> Self:
         return Self(self.s.shuffle[mask](other.s))
-    '''
-    '''
+    """
+    """
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
         return self.c.slice[slice_width](offset)
@@ -848,7 +848,7 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self.Antiscalar):
         self = self//other    
-    '''
+    """
 
 
 
@@ -927,7 +927,7 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     fn __setitem__(inout self, index: Int, item: Self.Unit):
         self.c[index] = item.c
     
-    '''
+    """
     #------ Min / Max ------#
     
     @always_inline
@@ -945,7 +945,7 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn reduce_min(self) -> Self.Unit:
         return self.c.reduce_min()
-    '''
+    """
     
     #------ Operators ------#
     
@@ -981,7 +981,7 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     fn __len__(self) -> Int:
         return sw
     
-    '''
+    """
     #------ SIMD ------#
     
     @always_inline
@@ -1035,8 +1035,8 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
             return acc
         else:
             return sq*(self*mul) + acc
-    '''
-    '''
+    """
+    """
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
         return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
@@ -1044,8 +1044,8 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn shuffle[*mask: Int](self, other: Self) -> Self:
         return Self(self.s.shuffle[mask](other.s))
-    '''
-    '''
+    """
+    """
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
         return self.c.slice[slice_width](offset)
@@ -1222,4 +1222,4 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self.Scalar):
         self = self//other
-    '''
+    """

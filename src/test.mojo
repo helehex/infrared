@@ -6,7 +6,7 @@ def main():
     #alias x = HyplexInt.Antiscalar(1)
 
     let a: Hyplex = 5
-    let b: HyplexInt = x
+    let b: HyplexInt = 1 + x
     let c: Hyplex64 = 10
     let d: HSIMD[1,DType.int64,8] = 6
     print_(a)
@@ -24,7 +24,7 @@ def main():
     #math_test()
     #mulsign_test()
 
-'''
+
 fn mulsign_test():
     from infrared.infrared import reverse
 
@@ -227,4 +227,4 @@ def utils_test():
     let test: SIMD[DType.bool,8] = SIMD[DType.bool,8](True, False, True, False, True, False, True, False)
 
     _print(select(test,a,b))
-'''
+"""

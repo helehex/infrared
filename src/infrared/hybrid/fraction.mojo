@@ -127,7 +127,7 @@ struct FloatH[sq: Int]:
         if index == 0: self.s.c = coef
         if index == 1: self.a.c = coef
     
-    '''
+    """
     #------( Min / Max )------#
     #
     @always_inline
@@ -145,7 +145,7 @@ struct FloatH[sq: Int]:
     @always_inline
     fn max_compose(self, other: Self) -> Self:
         return max_compose(self, other)
-    '''
+    """
     
     #------( Operators )------#
     #
@@ -161,7 +161,7 @@ struct FloatH[sq: Int]:
     fn __ne__(self, other: Self) -> Bool:
         return self.s != other.s or self.a != other.a
     
-    '''
+    """
     #------( Arithmetic )------#
     #
     @always_inline
@@ -407,7 +407,7 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
-    ''' 
+    """ 
 
 
 #----------- Float Scalar ------------#
@@ -608,7 +608,7 @@ struct FloatH_a[sq: Int]:
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
     
-    '''
+    """
     #------( Arithmetic )------#
     #
     @always_inline
@@ -813,4 +813,4 @@ struct FloatH_a[sq: Int]:
     @always_inline
     fn __itruediv__(inout self, other: Self.Scalar):
         self = self/other
-    '''
+    """

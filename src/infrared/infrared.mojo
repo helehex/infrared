@@ -5,7 +5,7 @@ alias Float = FloatLiteral
 
 
 
-'''
+"""
 #------------ select ------------#
 #---
 #--- simd conditional select
@@ -60,7 +60,7 @@ fn mul[dt: DType, sw: Int](a: SIMD[dt,sw], b: SIMD[dt,sw]) -> SIMD[dt,sw]:
 
 
 
-'''
+"""
 #------------ sqrt ------------#
 #---
 #--- square root
@@ -90,7 +90,7 @@ fn sqrt[sq: Int](o: FloatH[sq].Scalar) -> FloatH[sq].Scalar:
 @always_inline
 fn sqrt[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Scalar) -> HSIMD[sq,dt,sw].Scalar:
     return sqrt(o.c)
-'''
+"""
 
 
 
@@ -318,7 +318,8 @@ fn arg[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 
 
 
-
+"""
+"""
 #------ mulsign
 
 from utils.static_tuple import StaticTuple
@@ -363,13 +364,13 @@ fn mulsign[nels: Int, dt: DType, sw: Int, *pat: Int](o: StaticTuple[nels, SIMD[d
 
 
 
-'''
-'''
+"""
+"""
 @always_inline
 def min_basis[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]):
     return HSIMD[sq,dt,sw].Basis[index_of_min_coef]
-'''
-'''
+"""
+"""
 #--- set sign
 from math import copysign as _copysign
 
@@ -441,4 +442,4 @@ fn pow[dt: DType, sw: Int](a: SIMD[dt,sw], b: HSIMD[-1,dt,sw].I) -> HSIMD[-1,dt,
 fn pow[dt: DType, sw: Int](a: SIMD[dt,sw], b: HSIMD[-1,dt,sw]) -> HSIMD[-1,dt,sw]:
     return exp(b*_log(a))
 
-'''
+"""
