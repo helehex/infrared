@@ -256,7 +256,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD[sq,dt,slice_width]:
         return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.a.slice[slice_width](offset))
-
+    """
     #--- Splat
     #
     @always_inline
@@ -270,7 +270,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn splat(self, other: Self.Unit) -> Self:
         return Self(Self.Coef(other.s.c), Self.Coef(other.a.c))
-    
+    """
     #--- Fused multiply add
     #
     @always_inline # (Multivector * Scalar) + Scalar
@@ -692,6 +692,7 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     
     #------( SIMD )------#
     #
+    """
     @always_inline
     fn splat(self, other: Self.Unit) -> Self.Multivector:
         return Self(other)
@@ -703,24 +704,32 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
         return Self.Multivector(other.s, self)
-    
-    @always_inline
-    fn splat(self, other: Self.Fraction.Multivector) -> Self.Multivector:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete.Multivector) -> Self.Multivector:
-        return self.splat(other)
-    
-    @always_inline
-    fn fma(self, mul: Self, acc: Self) -> Self.Multivector:
+    """
+    @always_inline # (Scalar * Scalar) + Scalar
+    fn fma(self, mul: Self, acc: Self) -> Self:
         return self.c.fma(mul.c, acc.c)
 
-    @always_inline
+    @always_inline # (Scalar * Scalar) + Antiscalar
     fn fma(self, mul: Self, acc: Self.Antiscalar) -> Self.Multivector:
-        return (self*mul) + acc
+        return self*mul + acc
+
+    @always_inline # (Scalar * Scalar) + Multivector
+    fn fma(self, mul: Self, acc: Self.Multivector) -> Self.Multivector:
+        return self.fma(mul.s, acc.s) + acc.a
+
+    @always_inline # (Scalar * Antiscalar) + Scalar
+    fn fma(self, mul: Self.Antiscalar, acc: Self) -> Self.Multivector:
+        return self*mul + acc
     
-    @always_inline
+    @always_inline # (Scalar * Antiscalar) + Antiscalar
+    fn fma(self, mul: Self.Antiscalar, acc: Self.Antiscalar) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c.fma(mul.c, acc.c))
+
+    @always_inline # (Scalar * Antiscalar) + Multivector
+    fn fma(self, mul: Self.Antiscalar, acc: Self.Multivector) -> Self.Multivector:
+        return acc.s + self.fma(mul, acc.a)
+
+    @always_inline # (Scalar * Multivector) + Multivector
     fn fma(self, mul: Self, acc: Self.Multivector) -> Self.Multivector:
         return self.c.fma(mul.c, acc.s.c) + acc.a
     
@@ -1053,33 +1062,26 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     
     #------( SIMD )------#
     #
+    """
     @always_inline
-    fn splat(self, other: Self.Unit.Scalar) -> Self.Multivector:
-        return Self.Multivector(other, self)
+    fn splat(self, other: Self.Unit.Scalar) -> Self.Scalar:
+        return Self.Scalar(Self.Coef(other.c))
     
     @always_inline
     fn splat(self, other: Self.Unit) -> Self:
-        return Self(other)
+        return Self(Self.Coef(other.c))
     
     @always_inline
     fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
         return Self.Multivector(other.s, self)
-    
-    @always_inline
-    fn splat(self, other: Self.Fraction.Multivector) -> Self.Multivector:
-        return self.splat(other)
-    
-    @always_inline
-    fn splat(self, other: Self.Discrete.Multivector) -> Self.Multivector:
-        return self.splat(other)
-    
+    """
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self.Multivector:
         return self*mul + acc
     
     @always_inline
     fn fma(self, mul: Self.Scalar, acc: Self) -> Self:
-        return Self{s:self.s.fma(mul,acc.s)}
+        return Self(self.c.fma(mul.c, acc.c))
     
     @always_inline
     fn fma(self, mul: Self, acc: Self.Scalar) -> Self.Scalar:
@@ -1098,7 +1100,7 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
         return Self(self.s.shuffle[mask](other.s))
     """
     @always_inline
-    fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
+    fn slice[slice_width: Int](self, offset: Int) -> HSIMD_a[sq,dt,slice_width]:
         return self.c.slice[slice_width](offset)
 
     @always_inline
