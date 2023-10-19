@@ -1,7 +1,7 @@
 from infrared.hybrid.fraction import FloatH
 from infrared.hybrid.hsimd import HSIMD
 #from infrared import min, max, min_coef, max_coef
-from infrared import symbol, sqrt
+from infrared import symbol, sqrt, abs
 
 
 """
@@ -43,14 +43,6 @@ struct IntH[sq: Int]:
     
     #--- Implicit
     #
-    @always_inline # Discrete Coefficient
-    fn __init__(s: Self.Coef) -> Self:
-        return Self{s:s, a:Self.Antiscalar(0)}
-
-    @always_inline # HSIMD Unit Coefficient
-    fn __init__(s: Self.Unit.Coef) -> Self:
-        return Self{s:s, a:Self.Antiscalar(0)}
-
     @always_inline # Discrete Scalar
     fn __init__(s: Self.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
@@ -160,7 +152,7 @@ struct IntH[sq: Int]:
 
     @always_inline # norm(Multivector)
     fn norm(self) -> Self.Fraction.Scalar:
-        return sqrt(self.mags())
+        return sqrt(self.mags().c)
 
     
     #------( Products )------#
@@ -600,8 +592,8 @@ struct IntH_s[sq: Int]:
         return self.c
 
     @always_inline
-    fn dual(self) -> Self:
-        return 0
+    fn dual(self) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c)
 
     @always_inline
     fn mags(self) -> Self:
@@ -612,8 +604,8 @@ struct IntH_s[sq: Int]:
         return self._dot_(self.conj())
 
     @always_inline
-    fn norm(self) -> Self.Fraction:
-        return sqrt(self.mags())
+    fn norm(self) -> Self:
+        return abs(self)
 
     
     #------( Products )------#
@@ -951,11 +943,11 @@ struct IntH_a[sq: Int]:
 
     @always_inline
     fn conj(self) -> Self:
-        return Self(-self.c)
+        return -self
 
     @always_inline
-    fn dual(self) -> Self:
-        return Self(0)
+    fn dual(self) -> Self.Scalar:
+        return self.c
 
     @always_inline
     fn mags(self) -> Self.Scalar:
@@ -966,8 +958,8 @@ struct IntH_a[sq: Int]:
         return self._dot_(self.conj())
 
     @always_inline
-    fn norm(self) -> Self.Fraction.Scalar:
-        return sqrt(self.mags())
+    fn norm(self) -> Self.Scalar:
+        return abs(self)
 
     
     #------( Products )------#

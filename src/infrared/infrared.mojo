@@ -80,16 +80,74 @@ fn sqrt[dt: DType, sw: Int](o: SIMD[dt,sw]) -> SIMD[dt,sw]:
     return _sqrt(o)
 
 @always_inline
-fn sqrt[sq: Int](o: IntH[sq].Scalar) -> FloatH[sq].Scalar:
-    return sqrt(o.c)
+fn sqrt[sq: Int](o: IntH[sq].Scalar) -> FloatH[sq]:
+    if o > 0:
+        return FloatH[sq].Scalar(sqrt(o.c))
+    elif o < 0:
+        return FloatH[sq].Antiscalar(sqrt(o.c/sq))
+    else:
+        return FloatH[sq]()
 
 @always_inline
-fn sqrt[sq: Int](o: FloatH[sq].Scalar) -> FloatH[sq].Scalar:
-    return sqrt(o.c)
+fn sqrt[sq: Int](o: FloatH[sq].Scalar) -> FloatH[sq]:
+    if o > 0:
+        return FloatH[sq].Scalar(sqrt(o.c))
+    elif o < 0:
+        return FloatH[sq].Antiscalar(sqrt(o.c/sq))
+    else:
+        return FloatH[sq]()
 
 @always_inline
-fn sqrt[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Scalar) -> HSIMD[sq,dt,sw].Scalar:
-    return sqrt(o.c)
+fn sqrt[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Scalar) -> HSIMD[sq,dt,sw]:
+    if o > 0:
+        return HSIMD[sq,dt,sw].Scalar(sqrt(o.c))
+    elif o < 0:
+        return HSIMD[sq,dt,sw].Antiscalar(sqrt(o.c/sq))
+    else:
+        return HSIMD[sq,dt,sw]()
+
+
+#------------ abs ------------#
+#---
+#--- absolute value
+#---
+from math import abs as _abs
+
+@always_inline # mock
+fn abs(o: Int) -> Int:
+    return _abs(o)
+
+@always_inline # mock
+fn abs(o: Float) -> Float:
+    return _abs(Float64(o)).value
+
+@always_inline # mock
+fn abs[dt: DType, sw: Int](o: SIMD[dt,sw]) -> SIMD[dt,sw]:
+    return _abs(o)
+
+@always_inline
+fn abs[sq: Int](o: IntH[sq].Scalar) -> IntH[sq].Scalar:
+    return abs(o.c)
+
+@always_inline
+fn abs[sq: Int](o: IntH[sq].Antiscalar) -> IntH[sq].Scalar:
+    return abs(o.c)
+
+@always_inline
+fn abs[sq: Int](o: FloatH[sq].Scalar) -> FloatH[sq].Scalar:
+    return abs(o.c)
+
+@always_inline
+fn abs[sq: Int](o: FloatH[sq].Antiscalar) -> FloatH[sq].Scalar:
+    return abs(o.c)
+
+@always_inline
+fn abs[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Scalar) -> HSIMD[sq,dt,sw].Scalar:
+    return abs(o.c)
+
+@always_inline
+fn abs[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Antiscalar) -> HSIMD[sq,dt,sw].Scalar:
+    return abs(o.c)
 """
 
 

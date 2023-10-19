@@ -41,18 +41,6 @@ struct FloatH[sq: Int]:
     
     #--- Implicit
     #
-    @always_inline # Fractional Coefficient
-    fn __init__(s: Self.Coef) -> Self:
-        return Self{s:s, a:Self.Antiscalar(0)}
-
-    @always_inline # Discrete Coefficient
-    fn __init__(s: Self.Discrete.Coef) -> Self:
-        return Self{s:s, a:Self.Antiscalar(0)}
-
-    @always_inline # HSIMD Unit Coefficient
-    fn __init__(s: Self.Unit.Coef) -> Self:
-        return Self{s:s, a:Self.Antiscalar(0)}
-
     @always_inline # Fractional Scalar
     fn __init__(s: Self.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
@@ -179,7 +167,7 @@ struct FloatH[sq: Int]:
 
     @always_inline
     fn norm(self) -> Self.Scalar:
-        return sqrt(self.mags())
+        return sqrt(self.mags().c)
 
 
     #------( Products )------#
@@ -501,6 +489,53 @@ struct FloatH_s[sq: Int]:
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
 
+    @always_inline
+    fn conj(self) -> Self:
+        return self
+
+    @always_inline
+    fn dual(self) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c)
+
+    @always_inline
+    fn mags(self) -> Self:
+        return self._dot_(self)
+
+    @always_inline
+    fn mags_Conj(self) -> Self:
+        return self._dot_(self.conj())
+
+    @always_inline
+    fn norm(self) -> Self:
+        return abs(self)
+
+    
+    #------( Products )------#
+    #
+    @always_inline
+    fn _dot_(self, other: Self) -> Self:
+        return self*other
+
+    @always_inline
+    fn _dot_(self, other: Self.Antiscalar) -> Self:
+        return 0
+
+    @always_inline
+    fn _dot_(self, other: Self.Multivector) -> Self:
+        return self*other.s
+
+    @always_inline
+    fn _ext_(self, other: Self) -> Self:
+        return self*other
+    
+    @always_inline
+    fn _ext_(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return self*other
+
+    @always_inline
+    fn _ext_(self, other: Self.Multivector) -> Self.Multivector:
+        return self*other.s + self*other.a
+
 
     #------( Arithmetic )------#
     #
@@ -744,11 +779,11 @@ struct FloatH_a[sq: Int]:
 
     @always_inline
     fn conj(self) -> Self:
-        return Self(-self.c)
+        return -self
 
     @always_inline
-    fn dual(self) -> Self:
-        return Self(0)
+    fn dual(self) -> Self.Scalar:
+        return self.c
 
     @always_inline
     fn mags(self) -> Self.Scalar:
@@ -760,7 +795,7 @@ struct FloatH_a[sq: Int]:
 
     @always_inline
     fn norm(self) -> Self.Scalar:
-        return sqrt(self.mags())
+        return abs(self)
 
 
     #------( Products )------#
@@ -779,7 +814,7 @@ struct FloatH_a[sq: Int]:
 
     @always_inline
     fn _ext_(self, other: Self.Scalar) -> Self:
-        return Self(self*other)
+        return self*other
 
     @always_inline
     fn _ext_(self, other: Self) -> Self.Scalar:

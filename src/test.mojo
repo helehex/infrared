@@ -4,9 +4,9 @@ def main():
     from infrared import print_
 
     #alias x = HyplexInt.Antiscalar(1)
-
-    let a: Hyplex = 5
-    let b: HyplexInt = 1 + x
+    
+    let a: Hyplex = Hyplex(5)
+    let b: HyplexInt = 1 + 0*x
     let c: Hyplex64 = 10
     let d: HSIMD[1,DType.int64,8] = 6
     print_(a)
@@ -24,7 +24,7 @@ def main():
     #math_test()
     #mulsign_test()
 
-
+"""
 fn mulsign_test():
     from infrared.infrared import reverse
 
