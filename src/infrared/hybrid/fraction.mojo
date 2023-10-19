@@ -149,7 +149,7 @@ struct FloatH[sq: Int]:
     
     #------( Operators )------#
     #
-    @always_inline
+    @always_inline # -Multivector
     fn __neg__(self) -> Self:
         return Self(-self.s, -self.a)
     
@@ -161,173 +161,178 @@ struct FloatH[sq: Int]:
     fn __ne__(self, other: Self) -> Bool:
         return self.s != other.s or self.a != other.a
     
-    """
-    #------( Arithmetic )------#
-    #
-    @always_inline
-    fn __add__(self, other: Self.Scalar) -> Self:
-        return Self(self.s + other, self.i)
-    
-    @always_inline
-    fn __add__(self, other: Self.Discrete.Scalar) -> Self:
-        return self + Self.Scalar(other)
-    
-    @always_inline
-    fn __add__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i + other)
-    
-    @always_inline
-    fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s, self.i + other.i)
+    @always_inline # conjugate
+    fn conj(self) -> Self:
+        return Self(self.s, -self.a)
+
+    @always_inline # dual
+    fn dual(self) -> Self:
+        return Self(self.a.c, self.s.c)
+
+    @always_inline # norm squared
+    fn mags(self) -> Self.Scalar:
+        return self._dot_(self)
 
     @always_inline
+    fn mags_conj(self) -> Self.Scalar:
+        return self._dot_(self.conj())
+
+    @always_inline
+    fn norm(self) -> Self.Scalar:
+        return sqrt(self.mags())
+
+
+    #------( Products )------#
+    #
+    @always_inline # Multivector dot Scalar
+    fn _dot_(self, other: Self.Scalar) -> Self.Scalar:
+        return self.s*other
+
+    @always_inline # Multivector dot Antiscalar
+    fn _dot_(self, other: Self.Antiscalar) -> Self.Scalar:
+        return self.a*other
+
+    @always_inline # Multivector dot Multivector
+    fn _dot_(self, other: Self) -> Self.Scalar:
+        return self.s*other.s + self.a*other.a
+
+    @always_inline # Multivector ext Scalar
+    fn _ext_(self, other: Self.Scalar) -> Self:
+        return self.s*other + self.a*other
+
+    @always_inline # Multivector ext Antiscalar
+    fn _ext_(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return self.s*other
+
+    @always_inline # Multivector ext Multivector
+    fn _ext_(self, other: Self) -> Self:
+        return self.s*other.s + self.s*other.a + self.a*other.s
+
+    
+    #------( Arithmetic )------#
+    #
+    @always_inline # Multivector + Scalar
+    fn __add__(self, other: Self.Scalar) -> Self:
+        return Self(self.s + other, self.a)
+    
+    @always_inline # Multivector + Antiscalar
+    fn __add__(self, other: Self.Antiscalar) -> Self:
+        return Self(self.s, self.a + other)
+    
+    @always_inline # Multivector + Multivector
+    fn __add__(self, other: Self) -> Self:
+        return Self(self.s + other.s, self.a + other.a)
+
+    @always_inline # Multivector - Scalar
     fn __sub__(self, other: Self.Scalar) -> Self:
-        return Self(self.s - other, self.i)
+        return Self(self.s - other, self.a)
     
-    @always_inline
-    fn __sub__(self, other: Self.Discrete.Scalar) -> Self:
-        return self - Self.Scalar(other)
-    
-    @always_inline
+    @always_inline # Multivector - Antiscalar
     fn __sub__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, self.i - other)
+        return Self(self.s, self.a - other)
     
-    @always_inline
+    @always_inline # Multivector - Multivector
     fn __sub__(self, other: Self) -> Self:
-        return Self(self.s - other.s, self.i - other.i)
+        return Self(self.s - other.s, self.a - other.a)
     
-    @always_inline
+    @always_inline # Multivector * Scalar
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self(self.s*other, self.i*other)
+        return self.s*other + self.a*other
     
-    @always_inline
-    fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
-        return self*Self.Scalar(other)
-    
-    @always_inline
+    @always_inline # Multivector * Antiscalar
     fn __mul__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.i*other, self.s*other)
+        return self.s*other + self.a*other
     
-    @always_inline
+    @always_inline # Multivector * Multivector
     fn __mul__(self, other: Self) -> Self:
-        return Self(self.s*other.s + self.i*other.i, self.i*other.s + self.s*other.i)
+        return self.s*other.s + self.s*other.a + self.a*other.s + self.a*other.a
     
-    @always_inline
+    @always_inline # Multivector / Scalar
     fn __truediv__(self, other: Self.Scalar) -> Self:
         return self * (1/other)
     
-    @always_inline
-    fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self/Self.Scalar(other)
-    
-    @always_inline
+    @always_inline # Multivector / Antiscalar
     fn __truediv__(self, other: Self.Antiscalar) -> Self:
         return self * (1/other)
     
-    @always_inline
+    @always_inline # Multivector / Multivector
     fn __truediv__(self, other: Self) -> Self:
-        return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) / (other.s*other.s - other.i*other.i)
+        return self*other.conj() / other.mags_conj()
 
-    @always_inline
+    @always_inline # Multivector // Scalar
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s//other, self.i//other)
-
-    @always_inline
-    fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self//Self.Scalar(other)
+        return self.s//other + self.a//other
     
-    @always_inline
+    @always_inline # Multivector // Antiscalar
     fn __floordiv__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.i//other, self.s//other)
+        return self.a//other + self.s//other
     
-    @always_inline
+    @always_inline # Multivector // Multivector
     fn __floordiv__(self, other: Self) -> Self:
-        return Self(self.s*other.s - self.i*other.i, self.i*other.s - self.s*other.i) // (other.s*other.s - other.i*other.i)
+        return self*other.conj() // other.mags_conj()
     
     
     #------( Reverse Arithmetic )------#
     #
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self:
-        return Self(other + self.s, self.i)
-    
-    @always_inline
-    fn __radd__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, other + self.i)
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s, other.i + self.i)
+        return other + self
     
     @always_inline
     fn __rsub__(self, other: Self.Scalar) -> Self:
-        return Self(other - self.s, -self.i)
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self.Antiscalar) -> Self:
-        return Self(-self.s, other - self.i)
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self(other.s - self.s, other.i - self.i)
+        return other - self
 
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self(other*self.s, other*self.i)
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self.Antiscalar) -> Self:
-        return Self(other*self.i, other*self.s)
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self:
-        return Self(other.s*self.s + other.i*self.i, other.s*self.i + other.i*self.s)
+        return other*self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self:
-        return Self(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i))
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Antiscalar) -> Self:
-        return Self(self.s, -self.i) * (other/(self.s*self.s - self.i*self.i))
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self:
-        return Self(other.s*self.s - other.i*self.i, other.i*self.s - other.s*self.i) / (self.s*self.s - self.i*self.i)
+        return other/self
 
     @always_inline
     fn __rfloordiv__(self, other: Self.Scalar) -> Self:
-        let d: Self.Scalar = self.s*self.s - self.i*self.i
-        return Self(self.s*other // d, -self.i*other // d)
-
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)//self
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Antiscalar) -> Self:
-        let d: Self.Scalar = self.s*self.s - self.i*self.i
-        return Self(-self.i*other // d, self.s*other // d)
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self:
-        return Self(other.s*self.s - other.i*self.i, other.i*self.s - other.s*self.i) // (self.s*self.s - self.i*self.i)
+        return other//self
     
     
     #------( Internal Arithmetic )------#
@@ -335,11 +340,7 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __iadd__(inout self, other: Self.Scalar):
         self = self + other
-        
-    @always_inline
-    fn __iadd__(inout self, other: Self.Discrete.Scalar):
-        self = self + Self.Scalar(other)
-    
+
     @always_inline
     fn __iadd__(inout self, other: Self.Antiscalar):
         self = self + other
@@ -351,11 +352,7 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __isub__(inout self, other: Self.Scalar):
         self = self - other
-        
-    @always_inline
-    fn __isub__(inout self, other: Self.Discrete.Scalar):
-        self = self - Self.Scalar(other)
-    
+
     @always_inline
     fn __isub__(inout self, other: Self.Antiscalar):
         self = self - other
@@ -367,10 +364,6 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __imul__(inout self, other: Self.Scalar):
         self = self*other
-        
-    @always_inline
-    fn __imul__(inout self, other: Self.Discrete.Scalar):
-        self = self*Self.Scalar(other)
     
     @always_inline
     fn __imul__(inout self, other: Self.Antiscalar):
@@ -383,10 +376,6 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __itruediv__(inout self, other: Self.Scalar):
         self = self/other
-        
-    @always_inline
-    fn __itruediv__(inout self, other: Self.Discrete.Scalar):
-        self = self/Self.Scalar(other)
     
     @always_inline
     fn __itruediv__(inout self, other: Self.Antiscalar):
@@ -407,10 +396,10 @@ struct FloatH[sq: Int]:
     @always_inline
     fn __ifloordiv__(inout self, other: Self):
         self = self//other
-    """ 
 
 
-#----------- Float Scalar ------------#
+
+#----------- FloatH Scalar ------------#
 #---
 #---
 @register_passable("trivial")
@@ -512,9 +501,154 @@ struct FloatH_s[sq: Int]:
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
 
+
+    #------( Arithmetic )------#
+    #
+    @always_inline # Scalar + Scalar
+    fn __add__(self, other: Self) -> Self:
+        return self.c + other.c
+    
+    @always_inline # Scalar + Antiscalar
+    fn __add__(self, other: Self.Antiscalar) -> Self.Multivector:
+        return Self.Multivector(self, other)
+    
+    @always_inline # Scalar + Multivector
+    fn __add__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(self + other.s, other.a)
+    
+    @always_inline # Scalar - Scalar
+    fn __sub__(self, other: Self) -> Self:
+        return self.c - other.c
+    
+    @always_inline # Scalar - Antiscalar
+    fn __sub__(self, other: Self.Antiscalar) -> Self.Multivector:
+        return Self.Multivector(self, -other)
+    
+    @always_inline # Scalar - Multivector
+    fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
+        return Self.Multivector(self - other.s, -other.a)
+    
+    @always_inline # Scalar * Scalar
+    fn __mul__(self, other: Self) -> Self:
+        return self.c*other.c
+    
+    @always_inline # Scalar * Antiscalar
+    fn __mul__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c*other.c)
+    
+    @always_inline # Scalar * Multivector
+    fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
+        return self*other.s + self*other.a
+    
+    @always_inline
+    fn __truediv__(self, other: Self) -> Self:
+        return self.c/other.c
+    
+    @always_inline
+    fn __truediv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c/other.c)
+    
+    @always_inline
+    fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
+        return other.conj() * (self/other.mags_conj())
+
+    @always_inline
+    fn __floordiv__(self, other: Self) -> Self:
+        return self.c//other.c
+    
+    @always_inline
+    fn __floordiv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return Self.Antiscalar(self.c//other.c)
+    
+    @always_inline
+    fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
+        return self*other.conj() // other.mags_conj()
+    
+    
+    #------( Reverse Arithmetic )------#
+    #
+    @always_inline
+    fn __radd__(self, other: Self) -> Self:
+        return other + self
+    
+    @always_inline
+    fn __radd__(self, other: Self.Antiscalar) -> Self.Multivector:
+        return other + self
+    
+    @always_inline
+    fn __radd__(self, other: Self.Multivector) -> Self.Multivector:
+        return other + self
+    
+    @always_inline
+    fn __rsub__(self, other: Self) -> Self:
+        return other - self
+    
+    @always_inline
+    fn __rsub__(self, other: Self.Antiscalar) -> Self.Multivector:
+        return other - self
+    
+    @always_inline
+    fn __rsub__(self, other: Self.Multivector) -> Self.Multivector:
+        return other - self
+    
+    @always_inline
+    fn __rmul__(self, other: Self) -> Self:
+        return other*self
+    
+    @always_inline
+    fn __rmul__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return other*self
+    
+    @always_inline
+    fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
+        return other*self
+    
+    @always_inline
+    fn __rtruediv__(self, other: Self) -> Self:
+        return other/self
+    
+    @always_inline
+    fn __rtruediv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return other/self
+    
+    @always_inline
+    fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
+        return other/self
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self) -> Self:
+        return other//self
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+        return other//self
+    
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
+        return other//self
+    
+    
+    #------( Internal Arithmetic )------#
+    #
+    @always_inline
+    fn __iadd__(inout self, other: Self):
+        self = self + other
+    
+    @always_inline
+    fn __isub__(inout self, other: Self):
+        self = self - other
+        
+    @always_inline
+    fn __imul__(inout self, other: Self):
+        self = self*other
+        
+    @always_inline
+    fn __itruediv__(inout self, other: Self):
+        self = self/other
+
         
         
-#------------ Float Antiscalar ------------#
+#------------ FloatH Antiscalar ------------#
 #---
 #---
 @register_passable("trivial")
@@ -607,200 +741,186 @@ struct FloatH_a[sq: Int]:
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
         return self.c >= other.c
+
+    @always_inline
+    fn conj(self) -> Self:
+        return Self(-self.c)
+
+    @always_inline
+    fn dual(self) -> Self:
+        return Self(0)
+
+    @always_inline
+    fn mags(self) -> Self.Scalar:
+        return self._dot_(self)
+
+    @always_inline
+    fn mags_conj(self) -> Self.Scalar:
+        return self._dot_(self.conj()) 
+
+    @always_inline
+    fn norm(self) -> Self.Scalar:
+        return sqrt(self.mags())
+
+
+    #------( Products )------#
+    #
+    @always_inline
+    fn _dot_(self, other: Self.Scalar) -> Self.Scalar:
+        return 0
+
+    @always_inline
+    fn _dot_(self, other: Self) -> Self.Scalar:
+        return self*other
+
+    @always_inline
+    fn _dot_(self, other: Self.Multivector) -> Self.Scalar:
+        return self*other.a
+
+    @always_inline
+    fn _ext_(self, other: Self.Scalar) -> Self:
+        return Self(self*other)
+
+    @always_inline
+    fn _ext_(self, other: Self) -> Self.Scalar:
+        return 0
+
+    @always_inline
+    fn _ext_(self, other: Self.Multivector) -> Self:
+        return self*other.s
+
     
-    """
     #------( Arithmetic )------#
     #
     @always_inline
     fn __add__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
-
-    @always_inline
-    fn __add__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self + Self.Scalar(other)
     
     @always_inline
     fn __add__(self, other: Self) -> Self:
-        return Self{s:self.s + other.s}
+        return Self(self.c + other.c)
     
     @always_inline
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, self + other.i)
+        return Self.Multivector(other.s, self + other.a)
     
     @always_inline
     fn __sub__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(-other, self)
-
-    @always_inline
-    fn __sub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return self - Self.Scalar(other)
     
     @always_inline
     fn __sub__(self, other: Self) -> Self:
-        return Self{s:self.s - other.s}
+        return Self(self.c - other.c)
     
     @always_inline
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(-other.s, self - other.i)
+        return Self.Multivector(-other.s, self - other.a)
     
     @always_inline
     fn __mul__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s*other}
-
-    @always_inline
-    fn __mul__(self, other: Self.Discrete.Scalar) -> Self:
-        return self*Self.Scalar(other)
+        return Self(self.c*other.c)
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s*other.s
-        elif sq == -1:
-            return -self.s*other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s*other.s)
+        return sq*self.c*other.c
     
     @always_inline
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(self*other.i, self*other.s)
+        return self*other.a + self*other.s
     
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s/other}
-
-    @always_inline
-    fn __truediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self/Self.Scalar(other)
+        return Self(self.c/other.c)
     
     @always_inline
     fn __truediv__(self, other: Self) -> Self.Scalar:
-        return self.s/other.s
+        return self.c/other.c
     
     @always_inline
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, -other.i) * (self/(other.s*other.s - other.i*other.i))
+        return other.conj() * (self/other.mags_conj())
 
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
-        return Self{s:self.s//other}
-
-    @always_inline
-    fn __floordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return self//Self.Scalar(other)
+        return Self(self.c//other.c)
     
     @always_inline
     fn __floordiv__(self, other: Self) -> Self.Scalar:
-        return self.s//other.s
+        return self.c//other.c
     
     @always_inline
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
-        let d = other.s*other.s - other.i*other.i
-        return Self.Multivector(-other.i*self // d, other.s*self // d)
+        return self*other.conj() // other.mags_conj()
     
     
     #------( Reverse Arithmetic )------#
-    
+    #
     @always_inline
     fn __radd__(self, other: Self.Scalar) -> Self.Multivector:
-        return Self.Multivector(other, self)
-    
-    @always_inline
-    fn __radd__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return Self.Scalar(other) + self
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self) -> Self:
-        return Self{s:other.s + self.s}
+        return other + self
     
     @always_inline
     fn __radd__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i + self)
+        return other + self
     
     @always_inline
     fn __rsub__(self, other: Self.Scalar) -> Self.Multivector:
-        return Self.Multivector(other, -self)
-    
-    @always_inline
-    fn __rsub__(self, other: Self.Discrete.Scalar) -> Self.Multivector:
-        return Self.Scalar(other) - self
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self) -> Self:
-        return Self{s:other.s - self.s}
+        return other - self
     
     @always_inline
     fn __rsub__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i - self)
+        return other - self
     
     @always_inline
     fn __rmul__(self, other: Self.Scalar) -> Self:
-        return Self{s:other*self.s}
-    
-    @always_inline
-    fn __rmul__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)*self
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s*self.s
-        elif sq == -1:
-            return -other.s*self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s*self.s)
+        return other*self
     
     @always_inline
     fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.i*self, other.s*self)
+        return other*self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Scalar) -> Self:
-        return Self{s:other/self.s}
-    
-    @always_inline
-    fn __rtruediv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)/self
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self) -> Self.Scalar:
-        return other.s/self.s
+        return other/self
     
     @always_inline
     fn __rtruediv__(self, other: Self.Multivector) -> Self.Multivector:
-        return other * (1/self)
+        return other/self
 
     @always_inline
     fn __rfloordiv__(self, other: Self.Scalar) -> Self:
-        return Self{s:other//self.s}
-
-    @always_inline
-    fn __rfloordiv__(self, other: Self.Discrete.Scalar) -> Self:
-        return Self.Scalar(other)//self
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self) -> Self.Scalar:
-        return other.s//self.s
+        return other//self
     
     @always_inline
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.i//self, other.s//self)
+        return other//self
     
     
     #------( Internal Arithmetic )------#
-    
+    #
     @always_inline
     fn __iadd__(inout self, other: Self):
         self = self + other
-
-    @always_inline
-    fn __iadd__(inout self, other: Self.Scalar):
-        print("")
     
     @always_inline
     fn __isub__(inout self, other: Self):
@@ -813,4 +933,4 @@ struct FloatH_a[sq: Int]:
     @always_inline
     fn __itruediv__(inout self, other: Self.Scalar):
         self = self/other
-    """
+    
