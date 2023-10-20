@@ -1,10 +1,10 @@
 def main():
-    #int_test()
-    #simple_test()
-    #simd_test()
-    #other_test()
-    #utils_test()
-    #math_test()
+    int_test()
+    simple_test()
+    simd_test()
+    other_test()
+    utils_test()
+    math_test()
     mulsign_test()
 
 
