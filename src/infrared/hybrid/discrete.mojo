@@ -254,63 +254,63 @@ struct IntH[sq: Int]:
     
     #------( Arithmetic )------#
     #
-    @always_inline
+    @always_inline # Multivector + Scalar
     fn __add__(self, other: Self.Scalar) -> Self:
         return Self(self.s + other, self.a)
     
-    @always_inline
+    @always_inline # Multivector + Antiscalar
     fn __add__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.a + other)
     
-    @always_inline
+    @always_inline # Multivector + Multivector
     fn __add__(self, other: Self) -> Self:
         return Self(self.s + other.s, self.a + other.a)
 
-    @always_inline
+    @always_inline # Multivector - Scalar
     fn __sub__(self, other: Self.Scalar) -> Self:
         return Self(self.s - other, self.a)
     
-    @always_inline
+    @always_inline # Multivector - Antiscalar
     fn __sub__(self, other: Self.Antiscalar) -> Self:
         return Self(self.s, self.a - other)
     
-    @always_inline
+    @always_inline # Multivector - Multivector
     fn __sub__(self, other: Self) -> Self:
         return Self(self.s - other.s, self.a - other.a)
     
-    @always_inline
+    @always_inline # Multivector * Scalar
     fn __mul__(self, other: Self.Scalar) -> Self:
         return self.s*other + self.a*other
     
-    @always_inline
+    @always_inline # Multivector * Antiscalar
     fn __mul__(self, other: Self.Antiscalar) -> Self:
         return self.s*other + self.a*other
     
-    @always_inline
+    @always_inline # Multivector * Multivector
     fn __mul__(self, other: Self) -> Self:
         return self.s*other.s + self.s*other.a + self.a*other.s + self.a*other.a
     
-    @always_inline
+    @always_inline # Multivector / Scalar
     fn __truediv__(self, other: Self.Scalar) -> Self.Fraction:
         return self * (1/other)
     
-    @always_inline
+    @always_inline # Multivector / Antiscalar
     fn __truediv__(self, other: Self.Antiscalar) -> Self.Fraction:
         return self * (1/other)
     
-    @always_inline
+    @always_inline # Multivector / Multivector
     fn __truediv__(self, other: Self) -> Self.Fraction:
         return self*other.conj() / other.mags_conj()
     
-    @always_inline
+    @always_inline # Multivector // Scalar
     fn __floordiv__(self, other: Self.Scalar) -> Self:
         return self.s//other + self.a//other
     
-    @always_inline
+    @always_inline # Multivector // Antiscalar
     fn __floordiv__(self, other: Self.Antiscalar) -> Self:
         return self.s//other + self.a//other
     
-    @always_inline
+    @always_inline # Multivector // Multivector
     fn __floordiv__(self, other: Self) -> Self:
         return self*other.conj() // other.mags_conj()
     
@@ -644,63 +644,63 @@ struct IntH_s[sq: Int]:
     
     #------( Arithmetic )------#
     #
-    @always_inline
+    @always_inline # Scalar + Scalar
     fn __add__(self, other: Self) -> Self:
         return self.c + other.c
     
-    @always_inline
+    @always_inline # Scalar + Antiscalar
     fn __add__(self, other: Self.Antiscalar) -> Self.Multivector:
         return Self.Multivector(self, other)
     
-    @always_inline
+    @always_inline # Scalar + Multivector
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(self + other.s, other.a)
     
-    @always_inline
+    @always_inline # Scalar - Scalar
     fn __sub__(self, other: Self) -> Self:
         return self.c - other.c
     
-    @always_inline
+    @always_inline # Scalar - Antiscalar
     fn __sub__(self, other: Self.Antiscalar) -> Self.Multivector:
         return Self.Multivector(self, -other)
     
-    @always_inline
+    @always_inline # Scalar - Multivector
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(self - other.s, -other.a)
     
-    @always_inline
+    @always_inline # Scalar * Scalar
     fn __mul__(self, other: Self) -> Self:
         return self.c*other.c
     
-    @always_inline
+    @always_inline # Scalar * Antiscalar
     fn __mul__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c*other.c)
     
-    @always_inline
+    @always_inline # Scalar * Multivector
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.s + self*other.a
     
-    @always_inline
+    @always_inline # Scalar / Scalar
     fn __truediv__(self, other: Self) -> Self.Fraction:
         return self.c/other.c
     
-    @always_inline
+    @always_inline # Scalar / Antiscalar
     fn __truediv__(self, other: Self.Antiscalar) -> Self.Fraction.Antiscalar:
         return Self.Fraction.Antiscalar(self.c/other.c)
     
-    @always_inline
+    @always_inline # Scalar / Multivector
     fn __truediv__(self, other: Self.Multivector) -> Self.Fraction.Multivector:
         return other.conj() * (self/other.mags_conj())
     
-    @always_inline
+    @always_inline # Scalar // Scalar
     fn __floordiv__(self, other: Self) -> Self:
         return self.c//other.c
     
-    @always_inline
+    @always_inline # Scalar // Antiscalar
     fn __floordiv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c//other.c)
     
-    @always_inline
+    @always_inline # scalar // Multivector
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return (self*other) // other.mags_conj()
 

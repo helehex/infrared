@@ -5,16 +5,14 @@ def main():
 
     #alias x = HyplexInt.Antiscalar(1)
     
-    let a: Hyplex = Hyplex(5)
-    let b: HyplexInt = 1 + 0*x
-    let c: Hyplex64 = 10
-    let d: HSIMD[1,DType.int64,8] = 6
+    let a: Hyplex = Hyplex.Scalar(5)
+    #let b: HyplexInt = 1 + 0*x
+    #let c: Hyplex64 = Hyplex64.Scalar(10)
+    #let d: HSIMD[1,DType.int64,8] = HSIMD[1,DType.int64,8].Scalar(6)
     print_(a)
-    print_(b)
-    print_(c)
-    print_(d)
-    
-    # aborted
+    #print_(b)
+    #print_(c)
+    #print_(d)
 
     #int_test()
     #simple_test()

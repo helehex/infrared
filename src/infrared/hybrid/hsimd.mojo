@@ -1,7 +1,7 @@
 from infrared.hybrid.discrete import IntH
 from infrared.hybrid.fraction import FloatH
 #from infrared import min, max, min_coef, max_coef
-from infrared import symbol, sqrt
+from infrared import symbol, sqrt, abs
 
 
 
@@ -263,39 +263,39 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     #
     @always_inline # (Multivector * Scalar) + Scalar
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self:
-        return Self(self.s.fma(mul, acc), self.a*mul)
+        return self.s.fma(mul, acc) + self.a*mul
     
     @always_inline # (Multivector * Scalar) + Antiscalar
     fn fma(self, mul: Self.Scalar, acc: Self.Antiscalar) -> Self:
-        return Self(self.s*mul, self.a.fma(mul, acc))
+        return self.s*mul + self.a.fma(mul, acc)
     
     @always_inline # (Multivector * Scalar) + Multivector
     fn fma(self, mul: Self.Scalar, acc: Self) -> Self:
-        return Self(self.s.fma(mul, acc.s), self.a.fma(mul, acc.a))
+        return self.s.fma(mul, acc.s) + self.a.fma(mul, acc.a)
     
     @always_inline # (Multivector * Antiscalar) + Scalar
     fn fma(self, mul: Self.Antiscalar, acc: Self.Scalar) -> Self:
-        return Self(self.a.fma(mul, acc), self.s*mul)
+        return self.s*mul + self.a.fma(mul, acc)
     
     @always_inline # (Multivector * Antiscalar) + Antiscalar
     fn fma(self, mul: Self.Antiscalar, acc: Self.Antiscalar) -> Self:
-        return Self(self.a*mul, self.s.fma(mul, acc))
+        return self.s.fma(mul, acc) + self.a*mul
     
     @always_inline # (Multivector * Antiscalar) + Multivector
     fn fma(self, mul: Self.Antiscalar, acc: Self) -> Self:
-        return Self(self.a.fma(mul,acc.s), self.s.fma(mul,acc.a))
+        return self.s.fma(mul,acc.a) + self.a.fma(mul,acc.s)
     
     @always_inline # (Multivector * Multivector) + Scalar
     fn fma(self, mul: Self, acc: Self.Scalar) -> Self:
-        return Self(self.s.fma(mul.s, self.a.fma(mul.a, acc)), self.a.fma(mul.s, self.s*mul.a))
+        return self.s.fma(mul.s, self.a.fma(mul.a, acc)) + self.a.fma(mul.s, self.s*mul.a)
     
     @always_inline # (Multivector * Multivector) + Antiscalar
     fn fma(self, mul: Self, acc: Self.Antiscalar) -> Self:
-        return Self(self.s.fma(mul.s, self.a*mul.a), self.a.fma(mul.s, self.s.fma(mul.a, acc)))
+        return self.s.fma(mul.s, self.a*mul.a) + self.a.fma(mul.s, self.s.fma(mul.a, acc))
     
     @always_inline # (Multivector * Multivector) + Multivector
     fn fma(self, mul: Self, acc: Self) -> Self:
-        return Self(self.s.fma(mul.s, self.a.fma(mul.a,acc.s)), self.a.fma(mul.s, self.s.fma(mul.a,acc.a)))
+        return self.s.fma(mul.s, self.a.fma(mul.a,acc.s)) + self.a.fma(mul.s, self.s.fma(mul.a,acc.a))
     """
     #--- shuffle
     #
@@ -328,8 +328,6 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     #------( Arithmetic )------#
     #
-    #--- Addition
-    #
     @always_inline # Multivector + Scalar
     fn __add__(self, other: Self.Scalar) -> Self:
         return Self(self.s + other, self.a)
@@ -342,8 +340,6 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     fn __add__(self, other: Self) -> Self:
         return Self(self.s + other.s, self.a + other.a)
     
-    #--- Subtract
-    #
     @always_inline # Multivector - Scalar
     fn __sub__(self, other: Self.Scalar) -> Self:
         return Self(self.s - other, self.a)
@@ -356,8 +352,6 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     fn __sub__(self, other: Self) -> Self:
         return Self(self.s - other.s, self.a - other.a)
     
-    #--- Multiply
-    #
     @always_inline # Multivector * Scalar
     fn __mul__(self, other: Self.Scalar) -> Self:
         return self.s*other + self.a*other
@@ -368,11 +362,9 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     
     @always_inline # Multivector * Multivector
     fn __mul__(self, other: Self) -> Self:
-        return self.s.fma(other.s, self.s.fma(other.a, self.a.fma(other.s, self.a*other.a)))
-        #return self.s.fma(other.s, self.a*other.a) + self.s.fma(other.a, self.a*other.s)         <-------- test
+        #return self.s.fma(other.s, self.s.fma(other.a, self.a.fma(other.s, self.a*other.a)))         <-------- alt
+        return self.s.fma(other.s, self.a*other.a) + self.s.fma(other.a, self.a*other.s)
     
-    #--- Division (fraction)
-    #
     @always_inline
     fn __truediv__(self, other: Self.Scalar) -> Self:
         return self * (1/other)
@@ -385,8 +377,6 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     fn __truediv__(self, other: Self) -> Self:
         return self*other.conj() / other.mags_conj()
     
-    #--- Division (discrete)
-    #
     @always_inline
     fn __floordiv__(self, other: Self.Scalar) -> Self:
         return self.s//other + self.a//other
@@ -804,63 +794,63 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     
     #------( Arithmetic )------#
     #
-    @always_inline
+    @always_inline # Scalar + Scalar
     fn __add__(self, other: Self) -> Self:
         return self.c + other.c
     
-    @always_inline
+    @always_inline # Scalar + Antiscalar
     fn __add__(self, other: Self.Antiscalar) -> Self.Multivector:
         return Self.Multivector(self.c + other.c)
     
-    @always_inline
+    @always_inline # Scalar + Multivector
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(self + other.s, other.a)
     
-    @always_inline
+    @always_inline # Scalar - Scalar
     fn __sub__(self, other: Self) -> Self:
         return self.c - other.c
     
-    @always_inline
+    @always_inline # Scalar - Antiscalar
     fn __sub__(self, other: Self.Antiscalar) -> Self.Multivector:
         return Self.Multivector(self, -other)
     
-    @always_inline
+    @always_inline # Scalar - Multivector
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(self - other.s, -other.a)
     
-    @always_inline
+    @always_inline # Scalar * Scalar
     fn __mul__(self, other: Self) -> Self:
         return self.c*other.c
     
-    @always_inline
+    @always_inline # Scalar * Antiscalar
     fn __mul__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c*other.c)
     
-    @always_inline
+    @always_inline # Scalar * Multivector
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.s + self*other.a
     
-    @always_inline
+    @always_inline # Scalar / Scalar
     fn __truediv__(self, other: Self) -> Self:
         return self.c/other.c
     
-    @always_inline
+    @always_inline # Scalar / Antiscalar
     fn __truediv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c/other.c)
     
-    @always_inline
+    @always_inline # Scalar / Multivector
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
         return other.conj() * (self/other.mags_conj())
     
-    @always_inline
+    @always_inline # Scalar // Scalar
     fn __floordiv__(self, other: Self) -> Self:
         return self.c//other.c
     
-    @always_inline
+    @always_inline # Scalar // Antiscalar
     fn __floordiv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c//other.c)
     
-    @always_inline
+    @always_inline # Scalar // Multivector
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return (self*other.conj()) // other.mags_conj()
     
@@ -1154,21 +1144,41 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
         return Self.Multivector(other.s, self)
     """
-    @always_inline
+    @always_inline # (Antiscalar * Scalar) + Scalar
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self.Multivector:
         return self*mul + acc
-    
-    @always_inline
+
+    @always_inline # (Antiscalar * Scalar) + Antiscalar
     fn fma(self, mul: Self.Scalar, acc: Self) -> Self:
         return Self(self.c.fma(mul.c, acc.c))
     
-    @always_inline
+    @always_inline # (Antiscalar * Scalar) + Multivector
+    fn fma(self, mul: Self.Scalar, acc: Self.Multivector) -> Self.Multivector:
+        return acc.s + self.fma(mul, acc.a)
+
+    @always_inline # (Antiscalar * Antiscalar) + Scalar
     fn fma(self, mul: Self, acc: Self.Scalar) -> Self.Scalar:
         return self.c.fma(sq*mul.c, acc.c)
-    
-    @always_inline
+
+    @always_inline # (Antiscalar * Antiscalar) + Antiscalar
     fn fma(self, mul: Self, acc: Self) -> Self.Multivector:
-        return sq*(self*mul) + acc
+        return self*mul + acc
+    
+    @always_inline # (Antiscalar * Antiscalar) + Multivector
+    fn fma(self, mul: Self, acc: Self.Multivector) -> Self.Multivector:
+        return self.fma(mul, acc.s) + acc.a
+
+    @always_inline # (Antiscalar * Multivector) + Scalar
+    fn fma(self, mul: Self.Multivector, acc: Self.Scalar) -> Self.Multivector:
+        return self*mul.s + self.fma(mul.a, acc)
+
+    @always_inline # (Antiscalar * Multivector) + Antiscalar
+    fn fma(self, mul: Self.Multivector, acc: Self) -> Self.Multivector:
+        return self.fma(mul.s, acc) + self*mul.a
+    
+    @always_inline # (Antiscalar * Multivector) + Multivector
+    fn fma(self, mul: Self.Multivector, acc: Self.Multivector) -> Self.Multivector:
+        return self.fma(mul.s, acc.a) + self.fma(mul.a, acc.s)
     """
     @always_inline
     fn shuffle[*mask: Int](self) -> Self:
@@ -1201,63 +1211,63 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     
     #------( Arithmetic )------#
     #
-    @always_inline
+    @always_inline # Antiscalar + Scalar
     fn __add__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
     
-    @always_inline
+    @always_inline # Antiscalar + Antiscalar
     fn __add__(self, other: Self) -> Self:
         return Self(self.c + other.c)
     
-    @always_inline
+    @always_inline # Antiscalar + Multivector
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(other.s, self + other.a)
     
-    @always_inline
+    @always_inline # Antiscalar - Scalar
     fn __sub__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(-other, self)
     
-    @always_inline
+    @always_inline # Antiscalar - Antiscalar
     fn __sub__(self, other: Self) -> Self:
         return Self(self.c - other.c)
     
-    @always_inline
+    @always_inline # Antiscalar - Multivector
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(-other.s, self - other.a)
     
-    @always_inline
+    @always_inline # Antiscalar * Scalar
     fn __mul__(self, other: Self.Scalar) -> Self:
         return Self(self.c*other.c)
     
-    @always_inline
+    @always_inline # Antiscalar * Antiscalar
     fn __mul__(self, other: Self) -> Self.Scalar:
         return sq*self.c*other.c
     
-    @always_inline
+    @always_inline # Antiscalar * Multivector
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.s + self*other.a
     
-    @always_inline
+    @always_inline # Antiscalar / Scalar
     fn __truediv__(self, other: Self.Scalar) -> Self:
         return Self(self.c/other.c)
     
-    @always_inline
+    @always_inline # Antiscalar / Antiscalar
     fn __truediv__(self, other: Self) -> Self.Scalar:
         return self.c/other.c
     
-    @always_inline
+    @always_inline # Antiscalar / Multivector
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
         return other.conj() * (self/other.mags_conj())
     
-    @always_inline
+    @always_inline # antiscalar // Scalar
     fn __floordiv__(self, other: Self.Scalar) -> Self:
         return Self(self.c//other.c)
     
-    @always_inline
+    @always_inline # Antiscalar // Antiscalar
     fn __floordiv__(self, other: Self) -> Self.Scalar:
         return self.c//other.c
     
-    @always_inline
+    @always_inline # Antiscalar // Multivector
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return (self*other.conj()) // other.mags_conj()
     

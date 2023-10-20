@@ -1,7 +1,7 @@
 from infrared.hybrid.discrete import IntH
 from infrared.hybrid.hsimd import HSIMD
 #from infrared import min, max, min_coef, max_coef
-from infrared import symbol, sqrt
+from infrared import symbol, sqrt, abs
 
 alias Float = FloatLiteral
 
@@ -575,27 +575,27 @@ struct FloatH_s[sq: Int]:
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.s + self*other.a
     
-    @always_inline
+    @always_inline # Scalar / Scalar
     fn __truediv__(self, other: Self) -> Self:
         return self.c/other.c
     
-    @always_inline
+    @always_inline # Scalar / Antiscalar
     fn __truediv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c/other.c)
     
-    @always_inline
+    @always_inline # Scalar / Multivector
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
         return other.conj() * (self/other.mags_conj())
 
-    @always_inline
+    @always_inline # Scalar // Scalar
     fn __floordiv__(self, other: Self) -> Self:
         return self.c//other.c
     
-    @always_inline
+    @always_inline # Scalar // Antiscalar
     fn __floordiv__(self, other: Self.Antiscalar) -> Self.Antiscalar:
         return Self.Antiscalar(self.c//other.c)
     
-    @always_inline
+    @always_inline # Scalar // Multivector
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.conj() // other.mags_conj()
     
@@ -827,63 +827,63 @@ struct FloatH_a[sq: Int]:
     
     #------( Arithmetic )------#
     #
-    @always_inline
+    @always_inline # Antiscalar + Scalar
     fn __add__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(other, self)
     
-    @always_inline
+    @always_inline # Antiscalar + Antiscalar
     fn __add__(self, other: Self) -> Self:
         return Self(self.c + other.c)
     
-    @always_inline
+    @always_inline # Antiscalar + Multivector
     fn __add__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(other.s, self + other.a)
     
-    @always_inline
+    @always_inline # Antiscalar - Scalar
     fn __sub__(self, other: Self.Scalar) -> Self.Multivector:
         return Self.Multivector(-other, self)
     
-    @always_inline
+    @always_inline # Antiscalar - Antiscalar
     fn __sub__(self, other: Self) -> Self:
         return Self(self.c - other.c)
     
-    @always_inline
+    @always_inline # Antiscalar - Multivector
     fn __sub__(self, other: Self.Multivector) -> Self.Multivector:
         return Self.Multivector(-other.s, self - other.a)
     
-    @always_inline
+    @always_inline # Antiscalar * Scalar
     fn __mul__(self, other: Self.Scalar) -> Self:
         return Self(self.c*other.c)
     
-    @always_inline
+    @always_inline # Antiscalar * Antiscalar
     fn __mul__(self, other: Self) -> Self.Scalar:
         return sq*self.c*other.c
     
-    @always_inline
+    @always_inline # Antiscalar * Multivector
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.a + self*other.s
     
-    @always_inline
+    @always_inline # Antiscalar / Scalar
     fn __truediv__(self, other: Self.Scalar) -> Self:
         return Self(self.c/other.c)
     
-    @always_inline
+    @always_inline # Antiscalar / Antiscalar
     fn __truediv__(self, other: Self) -> Self.Scalar:
         return self.c/other.c
     
-    @always_inline
+    @always_inline # Antiscalar / Multivector
     fn __truediv__(self, other: Self.Multivector) -> Self.Multivector:
         return other.conj() * (self/other.mags_conj())
 
-    @always_inline
+    @always_inline # Antiscalar // Scalar
     fn __floordiv__(self, other: Self.Scalar) -> Self:
         return Self(self.c//other.c)
     
-    @always_inline
+    @always_inline # Antiscalar // Antiscalar
     fn __floordiv__(self, other: Self) -> Self.Scalar:
         return self.c//other.c
     
-    @always_inline
+    @always_inline # Antiscalar // Multivector
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return self*other.conj() // other.mags_conj()
     
