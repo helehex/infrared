@@ -131,43 +131,43 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
         if index == 0: self.s.c = coef
         if index == 1: self.a.c = coef
         
-    """
-    #------ Min / Max ------#
     
-    @always_inline
-    fn min_coef(self) -> Self.Coef:
-        return min_coef(self)
+    # #------( Min / Max )------#
     
-    @always_inline
-    fn max_coef(self) -> Self.Coef:
-        return max_coef(self)
+    # @always_inline
+    # fn min_coef(self) -> Self.Coef:
+    #     return min_coef(self)
     
-    @always_inline
-    fn min_compose(self, other: Self) -> Self:
-        return min_compose(self, other)
+    # @always_inline
+    # fn max_coef(self) -> Self.Coef:
+    #     return max_coef(self)
     
-    @always_inline
-    fn max_compose(self, other: Self) -> Self:
-        return max_compose(self, other)
+    # @always_inline
+    # fn min_compose(self, other: Self) -> Self:
+    #     return min_compose(self, other)
     
-    # reduce_coefficient reduces across every coefficient present
-    @always_inline
-    fn reduce_max_coef(self) -> Self.Single:
-        return max(self.s.reduce_max().c, self.a.reduce_max().c)
+    # @always_inline
+    # fn max_compose(self, other: Self) -> Self:
+    #     return max_compose(self, other)
     
-    @always_inline
-    fn reduce_min_coef(self) -> Self.Single:
-        return min(self.s.reduce_min().c, self.a.reduce_min().c)
+    # # reduce_coefficient reduces across every coefficient present
+    # @always_inline
+    # fn reduce_max_coef(self) -> Self.Single:
+    #     return max(self.s.reduce_max().c, self.a.reduce_max().c)
     
-    # reduce_compose treats each basis channel independently, then uses those to constuct a new multivector
-    @always_inline
-    fn reduce_max_compose(self) -> Self.Unit:
-        return Self.Unit(self.s.reduce_max(), self.a.reduce_max())
+    # @always_inline
+    # fn reduce_min_coef(self) -> Self.Single:
+    #     return min(self.s.reduce_min().c, self.a.reduce_min().c)
     
-    @always_inline
-    fn reduce_min_compose(self) -> Self.Unit:
-        return Self.Unit(self.s.reduce_min(), self.a.reduce_min())
-    """
+    # # reduce_compose treats each basis channel independently, then uses those to constuct a new multivector
+    # @always_inline
+    # fn reduce_max_compose(self) -> Self.Unit:
+    #     return Self.Unit(self.s.reduce_max(), self.a.reduce_max())
+    
+    # @always_inline
+    # fn reduce_min_compose(self) -> Self.Unit:
+    #     return Self.Unit(self.s.reduce_min(), self.a.reduce_min())
+    
     
     #------( Operators )------#
     #
@@ -244,7 +244,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD[sq,dt,slice_width]:
         return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.a.slice[slice_width](offset))
-    """
+    
     #--- Splat
     #
     @always_inline
@@ -258,7 +258,7 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn splat(self, other: Self.Unit) -> Self:
         return Self(Self.Coef(other.s.c), Self.Coef(other.a.c))
-    """
+    
     #--- Fused multiply add
     #
     @always_inline # (Multivector * Scalar) + Scalar
@@ -296,17 +296,17 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline # (Multivector * Multivector) + Multivector
     fn fma(self, mul: Self, acc: Self) -> Self:
         return self.s.fma(mul.s, self.a.fma(mul.a,acc.s)) + self.a.fma(mul.s, self.s.fma(mul.a,acc.a))
-    """
-    #--- shuffle
-    #
-    @always_inline
-    fn shuffle[*mask: Int](self) -> Self:
-        return Self(self.s.shuffle[mask](), self.x.shuffle[mask]())          #  <---- passing variadic parameters?
     
-    @always_inline
-    fn shuffle[*mask: Int](self, other: Self) -> Self:
-        return Self(self.s.shuffle[mask](other.s), self.x.shuffle[mask](other.x))
-    """
+    # #--- shuffle
+    # #
+    # @always_inline
+    # fn shuffle[*mask: Int](self) -> Self:
+    #     return Self(self.s.shuffle[mask](), self.x.shuffle[mask]())          #  <---- passing variadic parameters?
+    
+    # @always_inline
+    # fn shuffle[*mask: Int](self, other: Self) -> Self:
+    #     return Self(self.s.shuffle[mask](other.s), self.x.shuffle[mask](other.x))
+    
     #--- Rotate
     #
     @always_inline
@@ -609,25 +609,25 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     fn __setitem__(inout self, index: Int, item: Self.Unit):
         self.c[index] = item.c
     
-    """
-    #------( Min / Max )------#
-    #
-    @always_inline
-    fn min(self, other: Self) -> Self:
-        return min(self, other)
     
-    @always_inline
-    fn max(self, other: Self) -> Self:
-        return max(self, other)
+    # #------( Min / Max )------#
+    # #
+    # @always_inline
+    # fn min(self, other: Self) -> Self:
+    #     return min(self, other)
     
-    @always_inline
-    fn reduce_max(self) -> Self.Unit:
-        return self.c.reduce_max()
+    # @always_inline
+    # fn max(self, other: Self) -> Self:
+    #     return max(self, other)
     
-    @always_inline
-    fn reduce_min(self) -> Self.Unit:
-        return self.c.reduce_min()
-    """
+    # @always_inline
+    # fn reduce_max(self) -> Self.Unit:
+    #     return self.c.reduce_max()
+    
+    # @always_inline
+    # fn reduce_min(self) -> Self.Unit:
+    #     return self.c.reduce_min()
+    
     
     #------( Operators )------#
     #
@@ -713,19 +713,19 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
 
     #------( SIMD )------#
     #
-    """
-    @always_inline
-    fn splat(self, other: Self.Unit) -> Self.Multivector:
-        return Self(other)
     
-    @always_inline
-    fn splat(self, other: Self.Unit.Antiscalar) -> Self:
-        return Self.Multivector(other, self)
+    # @always_inline
+    # fn splat(self, other: Self.Unit) -> Self.Multivector:
+    #     return Self(other)
     
-    @always_inline
-    fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, self)
-    """
+    # @always_inline
+    # fn splat(self, other: Self.Unit.Antiscalar) -> Self:
+    #     return Self.Multivector(other, self)
+    
+    # @always_inline
+    # fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
+    #     return Self.Multivector(other.s, self)
+    
     @always_inline # (Scalar * Scalar) + Scalar
     fn fma(self, mul: Self, acc: Self) -> Self:
         return self.c.fma(mul.c, acc.c)
@@ -762,15 +762,15 @@ struct HSIMD_s[sq: Int, dt: DType, sw: Int]:
     fn fma(self, mul: Self.Multivector, acc: Self.Multivector) -> Self.Multivector:
         return self.fma(mul.s, acc.s) + self.fma(mul.a, acc.a)
 
-    """
-    @always_inline
-    fn shuffle[*mask: Int](self) -> Self:
-        return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
     
-    @always_inline
-    fn shuffle[*mask: Int](self, other: Self) -> Self:
-        return Self(self.s.shuffle[mask](other.s))
-    """
+    # @always_inline
+    # fn shuffle[*mask: Int](self) -> Self:
+    #     return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
+    
+    # @always_inline
+    # fn shuffle[*mask: Int](self, other: Self) -> Self:
+    #     return Self(self.s.shuffle[mask](other.s))
+    
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_s[sq,dt,slice_width]:
         return self.c.slice[slice_width](offset)
@@ -1027,25 +1027,25 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     fn __setitem__(inout self, index: Int, item: Self.Unit):
         self.c[index] = item.c
     
-    """
-    #------( Min / Max )------#
-    #
-    @always_inline
-    fn min(self, other: Self) -> Self:
-        return min(self, other)
     
-    @always_inline
-    fn max(self, other: Self) -> Self:
-        return max(self, other)
+    # #------( Min / Max )------#
+    # #
+    # @always_inline
+    # fn min(self, other: Self) -> Self:
+    #     return min(self, other)
     
-    @always_inline
-    fn reduce_max(self) -> Self.Unit:
-        return self.c.reduce_max()
+    # @always_inline
+    # fn max(self, other: Self) -> Self:
+    #     return max(self, other)
     
-    @always_inline
-    fn reduce_min(self) -> Self.Unit:
-        return self.c.reduce_min()
-    """
+    # @always_inline
+    # fn reduce_max(self) -> Self.Unit:
+    #     return self.c.reduce_max()
+    
+    # @always_inline
+    # fn reduce_min(self) -> Self.Unit:
+    #     return self.c.reduce_min()
+    
     
     #------( Operators )------#
     #
@@ -1129,21 +1129,21 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
         return self*other.s
     
     
-    #------( SIMD )------#
-    #
-    """
-    @always_inline
-    fn splat(self, other: Self.Unit.Scalar) -> Self.Scalar:
-        return Self.Scalar(Self.Coef(other.c))
+    # #------( SIMD )------#
+    # #
     
-    @always_inline
-    fn splat(self, other: Self.Unit) -> Self:
-        return Self(Self.Coef(other.c))
+    # @always_inline
+    # fn splat(self, other: Self.Unit.Scalar) -> Self.Scalar:
+    #     return Self.Scalar(Self.Coef(other.c))
     
-    @always_inline
-    fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, self)
-    """
+    # @always_inline
+    # fn splat(self, other: Self.Unit) -> Self:
+    #     return Self(Self.Coef(other.c))
+    
+    # @always_inline
+    # fn splat(self, other: Self.Unit.Multivector) -> Self.Multivector:
+    #     return Self.Multivector(other.s, self)
+    
     @always_inline # (Antiscalar * Scalar) + Scalar
     fn fma(self, mul: Self.Scalar, acc: Self.Scalar) -> Self.Multivector:
         return self*mul + acc
@@ -1179,15 +1179,15 @@ struct HSIMD_a[sq: Int, dt: DType, sw: Int]:
     @always_inline # (Antiscalar * Multivector) + Multivector
     fn fma(self, mul: Self.Multivector, acc: Self.Multivector) -> Self.Multivector:
         return self.fma(mul.s, acc.a) + self.fma(mul.a, acc.s)
-    """
-    @always_inline
-    fn shuffle[*mask: Int](self) -> Self:
-        return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
     
-    @always_inline
-    fn shuffle[*mask: Int](self, other: Self) -> Self:
-        return Self(self.s.shuffle[mask](other.s))
-    """
+    # @always_inline
+    # fn shuffle[*mask: Int](self) -> Self:
+    #     return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
+    
+    # @always_inline
+    # fn shuffle[*mask: Int](self, other: Self) -> Self:
+    #     return Self(self.s.shuffle[mask](other.s))
+    
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_a[sq,dt,slice_width]:
         return HSIMD_a[sq,dt,slice_width](self.c.slice[slice_width](offset))

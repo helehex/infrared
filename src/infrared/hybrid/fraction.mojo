@@ -115,25 +115,25 @@ struct FloatH[sq: Int]:
         if index == 0: self.s.c = coef
         if index == 1: self.a.c = coef
     
-    """
-    #------( Min / Max )------#
-    #
-    @always_inline
-    fn min_coef(self) -> Self.Coef:
-        return min_coef(self)
     
-    @always_inline
-    fn max_coef(self) -> Self.Coef:
-        return max_coef(self)
+    # #------( Min / Max )------#
+    # #
+    # @always_inline
+    # fn min_coef(self) -> Self.Coef:
+    #     return min_coef(self)
     
-    @always_inline
-    fn min_compose(self, other: Self) -> Self:
-        return min_compose(self, other)
+    # @always_inline
+    # fn max_coef(self) -> Self.Coef:
+    #     return max_coef(self)
     
-    @always_inline
-    fn max_compose(self, other: Self) -> Self:
-        return max_compose(self, other)
-    """
+    # @always_inline
+    # fn min_compose(self, other: Self) -> Self:
+    #     return min_compose(self, other)
+    
+    # @always_inline
+    # fn max_compose(self, other: Self) -> Self:
+    #     return max_compose(self, other)
+    
     
     #------( Operators )------#
     #

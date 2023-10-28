@@ -14,9 +14,9 @@ fn print_[sq: Int](o: IntH[sq]): print_(o.__str__())
 fn print_[sq: Int](o: IntH[sq].Scalar): print_(o.__str__())
 fn print_[sq: Int](o: IntH[sq].Antiscalar): print_(o.__str__())
 
-fn print_[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw]): print_(o.__str__())
-fn print_[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Scalar): print_(o.__str__())
-fn print_[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Antiscalar): print_(o.__str__())
+fn print_[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw]): print(o.__str__())
+fn print_[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Scalar): print(o.__str__())
+fn print_[sq: Int, dt: DType, sw: Int](o: HSIMD[sq,dt,sw].Antiscalar): print(o.__str__())
 
 # get the symbol for formatting
 fn symbol[sq: Int]() -> String:

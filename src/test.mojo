@@ -5,8 +5,8 @@ def main():
 
     #alias x = HyplexInt.Antiscalar(1)
     
-    let a: Hyplex = Hyplex.Scalar(5)
-    #let b: HyplexInt = 1 + 0*x
+    let a: Hyplex = Hyplex.Scalar(5) # <----- either: add coef math, or other, branch hybrid_cc, hybrid_ca, hybrid_sa
+    #let b: HyplexInt = 1 + x
     #let c: Hyplex64 = Hyplex64.Scalar(10)
     #let d: HSIMD[1,DType.int64,8] = HSIMD[1,DType.int64,8].Scalar(6)
     print_(a)
@@ -22,207 +22,206 @@ def main():
     #math_test()
     #mulsign_test()
 
-"""
-fn mulsign_test():
-    from infrared.infrared import reverse
 
-    let a = StaticTuple[4, Int32](1,1,1,1)
-    let b = reverse[4, DType.int32, 1](a) # not sure if parameter inference works here
-    for i in range(4): print(b[i])
+# fn mulsign_test():
+#     from infrared.infrared import reverse
+
+#     let a = StaticTuple[4, Int32](1,1,1,1)
+#     let b = reverse[4, DType.int32, 1](a) # not sure if parameter inference works here
+#     for i in range(4): print(b[i])
 
 
-def math_test():
-    import infrared.hybrid as irh
-    from infrared.io import _print
+# def math_test():
+#     import infrared.hybrid as irh
+#     from infrared.io import _print
 
-    alias z: irh.Complex = irh.Complex(-1,-1)
-    let z64: irh.Complex32 = irh.Complex32(-1,-1)
-    let z32: irh.Complex32 = irh.Complex32(-1,-1)
+#     alias z: irh.Complex = irh.Complex(-1,-1)
+#     let z64: irh.Complex32 = irh.Complex32(-1,-1)
+#     let z32: irh.Complex32 = irh.Complex32(-1,-1)
     
 
-def simple_test():
-    from infrared.hybrid import Hyplex, Complex, Paraplex
-    from infrared.io import _print
-    _print("--- simple test:")
+# def simple_test():
+#     from infrared.hybrid import Hyplex, Complex, Paraplex
+#     from infrared.io import _print
+#     _print("--- simple test:")
 
-    alias x = Hyplex.I
-    alias i = Complex.I
-    alias o = Paraplex.I
+#     alias x = Hyplex.I
+#     alias i = Complex.I
+#     alias o = Paraplex.I
 
-    # strange things
-    _print(x)    #: 1x
-    _print(x*x)  #: 1
-    _print(x/x)  #: 1
-    _print()
-    _print(i)    #: 1i
-    _print(i*i)  #: -1
-    _print(i/i)  #: 1
-    _print()
-    _print(o)    #: 1o
-    _print(o*o)  #: 0
-    _print(o/o)  #: 1
-    _print()
+#     # strange things
+#     _print(x)    #: 1x
+#     _print(x*x)  #: 1
+#     _print(x/x)  #: 1
+#     _print()
+#     _print(i)    #: 1i
+#     _print(i*i)  #: -1
+#     _print(i/i)  #: 1
+#     _print()
+#     _print(o)    #: 1o
+#     _print(o*o)  #: 0
+#     _print(o/o)  #: 1
+#     _print()
 
-    rx = 0.5 + x
-    ri = 0.5 + i
-    ro = 0.5 + o
+#     rx = 0.5 + x
+#     ri = 0.5 + i
+#     ro = 0.5 + o
 
-    _print(rx)         #: 0.5 + 1x
-    _print(rx*rx)      #: 1.25 + 1x
-    _print(rx/rx)      #: 1
-    _print((x/rx)*rx)  #: 1x
-    _print(rx*8 // x)  #:
-    _print()
+#     _print(rx)         #: 0.5 + 1x
+#     _print(rx*rx)      #: 1.25 + 1x
+#     _print(rx/rx)      #: 1
+#     _print((x/rx)*rx)  #: 1x
+#     _print(rx*8 // x)  #:
+#     _print()
 
-    _print(ri)         #: 0.5 + 1i
-    _print(ri*ri)      #: -0.75 + 1i
-    _print(ri/ri)      #: 1
-    _print((i/ri)*ri)  #: 1i
-    _print(ri*8 // i)  #:
-    _print()
+#     _print(ri)         #: 0.5 + 1i
+#     _print(ri*ri)      #: -0.75 + 1i
+#     _print(ri/ri)      #: 1
+#     _print((i/ri)*ri)  #: 1i
+#     _print(ri*8 // i)  #:
+#     _print()
 
-    _print(ro)         #: 0.5 + 1o
-    _print(ro*ro)      #: 0.25 + 1o
-    _print(ro/ro)      #: 1
-    _print((o/ro)*ro)  #: 1o
-    _print(ro*8 // o)  #:
-    _print()
-
-
-def int_test():
-    from infrared.hybrid import HyplexInt, ComplexInt, ParaplexInt
-    from infrared.io import _print
-    _print("--- int test:")
-
-    let i = ComplexInt.I  #// imaginary unit
-    let x = HyplexInt.I    #// hypernary unit
-    let o = ParaplexInt.I  #// pararnary unit
-
-    print("Squares:")
-    print("i*i = ", i*i) #// prints '-1'
-    print("x*x = ", x*x) #// prints '1'
-    print("o*o = ", o*o) #// prints '0'
-    print()
-
-    print("div:")
-    print("i/i = ", i/i) #// prints '-1'
-    print("x/x = ", x/x) #// prints '1'
-    print("o/o = ", o/o) #// prints '0'
-    print()
-
-    #//------------ some examples:
-    var h1 = ComplexInt(1,3)
-    var h2 = HyplexInt(1,3)
-    var h3 = ParaplexInt(1,3)
-    var h4 = 5 + -10*ComplexInt.I
-    var h5 = HyplexInt(128, 128)<<1
-    h5 >>= x
-
-    print("Before:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
-
-    h1 = h1*h1
-    h2 *= h2
-    h3 = h3*h3
-    h4 += (4*ComplexInt.I)//i
-    h5 = (h5 - 1000)//(h5*x)
-
-    print("After:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
+#     _print(ro)         #: 0.5 + 1o
+#     _print(ro*ro)      #: 0.25 + 1o
+#     _print(ro/ro)      #: 1
+#     _print((o/ro)*ro)  #: 1o
+#     _print(ro*8 // o)  #:
+#     _print()
 
 
-def other_test():
-    import infrared.hybrid as ir
-    from infrared.io import _print
-    _print("--- other test:")
-    # alias MyHybrid = ir.FloatH[-2]
+# def int_test():
+#     from infrared.hybrid import HyplexInt, ComplexInt, ParaplexInt
+#     from infrared.io import _print
+#     _print("--- int test:")
 
-    let i: ir.FloatH[-2] = ir.FloatH[-2](0.0,1.2)
-    let h = 0.8 + i
-    _print(i)
-    _print(i*i)
-    _print(h)
-    _print(h*h)
-    _print(h/h)
-    _print((1/h)*(h*h))
-    _print()
+#     let i = ComplexInt.I  #// imaginary unit
+#     let x = HyplexInt.I    #// hypernary unit
+#     let o = ParaplexInt.I  #// pararnary unit
+
+#     print("Squares:")
+#     print("i*i = ", i*i) #// prints '-1'
+#     print("x*x = ", x*x) #// prints '1'
+#     print("o*o = ", o*o) #// prints '0'
+#     print()
+
+#     print("div:")
+#     print("i/i = ", i/i) #// prints '-1'
+#     print("x/x = ", x/x) #// prints '1'
+#     print("o/o = ", o/o) #// prints '0'
+#     print()
+
+#     #//------------ some examples:
+#     var h1 = ComplexInt(1,3)
+#     var h2 = HyplexInt(1,3)
+#     var h3 = ParaplexInt(1,3)
+#     var h4 = 5 + -10*ComplexInt.I
+#     var h5 = HyplexInt(128, 128)<<1
+#     h5 >>= x
+
+#     print("Before:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
+
+#     h1 = h1*h1
+#     h2 *= h2
+#     h3 = h3*h3
+#     h4 += (4*ComplexInt.I)//i
+#     h5 = (h5 - 1000)//(h5*x)
+
+#     print("After:\n",h1.__str__(),'\n',h2.__str__(),'\n',h3.__str__(),'\n',h4.__str__(),'\n',h5.__str__(),'\n')
 
 
-def simd_test():
-    import infrared.hybrid as irh
-    from infrared.io import _print
-    _print("--- simd test:")
+# def other_test():
+#     import infrared.hybrid as ir
+#     from infrared.io import _print
+#     _print("--- other test:")
+#     # alias MyHybrid = ir.FloatH[-2]
 
-    let x = irh.Hyplex.I
-    let i = irh.Complex.I
-    let o = irh.Paraplex.I
+#     let i: ir.FloatH[-2] = ir.FloatH[-2](0.0,1.2)
+#     let h = 0.8 + i
+#     _print(i)
+#     _print(i*i)
+#     _print(h)
+#     _print(h*h)
+#     _print(h/h)
+#     _print((1/h)*(h*h))
+#     _print()
+
+
+# def simd_test():
+#     import infrared.hybrid as irh
+#     from infrared.io import _print
+#     _print("--- simd test:")
+
+#     let x = irh.Hyplex.I
+#     let i = irh.Complex.I
+#     let o = irh.Paraplex.I
     
-    let xx = irh.HSIMD[1,DType.float16,8].I
-    let ii = irh.HSIMD[-1,DType.float16,8].I
-    let oo = irh.HSIMD[0,DType.float16,8].I
+#     let xx = irh.HSIMD[1,DType.float16,8].I
+#     let ii = irh.HSIMD[-1,DType.float16,8].I
+#     let oo = irh.HSIMD[0,DType.float16,8].I
 
-    _print(x)    #: 1x
-    _print(x*x)  #: 1
-    _print()
-    _print(i)    #: 1i
-    _print(i*i)  #: -1
-    _print()
-    _print(o)    #: 1o
-    _print(o*o)  #: 0
-    _print()
+#     _print(x)    #: 1x
+#     _print(x*x)  #: 1
+#     _print()
+#     _print(i)    #: 1i
+#     _print(i*i)  #: -1
+#     _print()
+#     _print(o)    #: 1o
+#     _print(o*o)  #: 0
+#     _print()
 
-    rx = 0.5 + xx
-    ri = 0.5 + ii
-    ro = 0.5 + oo
+#     rx = 0.5 + xx
+#     ri = 0.5 + ii
+#     ro = 0.5 + oo
 
-    _print(rx)     #: 0.5 + 1x
-    _print(rx*rx)  #: 1.25 + 1x
-    _print()
-    _print(ri)     #: 0.5 + 1i
-    _print(ri*ri)  #: -0.75 + 1i
-    _print()
-    _print(ro)     #: 0.5 + 1o
-    _print(ro*ro)  #: 0.25 + 1o
-    _print()
+#     _print(rx)     #: 0.5 + 1x
+#     _print(rx*rx)  #: 1.25 + 1x
+#     _print()
+#     _print(ri)     #: 0.5 + 1i
+#     _print(ri*ri)  #: -0.75 + 1i
+#     _print()
+#     _print(ro)     #: 0.5 + 1o
+#     _print(ro*ro)  #: 0.25 + 1o
+#     _print()
 
-    rx[0] += x
-    ri[0] += i
-    ro[0] += o
+#     rx[0] += x
+#     ri[0] += i
+#     ro[0] += o
 
-    rx[1] -= x
-    ri[1] -= i
-    ro[1] -= o
+#     rx[1] -= x
+#     ri[1] -= i
+#     ro[1] -= o
 
-    rx[2] *= x * 10
-    ri[2] *= i * 10
-    ro[2] *= o * 10
+#     rx[2] *= x * 10
+#     ri[2] *= i * 10
+#     ro[2] *= o * 10
 
-    rx[3] /= x/32
-    ri[3] /= i/32
-    ro[3] /= o/32
+#     rx[3] /= x/32
+#     ri[3] /= i/32
+#     ro[3] /= o/32
 
-    _print(rx)
-    _print(rx*rx)
-    _print()
-    _print(ri)
-    _print(ri*ri)
-    _print()
-    _print(ro)
-    _print(ro*ro)
-    _print()
+#     _print(rx)
+#     _print(rx*rx)
+#     _print()
+#     _print(ri)
+#     _print(ri*ri)
+#     _print()
+#     _print(ro)
+#     _print(ro*ro)
+#     _print()
     
-    _print(ro.slice[2](2))
-    _print(ro[2].to_discrete())
-    _print()
+#     _print(ro.slice[2](2))
+#     _print(ro[2].to_discrete())
+#     _print()
 
 
-def utils_test():
-    import infrared.hybrid as irh
-    from infrared.io import _print
-    from infrared import select
-    _print("--- utils test:")
+# def utils_test():
+#     import infrared.hybrid as irh
+#     from infrared.io import _print
+#     from infrared import select
+#     _print("--- utils test:")
 
-    let a: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](4,-1)
-    let b: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](7,-2)
-    let test: SIMD[DType.bool,8] = SIMD[DType.bool,8](True, False, True, False, True, False, True, False)
+#     let a: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](4,-1)
+#     let b: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](7,-2)
+#     let test: SIMD[DType.bool,8] = SIMD[DType.bool,8](True, False, True, False, True, False, True, False)
 
-    _print(select(test,a,b))
-"""
+#     _print(select(test,a,b))

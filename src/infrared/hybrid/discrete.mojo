@@ -43,6 +43,7 @@ struct IntH[sq: Int]:
     
     #--- Implicit
     #
+
     @always_inline # Discrete Scalar
     fn __init__(s: Self.Scalar) -> Self:
         return Self{s:s, a:Self.Antiscalar(0)}
@@ -100,25 +101,25 @@ struct IntH[sq: Int]:
         if index == 0: self.s.c = coef
         if index == 1: self.a.c = coef
     
-    """
-    #------( Min / Max )------#
-    #
-    @always_inline
-    fn min_coef(self) -> Self.Coef:
-        return min_coef(self)
     
-    @always_inline
-    fn max_coef(self) -> Self.Coef:
-        return max_coef(self)
+    # #------( Min / Max )------#
+    # #
+    # @always_inline
+    # fn min_coef(self) -> Self.Coef:
+    #     return min_coef(self)
     
-    @always_inline
-    fn min_compose(self, other: Self) -> Self:
-        return min_compose(self, other)
+    # @always_inline
+    # fn max_coef(self) -> Self.Coef:
+    #     return max_coef(self)
     
-    @always_inline
-    fn max_compose(self, other: Self) -> Self:
-        return max_compose(self, other)
-    """
+    # @always_inline
+    # fn min_compose(self, other: Self) -> Self:
+    #     return min_compose(self, other)
+    
+    # @always_inline
+    # fn max_compose(self, other: Self) -> Self:
+    #     return max_compose(self, other)
+    
     
     #------( Operators )------#
     #
@@ -181,69 +182,69 @@ struct IntH[sq: Int]:
     fn _ext_(self, other: Self) -> Self:
         return self.s*other.s + self.s*other.a + self.a*other.s
 
-    """
-    @always_inline
-    fn _sca_(self, other: Self.Scalar) -> Self.Scalar:
-        return self.s*other.s
+    
+    # @always_inline
+    # fn _sca_(self, other: Self.Scalar) -> Self.Scalar:
+    #     return self.s*other.s
 
-    @always_inline
-    fn _sca_(self, other: Self.Antiscalar) -> Self.Scalar:
-        return self.a*other.a
+    # @always_inline
+    # fn _sca_(self, other: Self.Antiscalar) -> Self.Scalar:
+    #     return self.a*other.a
 
-    @always_inline
-    fn _sca_(self, other: Self) -> Self.Scalar:
-        return self.s*other.s + self.a*other.a
+    # @always_inline
+    # fn _sca_(self, other: Self) -> Self.Scalar:
+    #     return self.s*other.s + self.a*other.a
 
-    @always_inline
-    fn _inr_(self, other: Self.Scalar) -> Self.Scalar:
-        return self*other
+    # @always_inline
+    # fn _inr_(self, other: Self.Scalar) -> Self.Scalar:
+    #     return self*other
 
-    @always_inline
-    fn _inr_(self, other: Self.Antiscalar) -> Self.Scalar:
-        return self*other
+    # @always_inline
+    # fn _inr_(self, other: Self.Antiscalar) -> Self.Scalar:
+    #     return self*other
 
-    @always_inline
-    fn _inr_(self, other: Self) -> Self.Scalar:
-        return self*other
+    # @always_inline
+    # fn _inr_(self, other: Self) -> Self.Scalar:
+    #     return self*other
 
-    # fat dot ~ mul ?
+    # # fat dot ~ mul ?
 
-    @always_inline
-    fn _lco_(self, other: Self.Scalar) -> Self:
-        return self.s*other.s + self.a*other.s
+    # @always_inline
+    # fn _lco_(self, other: Self.Scalar) -> Self:
+    #     return self.s*other.s + self.a*other.s
 
-    @always_inline
-    fn _lco_(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return self.a*other.a
+    # @always_inline
+    # fn _lco_(self, other: Self.Antiscalar) -> Self.Antiscalar:
+    #     return self.a*other.a
 
-    @always_inline
-    fn _lco_(self, other: Self) -> Self:
-        return self.s*other.s + self.a*other.s + self.a*other.a
+    # @always_inline
+    # fn _lco_(self, other: Self) -> Self:
+    #     return self.s*other.s + self.a*other.s + self.a*other.a
 
-    @always_inline
-    fn _rco_(self, other: Self.Scalar) -> Self.Scalar:
-        return self.s*other.s
+    # @always_inline
+    # fn _rco_(self, other: Self.Scalar) -> Self.Scalar:
+    #     return self.s*other.s
 
-    @always_inline
-    fn _rco_(self, other: Self.Antiscalar) -> Self:
-        return self.s*other.a + self.a*other.a
+    # @always_inline
+    # fn _rco_(self, other: Self.Antiscalar) -> Self:
+    #     return self.s*other.a + self.a*other.a
 
-    @always_inline
-    fn _rco_(self, other: Self) -> Self:
-        return self.s*other.s + self.s*other.a + self.a*other.a
+    # @always_inline
+    # fn _rco_(self, other: Self) -> Self:
+    #     return self.s*other.s + self.s*other.a + self.a*other.a
 
-    @always_inline
-    fn _ext_(self, other: Self.Scalar) -> Self:
-        return self.s*other.s + self.a*other.s
+    # @always_inline
+    # fn _ext_(self, other: Self.Scalar) -> Self:
+    #     return self.s*other.s + self.a*other.s
 
-    @always_inline
-    fn _ext_(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return self.s*other.a
+    # @always_inline
+    # fn _ext_(self, other: Self.Antiscalar) -> Self.Antiscalar:
+    #     return self.s*other.a
 
-    @always_inline
-    fn _ext_(self, other: Self) -> Self:
-        return self.s*other.s + self.s*other.a + self.a*other.s
-    """
+    # @always_inline
+    # fn _ext_(self, other: Self) -> Self:
+    #     return self.s*other.s + self.s*other.a + self.a*other.s
+    
     
     #------( Bit )------#
     #
@@ -314,33 +315,33 @@ struct IntH[sq: Int]:
     fn __floordiv__(self, other: Self) -> Self:
         return self*other.conj() // other.mags_conj()
     
-    """
-    #------( Reverse Bit )------#
-    #
-    @always_inline
-    fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
-        return other<<self.s
     
-    @always_inline
-    fn __rlshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return other<<self.a
+    # #------( Reverse Bit )------#
+    # #
+    # @always_inline
+    # fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
+    #     return other<<self.s
     
-    @always_inline
-    fn __rlshift__(self, other: Self) -> Self:
-        return Self(other.s<<self.s, other.a<<self.a)
+    # @always_inline
+    # fn __rlshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+    #     return other<<self.a
     
-    @always_inline
-    fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
-        return  other>>self.s
+    # @always_inline
+    # fn __rlshift__(self, other: Self) -> Self:
+    #     return Self(other.s<<self.s, other.a<<self.a)
     
-    @always_inline
-    fn __rrshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
-        return other>>self.a
+    # @always_inline
+    # fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
+    #     return  other>>self.s
     
-    @always_inline
-    fn __rrshift__(self, other: Self) -> Self:
-        return Self(other.s>>self.s, other.a>>self.a)
-    """
+    # @always_inline
+    # fn __rrshift__(self, other: Self.Antiscalar) -> Self.Antiscalar:
+    #     return other>>self.a
+    
+    # @always_inline
+    # fn __rrshift__(self, other: Self) -> Self:
+    #     return Self(other.s>>self.s, other.a>>self.a)
+    
     
     #------( Reverse Arithmetic )------#
     #
@@ -404,33 +405,33 @@ struct IntH[sq: Int]:
     fn __rfloordiv__(self, other: Self) -> Self:
         return other//self
 
-    """
-    #------( Internal Bit )------#
-    #
-    @always_inline
-    fn __ilshift__(inout self, other: Self.Scalar):
-        self = self<<other
     
-    @always_inline
-    fn __ilshift__(inout self, other: Self.Antiscalar):
-        self = self<<other
+    # #------( Internal Bit )------#
+    # #
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self.Scalar):
+    #     self = self<<other
     
-    @always_inline
-    fn __ilshift__(inout self, other: Self):
-        self = self<<other
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self.Antiscalar):
+    #     self = self<<other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self.Scalar):
-        self = self>>other
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self):
+    #     self = self<<other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self.Antiscalar):
-        self = self>>other
+    # @always_inline
+    # fn __irshift__(inout self, other: Self.Scalar):
+    #     self = self>>other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self):
-        self = self>>other
-    """
+    # @always_inline
+    # fn __irshift__(inout self, other: Self.Antiscalar):
+    #     self = self>>other
+    
+    # @always_inline
+    # fn __irshift__(inout self, other: Self):
+    #     self = self>>other
+    
     
     #------( Internal Arithmetic )------#
     #
@@ -705,33 +706,33 @@ struct IntH_s[sq: Int]:
         return (self*other) // other.mags_conj()
 
     
-    """
-    #------( Reverse Bit )------#
-    #
-    @always_inline
-    fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
-        return other
     
-    @always_inline
-    fn __rlshift__(self, other: Self) -> Self:
-        return Self{s:other.s<<self.s}
+    # #------( Reverse Bit )------#
+    # #
+    # @always_inline
+    # fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
+    #     return other
     
-    @always_inline
-    fn __rlshift__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i.s<<self.s)
+    # @always_inline
+    # fn __rlshift__(self, other: Self) -> Self:
+    #     return Self{s:other.s<<self.s}
     
-    @always_inline
-    fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
-        return other
+    # @always_inline
+    # fn __rlshift__(self, other: Self.Multivector) -> Self.Multivector:
+    #     return Self.Multivector(other.s, other.i.s<<self.s)
     
-    @always_inline
-    fn __rrshift__(self, other: Self) -> Self:
-        return Self{s:other.s>>self.s}
+    # @always_inline
+    # fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
+    #     return other
     
-    @always_inline
-    fn __rrshift__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i.s>>self.s)
-    """
+    # @always_inline
+    # fn __rrshift__(self, other: Self) -> Self:
+    #     return Self{s:other.s>>self.s}
+    
+    # @always_inline
+    # fn __rrshift__(self, other: Self.Multivector) -> Self.Multivector:
+    #     return Self.Multivector(other.s, other.i.s>>self.s)
+    
     
     #------( Reverse Arithmetic )------#
     #
@@ -795,33 +796,33 @@ struct IntH_s[sq: Int]:
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return other//self
     
-    """
-    #------( Internal Bit )------#
-    #
-    @always_inline
-    fn __ilshift__(inout self, other: Self.Scalar):
-        self = self<<other
     
-    @always_inline
-    fn __ilshift__(inout self, other: Self):
-        self = self<<other
+    # #------( Internal Bit )------#
+    # #
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self.Scalar):
+    #     self = self<<other
     
-    @always_inline
-    fn __ilshift__(inout self, other: Self.Multivector):
-        self = self<<other
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self):
+    #     self = self<<other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self.Scalar):
-        self = self>>other
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self.Multivector):
+    #     self = self<<other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self):
-        self = self>>other
+    # @always_inline
+    # fn __irshift__(inout self, other: Self.Scalar):
+    #     self = self>>other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self.Multivector):
-        self = self>>other
-    """
+    # @always_inline
+    # fn __irshift__(inout self, other: Self):
+    #     self = self>>other
+    
+    # @always_inline
+    # fn __irshift__(inout self, other: Self.Multivector):
+    #     self = self>>other
+    
     
     #------( Internal Arithmetic )------#
     #
@@ -1058,33 +1059,33 @@ struct IntH_a[sq: Int]:
     fn __floordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return (self*other) // other.mags_conj()
     
-    """
-    #------( Reverse Bit )------#
-    #
-    @always_inline
-    fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
-        return other
     
-    @always_inline
-    fn __rlshift__(self, other: Self) -> Self:
-        return Self{s:other.s<<self.s}
+    # #------( Reverse Bit )------#
+    # #
+    # @always_inline
+    # fn __rlshift__(self, other: Self.Scalar) -> Self.Scalar:
+    #     return other
     
-    @always_inline
-    fn __rlshift__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i.s<<self.s)
+    # @always_inline
+    # fn __rlshift__(self, other: Self) -> Self:
+    #     return Self{s:other.s<<self.s}
     
-    @always_inline
-    fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
-        return other
+    # @always_inline
+    # fn __rlshift__(self, other: Self.Multivector) -> Self.Multivector:
+    #     return Self.Multivector(other.s, other.i.s<<self.s)
     
-    @always_inline
-    fn __rrshift__(self, other: Self) -> Self:
-        return Self{s:other.s>>self.s}
+    # @always_inline
+    # fn __rrshift__(self, other: Self.Scalar) -> Self.Scalar:
+    #     return other
     
-    @always_inline
-    fn __rrshift__(self, other: Self.Multivector) -> Self.Multivector:
-        return Self.Multivector(other.s, other.i.s>>self.s)
-    """
+    # @always_inline
+    # fn __rrshift__(self, other: Self) -> Self:
+    #     return Self{s:other.s>>self.s}
+    
+    # @always_inline
+    # fn __rrshift__(self, other: Self.Multivector) -> Self.Multivector:
+    #     return Self.Multivector(other.s, other.i.s>>self.s)
+    
     
     #------( Reverse Arithmetic )------#
     #
@@ -1148,33 +1149,33 @@ struct IntH_a[sq: Int]:
     fn __rfloordiv__(self, other: Self.Multivector) -> Self.Multivector:
         return other//self
     
-    """
-    #------( Internal Bit )------#
-    #
-    @always_inline
-    fn __ilshift__(inout self, other: Self.Scalar):
-        self = self<<other
     
-    @always_inline
-    fn __ilshift__(inout self, other: Self):
-        self = self<<other
+    # #------( Internal Bit )------#
+    # #
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self.Scalar):
+    #     self = self<<other
     
-    @always_inline
-    fn __ilshift__(inout self, other: Self.Multivector):
-        self = self<<other
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self):
+    #     self = self<<other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self.Scalar):
-        self = self>>other
+    # @always_inline
+    # fn __ilshift__(inout self, other: Self.Multivector):
+    #     self = self<<other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self):
-        self = self>>other
+    # @always_inline
+    # fn __irshift__(inout self, other: Self.Scalar):
+    #     self = self>>other
     
-    @always_inline
-    fn __irshift__(inout self, other: Self.Multivector):
-        self = self>>other
-    """
+    # @always_inline
+    # fn __irshift__(inout self, other: Self):
+    #     self = self>>other
+    
+    # @always_inline
+    # fn __irshift__(inout self, other: Self.Multivector):
+    #     self = self>>other
+    
     
     #------( Internal Arithmetic )------#
     #
