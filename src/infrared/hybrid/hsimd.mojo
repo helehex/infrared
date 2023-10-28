@@ -261,15 +261,15 @@ struct HSIMD[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn fma(self, mul: Self, acc: Self) -> Self:
         return Self(self.s.fma(mul.s, self.i.fma(mul.i,acc.s)), self.i.fma(mul.s, Self.I(self.s.fma(mul.i.s,acc.i.s))))
-    '''
-    @always_inline
-    fn shuffle[*mask: Int](self) -> Self:
-        return Self(self.s.shuffle[mask](), self.x.shuffle[mask]()) #  <---- passing variadic parameters?
     
-    @always_inline
-    fn shuffle[*mask: Int](self, other: Self) -> Self:
-        return Self(self.s.shuffle[mask](other.s), self.x.shuffle[mask](other.x))
-    '''
+    # @always_inline
+    # fn shuffle[*mask: Int](self) -> Self:
+    #     return Self(self.s.shuffle[mask](), self.x.shuffle[mask]()) #  <---- passing variadic parameters?
+    
+    # @always_inline
+    # fn shuffle[*mask: Int](self, other: Self) -> Self:
+    #     return Self(self.s.shuffle[mask](other.s), self.x.shuffle[mask](other.x))
+    
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD[sq,dt,slice_width]:
         return HSIMD[sq,dt,slice_width](self.s.slice[slice_width](offset), self.i.slice[slice_width](offset))
@@ -935,15 +935,15 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
             return acc
         else:
             return sq*(self*mul) + acc
-    '''
-    @always_inline
-    fn shuffle[*mask: Int](self) -> Self:
-        return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
     
-    @always_inline
-    fn shuffle[*mask: Int](self, other: Self) -> Self:
-        return Self(self.s.shuffle[mask](other.s))
-    '''
+    # @always_inline
+    # fn shuffle[*mask: Int](self) -> Self:
+    #     return Self(self.s.shuffle[mask]()) #  <---- passing variadic parameters?
+    
+    # @always_inline
+    # fn shuffle[*mask: Int](self, other: Self) -> Self:
+    #     return Self(self.s.shuffle[mask](other.s))
+    
     @always_inline
     fn slice[slice_width: Int](self, offset: Int) -> HSIMD_i[sq,dt,slice_width]:
         return HSIMD_i[sq,dt,slice_width](self.s.slice[slice_width](offset))
@@ -1270,61 +1270,61 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     #------ Internal Arithmetic ------#
     
     @always_inline
-    fn __iadd__(inout self, other: Self):
-        self = self + other
+    fn __iadd__(inout self, other: Tuple[Self]):
+        self = self + other.get[0,Self]()
         
     @always_inline
-    fn __iadd__(inout self, other: Self.Fraction):
-        self = self + other
+    fn __iadd__(inout self, other: Tuple[Self.Fraction]):
+        self = self + other.get[0,Self]()
         
     @always_inline
-    fn __iadd__(inout self, other: Self.Discrete):
-        self = self + other
+    fn __iadd__(inout self, other: Tuple[Self.Discrete]):
+        self = self + other.get[0,Self]()
     
     @always_inline
-    fn __isub__(inout self, other: Self):
-        self = self - other
+    fn __isub__(inout self, other: Tuple[Self]):
+        self = self - other.get[0,Self]()
         
     @always_inline
-    fn __isub__(inout self, other: Self.Fraction):
-        self = self - other
+    fn __isub__(inout self, other: Tuple[Self.Fraction]):
+        self = self - other.get[0,Self]()
         
     @always_inline
-    fn __isub__(inout self, other: Self.Discrete):
-        self = self - other
+    fn __isub__(inout self, other: Tuple[Self.Discrete]):
+        self = self - other.get[0,Self]()
         
     @always_inline
-    fn __imul__(inout self, other: Self.Scalar):
-        self = self*other
+    fn __imul__(inout self, other: Tuple[Self.Scalar]):
+        self = self*other.get[0,Self]()
         
     @always_inline
-    fn __imul__(inout self, other: Self.Fraction.Scalar):
-        self = self*other
+    fn __imul__(inout self, other: Tuple[Self.Fraction.Scalar]):
+        self = self*other.get[0,Self]()
         
     @always_inline
-    fn __imul__(inout self, other: Self.Discrete.Scalar):
-        self = self*other
+    fn __imul__(inout self, other: Tuple[Self.Discrete.Scalar]):
+        self = self*other.get[0,Self]()
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Scalar):
-        self = self/other
+    fn __itruediv__(inout self, other: Tuple[Self.Scalar]):
+        self = self/other.get[0,Self]()
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Fraction.Scalar):
-        self = self/other
+    fn __itruediv__(inout self, other: Tuple[Self.Fraction.Scalar]):
+        self = self/other.get[0,Self]()
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Discrete.Scalar):
-        self = self/other
+    fn __itruediv__(inout self, other: Tuple[Self.Discrete.Scalar]):
+        self = self/other.get[0,Self]()
         
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.Scalar):
-        self = self//other
+    fn __ifloordiv__(inout self, other: Tuple[Self.Scalar]):
+        self = self//other.get[0,Self]()
         
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.Fraction.Scalar):
-        self = self//other
+    fn __ifloordiv__(inout self, other: Tuple[Self.Fraction.Scalar]):
+        self = self//other.get[0,Self]()
         
     @always_inline
-    fn __ifloordiv__(inout self, other: Self.Discrete.Scalar):
-        self = self//other
+    fn __ifloordiv__(inout self, other: Tuple[Self.Discrete.Scalar]):
+        self = self//other.get[0,Self]()

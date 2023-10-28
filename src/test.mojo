@@ -6,6 +6,9 @@ def main():
     utils_test()
     math_test()
     mulsign_test()
+    #i_test()
+
+
 
 
 fn mulsign_test():
@@ -209,3 +212,13 @@ def utils_test():
     let test: SIMD[DType.bool,8] = SIMD[DType.bool,8](True, False, True, False, True, False, True, False)
 
     _print(select(test,a,b))
+
+
+fn i_test():
+    from infrared.hybrid import Hyplex, Complex, Paraplex
+    from infrared.io import _print
+
+    var a: Hyplex.I = 5
+    # a += 5              # <---- doesnt work
+    a += Hyplex.I(5)
+    _print(a)

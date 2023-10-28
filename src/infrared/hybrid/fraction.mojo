@@ -664,21 +664,17 @@ struct FloatH_i[sq: Int]:
     #------ Internal Arithmetic ------#
     
     @always_inline
-    fn __iadd__(inout self, other: Self):
-        self = self + other
-
-    @always_inline
-    fn __iadd__(inout self, other: Self.Scalar):
-        print("")
+    fn __iadd__(inout self, other: Tuple[Self]):
+        self = self + other.get[0,Self]()
     
     @always_inline
-    fn __isub__(inout self, other: Self):
-        self = self - other
+    fn __isub__(inout self, other: Tuple[Self]):
+        self = self - other.get[0,Self]()
         
     @always_inline
-    fn __imul__(inout self, other: Self.Scalar):
-        self = self*other
+    fn __imul__(inout self, other: Tuple[Self.Scalar]):
+        self = self*other.get[0,Self]()
         
     @always_inline
-    fn __itruediv__(inout self, other: Self.Scalar):
-        self = self/other
+    fn __itruediv__(inout self, other: Tuple[Self.Scalar]):
+        self = self/other.get[0,Self]()
