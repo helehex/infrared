@@ -142,9 +142,9 @@ def simd_test():
     let i = irh.Complex.I(1)
     let o = irh.Paraplex.I(1)
     
-    let xx = irh.HSIMD[1,DType.float16,8].I(1)
-    let ii = irh.HSIMD[-1,DType.float16,8].I(1)
-    let oo = irh.HSIMD[0,DType.float16,8].I(1)
+    let xx = irh.HSIMD[1,DType.float16,4].I(1)
+    let ii = irh.HSIMD[-1,DType.float16,4].I(1)
+    let oo = irh.HSIMD[0,DType.float16,4].I(1)
 
     _print(x)    #: 1x
     _print(x*x)  #: 1
@@ -207,9 +207,9 @@ def utils_test():
     from infrared import select
     _print("--- utils test:")
 
-    let a: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](4,-1)
-    let b: irh.HSIMD[1,DType.int32,8] = irh.HSIMD[1,DType.int32,8](7,-2)
-    let test: SIMD[DType.bool,8] = SIMD[DType.bool,8](True, False, True, False, True, False, True, False)
+    let a: irh.HSIMD[1,DType.int32,4] = irh.HSIMD[1,DType.int32,4](4,-1)
+    let b: irh.HSIMD[1,DType.int32,4] = irh.HSIMD[1,DType.int32,4](7,-2)
+    let test: SIMD[DType.bool,4] = SIMD[DType.bool,4](True, False, True, False, True, False, True, False)
 
     _print(select(test,a,b))
 
