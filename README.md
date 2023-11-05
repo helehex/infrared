@@ -1,6 +1,8 @@
 # Infrared 🔥
 Geometric Algebra for Mojo
 
+Tested on mojo version 0.5.0
+
 ## package layout:
 
 - infrared.hybrid
