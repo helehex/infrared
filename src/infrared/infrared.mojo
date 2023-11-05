@@ -305,7 +305,6 @@ fn arg[sq: Int, dt: DType, sw: Int](h: HSIMD[sq,dt,sw]) -> HSIMD[sq,dt,sw]:
 #------ mulsign
 
 from utils.static_tuple import StaticTuple
-from utils.list import VariadicList
 from algorithm.functional import unroll
 
 @always_inline
