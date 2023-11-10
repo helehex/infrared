@@ -768,11 +768,11 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     @always_inline
     fn __init__(u: Self.Unit) -> Self:
         return Self{s:u.s}
-    '''
-    @always_inline
-    fn __init__(s: Self.Unit.Scalar) -> Self:
-        return Self{s:s}
-    '''
+    
+    # @always_inline
+    # fn __init__(s: Self.Unit.Scalar) -> Self:
+    #     return Self{s:s}
+    
     
     #------ To ------#
     
@@ -1037,15 +1037,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s*other.s
-        elif sq == -1:
-            return -self.s*other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s*other.s)
+        return sq*(self.s*other.s)
     
     @always_inline
     fn __mul__(self, other: Self.Fraction) -> Self.Scalar:
@@ -1188,15 +1180,7 @@ struct HSIMD_i[sq: Int, dt: DType, sw: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return other.s*self.s
-        elif sq == -1:
-            return -other.s*self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s*self.s)
+        return sq*(other.s*self.s)
     
     @always_inline
     fn __rmul__(self, other: Self.Fraction) -> Self.Scalar:

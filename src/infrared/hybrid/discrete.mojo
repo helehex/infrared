@@ -524,15 +524,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __mul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:
-            return self.s*other.s
-        elif sq == -1:
-            return -self.s*other.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(self.s*other.s)
+        return sq*(self.s*other.s)
     
     @always_inline
     fn __mul__(self, other: Self.Multivector) -> Self.Multivector:
@@ -622,15 +614,7 @@ struct IntH_i[sq: Int]:
     
     @always_inline
     fn __rmul__(self, other: Self) -> Self.Scalar:
-        @parameter
-        if sq == 1:            
-            return other.s*self.s
-        elif sq == -1:
-            return -other.s*self.s
-        elif sq == 0:
-            return 0
-        else:
-            return sq*(other.s*self.s)
+        return sq*(other.s*self.s)
     
     @always_inline
     fn __rmul__(self, other: Self.Multivector) -> Self.Multivector:
