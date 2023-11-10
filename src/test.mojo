@@ -5,18 +5,7 @@ def main():
     other_test()
     utils_test()
     math_test()
-    mulsign_test()
     #i_test()
-
-
-
-
-fn mulsign_test():
-    from infrared.infrared import reverse
-
-    let a = StaticTuple[4, Int32](1,1,1,1)
-    let b = reverse[4, DType.int32, 1](a) # not sure if parameter inference works here
-    for i in range(4): print(b[i])
 
 
 def math_test():
@@ -219,6 +208,6 @@ fn i_test():
     from infrared.io import _print
 
     var a: Hyplex.I = 5
-    # a += 5              # <---- doesnt work
-    a += Hyplex.I(5)
+    # a += 5              # <--- doesnt work (probably a good thing)
+    a += Hyplex.I(5)      # <--- this works though
     _print(a)
