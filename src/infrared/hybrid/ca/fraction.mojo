@@ -1,5 +1,5 @@
-from infrared.io import symbol
-from .discrete_ca import IntH_ca
+from infrared import symbol
+from .discrete import IntH_ca
 
 alias Float = FloatLiteral
 
@@ -187,7 +187,7 @@ struct FloatH_a[sq: Int]:
 
     @always_inline # Discrete _Coef
     fn __init__(_c: Self.Discrete._Coef) -> Self:
-        return Self{c:_c.get[0,Self.Coef]()}
+        return Self{c:_c.get[0,Self.Discrete.Coef]()}
 
     @always_inline # Discrete Antiox
     fn __init__(a: Self.Discrete) -> Self:

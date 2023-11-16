@@ -1,4 +1,7 @@
-from infrared.io import symbol
+from infrared import symbol
 
 def main():
-    print(symbol[-2]())
+    from infrared.hybrid.ca import test_ca
+    from infrared.hybrid.cc import test_cc
+    test_cc()
+    test_ca()

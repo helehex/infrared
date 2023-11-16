@@ -1,5 +1,5 @@
-from infrared.io import symbol
-from .fraction_ca import FloatH_ca
+from infrared import symbol
+from .fraction import FloatH_ca
 
 
 
@@ -86,7 +86,7 @@ struct IntH_ca[sq: Int]:
 
     @always_inline # Coef + Hybrid
     fn __radd__(self, other: Self.Fraction.Coef) -> Self.Fraction:
-        return other + self
+        return other + Self.Fraction(self)
     
     
     #------( Internal Arithmetic )------#
@@ -173,7 +173,7 @@ struct IntH_a[sq: Int]:
 
     @always_inline # Coef + Antiox
     fn __radd__(self, other: Self.Fraction.Coef) -> Self.Fraction.Hybrid:
-        return other + self
+        return other + Self.Fraction.Antiox(self)
     
     
     #------( Internal Arithmetic )------#

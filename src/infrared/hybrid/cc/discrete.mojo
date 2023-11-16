@@ -1,5 +1,5 @@
-from infrared.io import symbol
-from .fraction_cc import FloatH
+from infrared import symbol
+from .fraction import FloatH
 
 
 
@@ -12,10 +12,10 @@ struct IntH[sq: Int]:
     
     #------[ Alias ]------#
     #
-    alias Coef  = Int
+    alias Coef = Int
 
-    alias Discrete  = Self
-    alias Fraction  = FloatH[sq]
+    alias Discrete = Self
+    alias Fraction = FloatH[sq]
 
 
     #------< Data >------#
@@ -31,20 +31,20 @@ struct IntH[sq: Int]:
         return Self{s:0, a:0}
     
     #--- Implicit
-    @always_inline # Discrete Coef
+    @always_inline # Scalar
     fn __init__(s: Self.Coef) -> Self:
         return Self{s:s, a:0}
 
     #--- Explicit
-    @always_inline # Coefficients
-    fn __init__(s1: Self.Coef, s2: Self.Coef) -> Self:
-        return Self{s:s1, a:s2}
+    @always_inline # Scalar + Antiox
+    fn __init__(s: Self.Coef, a: Self.Coef) -> Self:
+        return Self{s:s, a:a}
     
     
     #------( Formatting )------#
     #
     fn __str__(self) -> String:
-        return String(self.s) + " + " + String(self.a)
+        return String(self.s) + " + " + String(self.a) + symbol[sq]()
 
     
     #------( Arithmetic )------#
@@ -70,7 +70,7 @@ struct IntH[sq: Int]:
 
     @always_inline # Coef + Hybrid
     fn __radd__(self, other: Self.Fraction.Coef) -> Self.Fraction:
-        return other + self
+        return other + Self.Fraction(self)
     
     
     #------( Internal Arithmetic )------#

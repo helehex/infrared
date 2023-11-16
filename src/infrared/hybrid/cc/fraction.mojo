@@ -1,5 +1,5 @@
-from infrared.io import symbol
-from .discrete_cc import IntH
+from infrared import symbol
+from .discrete import IntH
 
 alias Float = FloatLiteral
 
@@ -54,7 +54,7 @@ struct FloatH[sq: Int]:
     #------( Formatting )------#
     #
     fn __str__(self) -> String:
-        return String(self.s) + " + " + String(self.a)
+        return String(self.s) + " + " + String(self.a) + symbol[sq]()
 
     
     #------( Arithmetic )------#
