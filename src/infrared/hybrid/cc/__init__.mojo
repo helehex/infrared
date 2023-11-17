@@ -1,15 +1,22 @@
-from .discrete import *
-from .fraction import *
+from .int_hybrid import *
+from .float_literal_hybrid import *
 
-fn test_cc():
 
-    let int_literal  : IntLiteral   = 3
-    let int_coef     : Int          = 3
-    var int_hybrid   : IntH[1]      = 3
 
-    let float_coef   : FloatLiteral = 3
-    var float_hybrid : FloatH[1]    = 3
 
+fn static_test_cc():
+
+    let int_literal : IntLiteral   = 3
+    let int_coef    : Int          = 3
+    let float_coef  : FloatLiteral = 3
+
+
+    # int: construct
+    var int_hybrid: IntH[1] = IntH[1]()
+    int_hybrid = IntH[1](int_literal)
+    int_hybrid = IntH[1](int_coef)
+    int_hybrid = IntH[1](int_coef, int_literal)
+    int_hybrid = IntH[1](int_coef, int_coef)
 
     # int: set
     int_hybrid = int_literal
@@ -24,7 +31,7 @@ fn test_cc():
     # int: hybrid + hybrid
     int_hybrid = int_hybrid + int_hybrid
 
-    # int hybrid + scalar
+    # int: hybrid + scalar
     int_hybrid = int_hybrid + int_literal
     int_hybrid = int_literal + int_hybrid
 
@@ -32,11 +39,20 @@ fn test_cc():
     int_hybrid = int_coef + int_hybrid
 
 
+    # float: construct
+    var float_hybrid : FloatH[1] = FloatH[1]()
+    float_hybrid = FloatH[1](int_literal)
+    float_hybrid = FloatH[1](int_coef)
+    float_hybrid = FloatH[1](float_coef)
+    float_hybrid = FloatH[1](float_coef, int_literal)
+    float_hybrid = FloatH[1](float_coef, int_coef)
+    float_hybrid = FloatH[1](float_coef, float_coef)
+
     # float: set
     float_hybrid = int_literal
     float_hybrid = int_coef
-    float_hybrid = float_coef
     float_hybrid = int_hybrid
+    float_hybrid = float_coef
     float_hybrid = FloatH[1](float_coef, float_coef)
 
     # float: iadd

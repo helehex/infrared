@@ -1,24 +1,22 @@
 from infrared import symbol
-from .discrete import IntH
-
-alias Float = FloatLiteral
+from .float_literal_hybrid import FloatH
 
 
 
 
-#------------ Float Hybrid ------------#
+#------------ Int Hybrid ------------#
 #---
 #---
 @register_passable("trivial")
-struct FloatH[sq: Int]:
+struct IntH[sq: Int]:
     
     #------[ Alias ]------#
     #
-    alias Coef  = Float
+    alias Coef = Int
 
-    alias Discrete  = IntH[sq]
-    alias Fraction  = Self
-    
+    alias Discrete = Self
+    alias Fraction = FloatH[sq]
+
 
     #------< Data >------#
     #
@@ -33,22 +31,14 @@ struct FloatH[sq: Int]:
         return Self{s:0, a:0}
     
     #--- Implicit
-    @always_inline # Fraction Coef
+    @always_inline # Scalar
     fn __init__(s: Self.Coef) -> Self:
         return Self{s:s, a:0}
 
-    @always_inline # Discrete Coef
-    fn __init__(s: Self.Discrete.Coef) -> Self:
-        return Self{s:s, a:0}
-
-    @always_inline # Discrete Hybrid
-    fn __init__(m: Self.Discrete) -> Self:
-        return Self{s:m.s, a:m.a}
-    
     #--- Explicit
-    @always_inline # Coefficients
-    fn __init__(s1: Self.Coef, s2: Self.Coef) -> Self:
-        return Self{s:s1, a:s2}
+    @always_inline # Scalar + Antiox
+    fn __init__(s: Self.Coef, a: Self.Coef) -> Self:
+        return Self{s:s, a:a}
     
     
     #------( Formatting )------#
@@ -64,8 +54,8 @@ struct FloatH[sq: Int]:
         return Self(self.s + other, self.a)
 
     @always_inline # Hybrid + Coef
-    fn __add__(self, other: Self.Discrete.Coef) -> Self:
-        return self + Self.Coef(other)
+    fn __add__(self, other: Self.Fraction.Coef) -> Self.Fraction:
+        return Self.Fraction(self) + other
     
     @always_inline # Hybrid + Hybrid
     fn __add__(self, other: Self) -> Self:
@@ -79,22 +69,14 @@ struct FloatH[sq: Int]:
         return Self(other + self.s, self.a)
 
     @always_inline # Coef + Hybrid
-    fn __radd__(self, other: Self.Discrete.Coef) -> Self:
-        return Self.Coef(other) + self
-
-    @always_inline # Hybrid + Hybrid
-    fn __radd__(self, other: Self.Discrete) -> Self:
-        return Self(other) + self
+    fn __radd__(self, other: Self.Fraction.Coef) -> Self.Fraction:
+        return other + Self.Fraction(self)
     
     
     #------( Internal Arithmetic )------#
     #
     @always_inline # Hybrid += Coef
     fn __iadd__(inout self, other: Self.Coef):
-        self = self + other
-
-    @always_inline # Hybrid += Coef
-    fn __iadd__(inout self, other: Self.Discrete.Coef):
         self = self + other
     
     @always_inline # Hybrid += Hybrid
