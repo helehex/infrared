@@ -1,5 +1,7 @@
 from infrared import symbol
-from .float_literal_hybrid import FloatH
+from .int_antiox_ca import IntAntiox_ca
+from .float_literal_hybrid_ca import FloatLiteralHybrid_ca
+from .float_literal_antiox_ca import FloatLiteralAntiox_ca
 
 
 
@@ -8,43 +10,54 @@ from .float_literal_hybrid import FloatH
 #---
 #---
 @register_passable("trivial")
-struct IntH[sq: Int]:
+struct IntHybrid_ca[sq: Int]:
     
     #------[ Alias ]------#
     #
     alias Coef = Int
 
+    alias Hybrid = Self
+    alias Antiox = IntAntiox_ca[sq]
+
     alias Discrete = Self
-    alias Fraction = FloatH[sq]
+    alias Fraction = FloatLiteralHybrid_ca[sq]
 
 
     #------< Data >------#
     #
     var s: Self.Coef
-    var a: Self.Coef
+    var a: Self.Antiox
     
     
     #------( Initialize )------#
     #
     @always_inline # Zero
     fn __init__() -> Self:
-        return Self{s:0, a:0}
+        return Self{s:0, a:Self.Antiox(0)}
     
     #--- Implicit
-    @always_inline # Scalar
+    @always_inline # Discrete Coef
     fn __init__(s: Self.Coef) -> Self:
-        return Self{s:s, a:0}
+        return Self{s:s, a:Self.Antiox(0)}
+    
+    @always_inline # Discrete Antiox
+    fn __init__(a: Self.Antiox) -> Self:
+        return Self{s:0, a:a}
 
     #--- Explicit
-    @always_inline # Scalar + Antiox
-    fn __init__(s: Self.Coef, a: Self.Coef) -> Self:
+    @always_inline # Coefficients
+    fn __init__(s1: Self.Coef, s2: Self.Coef) -> Self:
+        return Self{s:s1, a:Self.Antiox(s2)}
+
+    @always_inline # Coef + Antiox
+    fn __init__(s: Self.Coef, a: Self.Antiox) -> Self:
         return Self{s:s, a:a}
     
     
     #------( Formatting )------#
     #
     fn __str__(self) -> String:
-        return String(self.s) + " + " + String(self.a) + symbol[sq]()
+        return String(self.s) + " + " + self.a.__str__()
 
     
     #------( Arithmetic )------#
@@ -56,6 +69,10 @@ struct IntH[sq: Int]:
     @always_inline # Hybrid + Coef
     fn __add__(self, other: Self.Fraction.Coef) -> Self.Fraction:
         return Self.Fraction(self) + other
+    
+    @always_inline # Hybrid + Antiox
+    fn __add__(self, other: Self.Antiox) -> Self:
+        return Self(self.s, self.a + other)
     
     @always_inline # Hybrid + Hybrid
     fn __add__(self, other: Self) -> Self:
@@ -77,6 +94,10 @@ struct IntH[sq: Int]:
     #
     @always_inline # Hybrid += Coef
     fn __iadd__(inout self, other: Self.Coef):
+        self = self + other
+    
+    @always_inline # Hybrid += Antiox
+    fn __iadd__(inout self, other: Self.Antiox):
         self = self + other
     
     @always_inline # Hybrid += Hybrid

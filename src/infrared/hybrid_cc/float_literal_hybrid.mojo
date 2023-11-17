@@ -1,21 +1,21 @@
 from infrared import symbol
-from .int_hybrid import IntH
+from .int_hybrid import IntHybrid
 
 
 
 
-#------------ Float Hybrid ------------#
+#------------ Float Literal Hybrid ------------#
 #---
 #---
 @register_passable("trivial")
-struct FloatH[sq: Int]:
+struct FloatLiteralHybrid[sq: Int]:
     
     #------[ Alias ]------#
     #
-    alias Coef  = FloatLiteral
+    alias Coef = FloatLiteral
 
-    alias Discrete  = IntH[sq]
-    alias Fraction  = Self
+    alias Discrete = IntHybrid[sq]
+    alias Fraction = Self
     
 
     #------< Data >------#

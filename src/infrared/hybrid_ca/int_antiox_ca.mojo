@@ -1,6 +1,7 @@
 from infrared import symbol
-from .int_hybrid import IntH_ca
-from .float_literal_hybrid import FloatH_ca
+from .int_hybrid_ca import IntHybrid_ca
+from .float_literal_hybrid_ca import FloatLiteralHybrid_ca
+from .float_literal_antiox_ca import FloatLiteralAntiox_ca
 
 
 
@@ -9,17 +10,17 @@ from .float_literal_hybrid import FloatH_ca
 #---
 #---       
 @register_passable("trivial")
-struct IntH_a[sq: Int]:
+struct IntAntiox_ca[sq: Int]:
     
     #------[ Alias ]------#
     #
     alias Coef  = Int
 
-    alias Hybrid  = IntH_ca[sq]
+    alias Hybrid  = IntHybrid_ca[sq]
     alias Antiox  = Self
 
     alias Discrete  = Self
-    alias Fraction  = FloatH_ca[sq].Antiox
+    alias Fraction  = FloatLiteralAntiox_ca[sq]
     
 
     #------< Data >------#
