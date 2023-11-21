@@ -1,11 +1,20 @@
 # get the symbol for formatting
-fn symbol[sq: Int]() -> String:
+fn symbol[square: IntLiteral]() -> String:
+    return symbol[DType.float64, SIMD[DType.float64,1](square)]()
+
+fn symbol[square: FloatLiteral]() -> String:
+    return symbol[DType.float64, SIMD[DType.float64,1](square)]()
+
+fn symbol[square: Int]() -> String:
+    return symbol[DType.float64, SIMD[DType.float64,1](square)]()
+
+fn symbol[type: DType, square: SIMD[type,1]]() -> String:
     @parameter
-    if sq == 1:
+    if square == 1:
         return "x"
-    elif sq == -1:
+    elif square == -1:
         return "i"
-    elif sq == 0:
+    elif square == 0:
         return "o"
     else:
-        return "[" + String(sq) + "]"
+        return "[" + String(square) + "]"
