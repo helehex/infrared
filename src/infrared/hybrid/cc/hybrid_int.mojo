@@ -1,10 +1,6 @@
 """
 A Hybrid type with Int scalar and antiox parts. Parameterized on the Antiox Squared.
 """
-from infrared import symbol
-from .hybrid_int_literal import HybridIntLiteral
-from .hybrid_float_literal import HybridFloatLiteral
-from .hybrid_simd import HybridSIMD
 
 alias HyplexInt = HybridInt[1]
 alias ComplexInt = HybridInt[-1]
@@ -19,10 +15,13 @@ alias ParaplexInt = HybridInt[0]
 #---
 @register_passable("trivial")
 struct HybridInt[square: Int = 1]:
-    
+    """
+
+    """
+
     #------[ Alias ]------#
     #
-    alias Coef = Int
+    alias Coef = Int """Represents an integer coefficient"""
 
 
     #------< Data >------#

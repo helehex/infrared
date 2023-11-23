@@ -1,10 +1,6 @@
 """
 SIMD Hybrid. Parameterized on the Antiox Squared.
 """
-from infrared import symbol
-from .hybrid_int_literal import HybridIntLiteral
-from .hybrid_float_literal import HybridFloatLiteral
-from .hybrid_int import HybridInt
 
 alias HyplexInt8   = HybridSIMD[DType.int8,1,1]
 alias HyplexUInt8  = HybridSIMD[DType.uint8,1,1]
@@ -180,9 +176,17 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     fn __add__(self, other: Self) -> Self:
         return Self(self.s + other.s, self.a + other.a)
 
-    # @always_inline # Hybrid + Hyplex
-    # fn __add__(self, other: Tuple[HybridSIMD[type,size,1]]) -> MultiplexSIMD[type,size]:
-    #     return MultiplexSIMD(self) + other
+    @always_inline # Hybrid + Hyplex
+    fn __add__(self, other: Tuple[HybridSIMD[type,size,1]]) -> MultiplexSIMD[type,size]:
+        return MultiplexSIMD(self) + other.get[0,HybridSIMD[type,size,1]]()
+
+    @always_inline # Hybrid + Hyplex
+    fn __add__(self, other: Tuple[HybridSIMD[type,size,-1]]) -> MultiplexSIMD[type,size]:
+        return MultiplexSIMD(self) + other.get[0,HybridSIMD[type,size,-1]]()
+
+    @always_inline # Hybrid + Hyplex
+    fn __add__(self, other: Tuple[HybridSIMD[type,size,0]]) -> MultiplexSIMD[type,size]:
+        return MultiplexSIMD(self) + other.get[0,HybridSIMD[type,size,0]]()
     
     
     #------( Reverse Arithmetic )------#
