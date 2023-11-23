@@ -10,10 +10,13 @@ alias HyplexFloatLiteral = HybridFloatLiteral
 alias ComplexFloatLiteral = HybridFloatLiteral[-1]
 alias ParaplexFloatLiteral = HybridFloatLiteral[0]
 
+fn constrain_square[a: FloatLiteral, b: Int]():
+    constrained[a == b, "mismatched 'square' parameter"]()
 
 
 
-#------------ Float Literal Hybrid ------------#
+
+#------------ Hybrid Float Literal ------------#
 #---
 #---
 @register_passable("trivial")
@@ -23,9 +26,9 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     #
     alias Coef = FloatLiteral
 
-    alias integral_square: Int = square.to_int()
-    alias is_integral_square: Bool = Float64(Self.integral_square) == square
-    alias constrain_integral_square: fn()->None = constrained[Self.is_integral_square,"cannot convert from integral square to floating square"]
+    # alias integral_square: Int = square.to_int()
+    # alias is_integral_square: Bool = Float64(Self.integral_square) == square
+    # alias constrain_integral_square: fn()->None = constrained[Self.is_integral_square,"cannot convert from integral square to floating square"]
     
 
     #------< Data >------#
@@ -54,14 +57,14 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         return Self{s:s, a:0}
 
     @always_inline # Hybrid
-    fn __init__(h: HybridIntLiteral[Self.integral_square]) -> Self:
-        Self.constrain_integral_square()
+    fn __init__(h: HybridIntLiteral[square.to_int()]) -> Self:
+        constrain_square[square, h.square]()
         return Self{s:h.s, a:h.a}
 
-    # @always_inline # Hybrid
-    # fn __init__(h: HybridInt[Self.integral_square]) -> Self:
-    #     Self.constrain_integral_square()
-    #     return Self{s:h.s, a:h.a}
+    @always_inline # Hybrid
+    fn __init__(h: HybridInt[square.to_int()]) -> Self:
+        constrain_square[square, h.square]()
+        return Self{s:h.s, a:h.a}
     
     #--- Explicit
     @always_inline # Scalar + Antiox
@@ -71,8 +74,8 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
 
     #------( To )------#
     #
-    fn to_int(self) -> HybridInt[Self.integral_square]:
-        return HybridInt[Self.integral_square](self.s.to_int(), self.a.to_int())
+    fn to_int(self) -> HybridInt[square.to_int()]:
+        return HybridInt[square.to_int()](self.s.to_int(), self.a.to_int())
 
     fn to_simd[type: DType, size: Int](self) -> HybridSIMD[type, size, square]:
         return HybridSIMD[type,size,square](self.s, self.a)
@@ -89,6 +92,10 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     @always_inline # Hybrid + Scalar
     fn __add__(self, other: Self.Coef) -> Self:
         return Self(self.s + other, self.a)
+
+    @always_inline # Hybrid + Scalar
+    fn __add__(self, other: IntLiteral) -> Self:
+        return self + Self.Coef(other)
     
     @always_inline # Hybrid + Hybrid
     fn __add__(self, other: Self) -> Self:
@@ -100,6 +107,10 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     @always_inline # Scalar + Hybrid
     fn __radd__(self, other: Self.Coef) -> Self:
         return Self(other + self.s, self.a)
+
+    @always_inline # Scalar + Hybrid
+    fn __radd__(self, other: IntLiteral) -> Self:
+        return Self.Coef(other) + self
 
     @always_inline # Hybrid + Hybrid
     fn __radd__(self, other: Self) -> Self:

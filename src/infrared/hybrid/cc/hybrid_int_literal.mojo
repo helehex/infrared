@@ -17,7 +17,7 @@ alias o: ParaplexIntLiteral = ParaplexIntLiteral(0,1)
 
 
 
-#------------ Int Literal Hybrid ------------#
+#------------ Hybrid Int Literal ------------#
 #---
 #---
 @register_passable("trivial")

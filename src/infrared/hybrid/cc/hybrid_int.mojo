@@ -13,8 +13,9 @@ alias ParaplexInt = HybridInt[0]
 
 
 
-#------------ Int Hybrid ------------#
+#------------ Hybrid Int ------------#
 #---
+#--- not really necessary, but thats ok, it does allow for Int/Int to give a SIMD[DType.float64,1], thats the only thing i can really see
 #---
 @register_passable("trivial")
 struct HybridInt[square: Int = 1]:
@@ -88,12 +89,12 @@ struct HybridInt[square: Int = 1]:
         return Self(other.s + self.s, other.a + self.a)
     
     
-    # #------( Internal Arithmetic )------#
-    # #
-    # @always_inline # Hybrid += Coef
-    # fn __iadd__(inout self, other: Self.Coef):
-    #     self = self + other
+    #------( Internal Arithmetic )------#
+    #
+    @always_inline # Hybrid += Coef
+    fn __iadd__(inout self, other: Self.Coef):
+        self = self + other
     
-    # @always_inline # Hybrid += Hybrid
-    # fn __iadd__(inout self, other: Self):
-    #     self = self + other
+    @always_inline # Hybrid += Hybrid
+    fn __iadd__(inout self, other: Self):
+        self = self + other
