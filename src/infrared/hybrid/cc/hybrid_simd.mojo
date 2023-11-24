@@ -90,6 +90,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     #--- Implicit
     @always_inline # Scalar
     fn __init__(*s: SIMD[type,1]) -> Self:
+        """Initializes a HybridSIMD from a variadic argument of scalars."""
         var result: Self = Self{s:s[0], a:0}
         for i in range(1, len(s)):
             result[i].s = s[i]
@@ -97,14 +98,17 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
 
     @always_inline # Scalar
     fn __init__(s: FloatLiteral) -> Self:
+        """Initializes a HybridSIMD from a FloatLiteral. Truncates if necessary."""
         return Self{s:s, a:0}
 
     @always_inline # Scalar
     fn __init__(s: Int) -> Self:
+        """Initializes a HybridSIMD from an Int."""
         return Self{s:s, a:0}
 
     @always_inline # Hybrid
     fn __init__(*h: HybridSIMD[type, 1, square]) -> Self:
+        """Initializes a HybridSIMD from a variadic argument of hybrid elements."""
         var result: Self = Self{s:h[0].s, a:h[0].a}
         for i in range(len(h)):
             result[i] = h[i]
@@ -112,22 +116,26 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
 
     @always_inline # Hybrid
     fn __init__(h: HybridIntLiteral) -> Self:
+        """Initializes a HybridSIMD from a HybridIntLiteral."""
         constrain_square[type, square, h.square]()
         return Self{s:h.s, a:h.a}
 
     @always_inline # Hybrid
     fn __init__(h: HybridFloatLiteral) -> Self:
+        """Initializes a HybridSIMD from a HybridFloatLiteral."""
         constrain_square[type, square, h.square]()
         return Self{s:h.s, a:h.a}
 
     @always_inline # Hybrid
     fn __init__(h: HybridInt) -> Self:
+        """Initializes a HybridSIMD from a HybridInt."""
         constrain_square[type, square, h.square]()
         return Self{s:h.s, a:h.a}
     
     #--- Explicit
     @always_inline # Scalar + Antiox
     fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
+        """Initializes a HybridSIMD from coefficients."""
         return Self{s:s, a:a}
 
 
@@ -167,8 +175,8 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         else:
             var result: String = ""
             @unroll
-            for index in range(size): result += self[index].__str__() + "\n"
-            return result
+            for index in range(size-1): result += self[index].__str__() + "\n"
+            return result + self[size-1].__str__()
 
 
     #------( Get / Set )------#
@@ -193,7 +201,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
 
         Args:
             idx: The index of the hybrid element.
-            item: The hybrid element to set.
+            item: The hybrid element to insert at position `idx`.
         """
         self.s[idx] = item.s
         self.a[idx] = item.a
@@ -201,7 +209,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline
     fn get_coef(self, idx: Int) -> Self.Coef:
         """
-        Gets an index based coefficient.
+        Gets a coefficient at an index.
 
             0: scalar
             1: antiox
@@ -219,17 +227,17 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline
     fn set_coef(inout self, idx: Int, coef: Self.Coef):
         """
-        Sets an index based coefficient.
+        Sets a coefficient at an index.
 
             0: scalar
             1: antiox
 
         Args:
             idx: The index of the coefficient.
-            coef: The new coefficient.
+            coef: The coefficient to insert at the given index.
         """
         if idx == 0: self.s = coef
-        if idx == 1: self.a = coef
+        elif idx == 1: self.a = coef
 
     
     #------( Arithmetic )------#
@@ -237,22 +245,10 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline # Hybrid + Scalar
     fn __add__(self, other: Self.Coef) -> Self:
         return Self(self.s + other, self.a)
-
-    @always_inline # Hybrid + Scalar
-    fn __add__(self, *other: SIMD[type,1]) -> Self: # maybe variadic could be replaced with union of Self.Coef
-        return self + Self.Coef(other[0])
-
-    @always_inline # Hybrid + Scalar
-    fn __add__(self, other: FloatLiteral) -> Self:
-        return self + Self.Coef(other)
-
-    @always_inline # Hybrid + Scalar
-    fn __add__(self, other: Int) -> Self:
-        return self + Self.Coef(other)
     
     @always_inline # Hybrid + Hybrid
-    fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s, self.a + other.a)
+    fn __add__(self, *other: Self) -> Self:
+        return Self(self.s + other[0].s, self.a + other[0].a)
 
     @always_inline # Hybrid + Hyplex
     fn __add__(self, other: Tuple[HybridSIMD[type,size,1]]) -> MultiplexSIMD[type,size]:
@@ -273,41 +269,17 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     fn __radd__(self, other: Self.Coef) -> Self:
         return Self(other + self.s, self.a)
 
-    @always_inline # Scalar + Hybrid
-    fn __radd__(self, *other: SIMD[type,1]) -> Self:
-        return Self.Coef(other[0]) + self
-
-    @always_inline # Scalar + Hybrid
-    fn __radd__(self, other: FloatLiteral) -> Self:
-        return Self.Coef(other) + self
-
-    @always_inline # Scalar + Hybrid
-    fn __radd__(self, other: Int) -> Self:
-        return Self.Coef(other) + self
-
     @always_inline # Hybrid + Hybrid
-    fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s, other.a + self.a)
+    fn __radd__(self, *other: Self) -> Self:
+        return Self(other[0].s + self.s, other[0].a + self.a)
     
     
-    #------( Internal Arithmetic )------#
+    #------( In Place Arithmetic )------#
     #
     @always_inline # Hybrid += Scalar
     fn __iadd__(inout self, other: Self.Coef):
         self = self + other
-
-    @always_inline # Hybrid += Scalar
-    fn __iadd__(inout self, *other: SIMD[type,1]):
-        self = self + other[0]
-
-    @always_inline # Hybrid += Scalar
-    fn __iadd__(inout self, other: FloatLiteral):
-        self = self + other
-
-    @always_inline # Hybrid += Scalar
-    fn __iadd__(inout self, other: Int):
-        self = self + other
     
     @always_inline # Hybrid += Hybrid
-    fn __iadd__(inout self, other: Self):
-        self = self + other
+    fn __iadd__(inout self, *other: Self):
+        self = self + other[0]

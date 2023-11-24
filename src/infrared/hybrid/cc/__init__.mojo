@@ -30,6 +30,8 @@ fn static_test_cc():
     let simd: SIMD[simd_type,simd_size] = SIMD[simd_type,simd_size](2)
     var hybrid_simd: HybridSIMD[simd_type,simd_size] = HybridSIMD[simd_type,simd_size](2)
 
+    var multiplex: Multiplex64 = Multiplex64(2)
+
 
     #------ hybrid_int_literal ------#
     #
@@ -151,6 +153,20 @@ fn static_test_cc():
     hybrid_simd += simd
     hybrid_simd += hybrid_simd
 
+    hybrid_simd[0] = hybrid_int_literal
+
+
+    #------ multiplex ------#
+    #
+    multiplex = Hyplex64(1,1) + Complex64(1,1) + Paraplex64(1,1)
+    multiplex = multiplex + Hyplex64(1,1)
+    multiplex = multiplex + Complex64(1,1)
+    multiplex = multiplex + int_literal
+    multiplex = multiplex + float_literal
+    multiplex = multiplex + int
+    multiplex = multiplex + float
+    #multiplex = multiplex + simd
+
 
     #--- print ---#
     #
@@ -158,5 +174,8 @@ fn static_test_cc():
     print(hybrid_float_literal.__str__())
     print(hybrid_int.__str__())
     print(hybrid_float.__str__())
+    print()
     print(hybrid_simd.__str__())
-    print((Hyplex32(1,1) + Complex32(1,1) + Paraplex32(1,1)).__str__())
+    print(hybrid_simd[0].get_coef(1))
+    print()
+    print(multiplex.__str__())

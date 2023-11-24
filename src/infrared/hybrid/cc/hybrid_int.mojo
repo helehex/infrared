@@ -48,11 +48,13 @@ struct HybridInt[square: Int = 1]:
     #--- Implicit
     @always_inline # Scalar
     fn __init__(h: HybridIntLiteral[square]) -> Self:
+        """Initializes a HybridInt from a HybridIntLiteral."""
         return Self{s:h.s, a:h.a} 
 
     #--- Explicit
     @always_inline # Scalar + Antiox
     fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
+        """Initializes a HybridInt from coefficients."""
         return Self{s:s, a:a}
     
     
@@ -87,7 +89,7 @@ struct HybridInt[square: Int = 1]:
     @always_inline
     fn get_coef(self, idx: Int) -> Self.Coef:
         """
-        Gets an index based coefficient.
+        Gets a coefficient at an index.
 
             0: scalar
             1: antiox
@@ -105,17 +107,17 @@ struct HybridInt[square: Int = 1]:
     @always_inline
     fn set_coef(inout self, idx: Int, coef: Self.Coef):
         """
-        Sets an index based coefficient.
+        Sets a coefficient at an index.
 
             0: scalar
             1: antiox
 
         Args:
             idx: The index of the coefficient.
-            coef: The new coefficient.
+            coef: The coefficient to insert at the given index.
         """
         if idx == 0: self.s = coef
-        if idx == 1: self.a = coef
+        elif idx == 1: self.a = coef
 
     
     #------( Arithmetic )------#
@@ -140,7 +142,7 @@ struct HybridInt[square: Int = 1]:
         return Self(other.s + self.s, other.a + self.a)
     
     
-    #------( Internal Arithmetic )------#
+    #------( In Place Arithmetic )------#
     #
     @always_inline # Hybrid += Scalar
     fn __iadd__(inout self, other: Self.Coef):

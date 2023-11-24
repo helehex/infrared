@@ -49,6 +49,7 @@ struct HybridIntLiteral[square: Int = 1]:
     #
     @always_inline # Scalar + Antiox
     fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
+        """Initializes a HybridIntLiteral from coefficients."""
         return Self{s:s, a:a}
 
 
@@ -83,7 +84,7 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline
     fn get_coef(self, idx: Int) -> Self.Coef:
         """
-        Gets an index based coefficient.
+        Gets a coefficient at an index.
 
             0: scalar
             1: antiox
@@ -101,17 +102,17 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline
     fn set_coef(inout self, idx: Int, coef: Self.Coef):
         """
-        Sets an index based coefficient.
+        Sets a coefficient at an index.
 
             0: scalar
             1: antiox
 
         Args:
             idx: The index of the coefficient.
-            coef: The new coefficient.
+            coef: The coefficient to insert at the given index.
         """
         if idx == 0: self.s = coef
-        if idx == 1: self.a = coef
+        elif idx == 1: self.a = coef
 
     
     #------( Arithmetic )------#
@@ -132,7 +133,7 @@ struct HybridIntLiteral[square: Int = 1]:
         return Self(other + self.s, self.a)
     
     
-    #------( Internal Arithmetic )------#
+    #------( In Place Arithmetic )------#
     #
     @always_inline # Hybrid += Scalar
     fn __iadd__(inout self, other: Self.Coef):
