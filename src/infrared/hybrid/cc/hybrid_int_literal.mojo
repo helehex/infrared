@@ -81,12 +81,12 @@ struct HybridIntLiteral[square: Int = 1]:
         return Self(other + self.s, self.a)
     
     
-    # #------( Internal Arithmetic )------#
-    # #
-    # @always_inline # Hybrid += Coef
-    # fn __iadd__(inout self, other: Self.Coef):
-    #     self = self + other
+    #------( Internal Arithmetic )------#
+    #
+    @always_inline # Hybrid += Scalar
+    fn __iadd__(inout self, other: Self.Coef):
+        self = self + other
     
-    # @always_inline # Hybrid += Hybrid
-    # fn __iadd__(inout self, other: Self):
-    #     self = self + other
+    @always_inline # Hybrid += Hybrid
+    fn __iadd__(inout self, other: Self):
+        self = self + other

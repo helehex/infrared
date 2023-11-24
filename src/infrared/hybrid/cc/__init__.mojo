@@ -6,52 +6,67 @@ from .multiplex_simd import *
 from infrared import symbol
 
 
-
+alias simd_type: DType = DType.float64
+alias simd_size = 4
 
 fn static_test_cc():
 
-    alias int_literal: IntLiteral = IntLiteral(2)
-    alias hybrid_int_literal: HybridIntLiteral = HybridIntLiteral(2,1)
+    let int_literal: IntLiteral = IntLiteral(2)
+    var hybrid_int_literal: HybridIntLiteral = HybridIntLiteral(2)
 
-    alias float_literal: FloatLiteral = FloatLiteral(2)
-    alias hybrid_float_literal: HybridFloatLiteral = HybridFloatLiteral(2,1)
+    let float_literal: FloatLiteral = FloatLiteral(2)
+    var hybrid_float_literal: HybridFloatLiteral = HybridFloatLiteral(2)
 
     let int: Int = Int(2)
     var hybrid_int: HybridInt = HybridInt(2,1)
 
-    let float: SIMD[DType.float64,1] = SIMD[DType.float64,1](2)
-    let hybrid_float: HybridSIMD[DType.float64,1] = HybridSIMD[DType.float64,1](2,1)
+    let float: SIMD[simd_type,1] = SIMD[simd_type,1](2)
+    let hybrid_float: HybridSIMD[simd_type,1] = HybridSIMD[simd_type,1](2)
 
-    alias simd_size = 4
-    let simd: SIMD[DType.float64,simd_size] = SIMD[DType.float64,simd_size](2)
-    var hybrid_simd: HybridSIMD[DType.float64,simd_size] = HybridSIMD[DType.float64,simd_size](2,1)
+    let simd: SIMD[simd_type,simd_size] = SIMD[simd_type,simd_size](2)
+    var hybrid_simd: HybridSIMD[simd_type,simd_size] = HybridSIMD[simd_type,simd_size](2)
 
 
     #------ hybrid_int_literal ------#
     #
-    alias hybrid_int_literal_a: HybridIntLiteral = int_literal
-    alias hybrid_int_literal_b: HybridIntLiteral = hybrid_int_literal
+    hybrid_int_literal = int_literal
+    hybrid_int_literal = HybridIntLiteral(2,2)
 
-    alias hybrid_int_literal_1 = hybrid_int_literal + int_literal
-    alias hybrid_int_literal_2 = int_literal + hybrid_int_literal
-    alias hybrid_int_literal_3 = hybrid_int_literal + hybrid_int_literal
+    hybrid_int_literal = hybrid_int_literal + int_literal
+    hybrid_int_literal = int_literal + hybrid_int_literal
+
+    hybrid_int_literal = hybrid_int_literal + hybrid_int_literal
+
+    hybrid_int_literal += int_literal
+    hybrid_int_literal += hybrid_int_literal
+    
+
     #alias hybrid_int_literal_ = hybrid_int_literal + i
 
 
     #------ hybrid_float_literal ------#
     #
-    alias hybrid_float_literal_a = int_literal
-    alias hybrid_float_literal_b = hybrid_int_literal
-    alias hybrid_float_literal_c = float_literal
-    alias hybrid_float_literal_d = hybrid_float_literal
+    hybrid_float_literal = int_literal
+    hybrid_float_literal = hybrid_int_literal
+    hybrid_float_literal = float_literal
+    hybrid_float_literal = HybridFloatLiteral(2,2)
 
-    alias hybrid_float_literal_1 = hybrid_float_literal + int_literal
-    alias hybrid_float_literal_2 = int_literal + hybrid_float_literal
-    alias hybrid_float_literal_3 = hybrid_float_literal + hybrid_int_literal
-    alias hybrid_float_literal_4 = hybrid_int_literal + hybrid_float_literal
-    alias hybrid_float_literal_5 = hybrid_float_literal + float_literal
-    alias hybrid_float_literal_6 = float_literal + hybrid_float_literal
-    alias hybrid_float_literal_7 = hybrid_float_literal + hybrid_float_literal
+    hybrid_float_literal = hybrid_float_literal + int_literal
+    hybrid_float_literal = int_literal + hybrid_float_literal
+
+    hybrid_float_literal = hybrid_float_literal + hybrid_int_literal
+    hybrid_float_literal = hybrid_int_literal + hybrid_float_literal
+
+    hybrid_float_literal = hybrid_float_literal + float_literal
+    hybrid_float_literal = float_literal + hybrid_float_literal
+
+    hybrid_float_literal = hybrid_float_literal + hybrid_float_literal
+
+    hybrid_float_literal += int_literal
+    hybrid_float_literal += hybrid_int_literal
+    hybrid_float_literal += float_literal
+    hybrid_float_literal += hybrid_float_literal
+
     #alias hybrid_float_literal_ = hybrid_float_literal + i
 
 
@@ -60,6 +75,8 @@ fn static_test_cc():
     hybrid_int = int_literal
     hybrid_int = hybrid_int_literal
     hybrid_int = int
+    hybrid_int = HybridInt(2,2)
+
 
     hybrid_int = hybrid_int + int_literal
     hybrid_int = int_literal + hybrid_int
@@ -75,6 +92,7 @@ fn static_test_cc():
     hybrid_int += int_literal
     hybrid_int += hybrid_int_literal
     hybrid_int += int
+    hybrid_int += hybrid_int
 
 
     #------ hybrid_simd ------#
@@ -87,6 +105,7 @@ fn static_test_cc():
     hybrid_simd = hybrid_int
     hybrid_simd = float
     hybrid_simd = hybrid_float
+    hybrid_simd = HybridSIMD[simd_type,simd_size](2,2)
 
     hybrid_simd = hybrid_simd + int_literal
     hybrid_simd = int_literal + hybrid_simd
@@ -125,6 +144,8 @@ fn static_test_cc():
     hybrid_simd += hybrid_int
     hybrid_simd += float
     hybrid_simd += hybrid_float
+    hybrid_simd += simd
+    hybrid_simd += hybrid_simd
 
 
     #--- print ---#

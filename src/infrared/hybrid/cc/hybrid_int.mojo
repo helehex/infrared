@@ -1,5 +1,5 @@
 """
-A Hybrid type with Int scalar and antiox parts. Parameterized on the Antiox Squared.
+Implements a hybrid integer type.
 """
 
 alias HyplexInt = HybridInt[1]
@@ -16,18 +16,30 @@ alias ParaplexInt = HybridInt[0]
 @register_passable("trivial")
 struct HybridInt[square: Int = 1]:
     """
+    A hybrid integer type with scalar and antiox parts.
 
+    Parameterized on the antiox squared.
+
+        antiox*antiox = square
+    
+    Parameters:
+        square: Equals the antiox squared.
     """
 
     #------[ Alias ]------#
     #
-    alias Coef = Int """Represents an integer coefficient"""
+    alias Coef = Int
+    """Represents an integer coefficient"""
 
 
     #------< Data >------#
     #
+    
     var s: Self.Coef
+    """The scalar part."""
+
     var a: Self.Coef
+    """The antiox part."""
     
     
     #------( Initialize )------#
@@ -90,7 +102,7 @@ struct HybridInt[square: Int = 1]:
     
     #------( Internal Arithmetic )------#
     #
-    @always_inline # Hybrid += Coef
+    @always_inline # Hybrid += Scalar
     fn __iadd__(inout self, other: Self.Coef):
         self = self + other
     
