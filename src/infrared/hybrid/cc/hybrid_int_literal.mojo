@@ -82,7 +82,7 @@ struct HybridIntLiteral[square: Int = 1]:
     #------( Get / Set )------#
     #
     @always_inline
-    fn get_coef(self, idx: Int) -> Self.Coef:
+    fn __getitem__(self, idx: Int) -> Self.Coef:
         """
         Gets a coefficient at an index.
 
@@ -100,7 +100,7 @@ struct HybridIntLiteral[square: Int = 1]:
         return 0
     
     @always_inline
-    fn set_coef(inout self, idx: Int, coef: Self.Coef):
+    fn __setitem__(inout self, idx: Int, coef: Self.Coef):
         """
         Sets a coefficient at an index.
 

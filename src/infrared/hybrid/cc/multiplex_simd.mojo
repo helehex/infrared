@@ -25,6 +25,8 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     Represents a multiplex simd type.
     
     Multiplex is the composition of hyplex, complex and paraplex numbers.
+
+    Coefficients take precedence as the major axis istead of the SIMD axis.
     
     Parameters:
         type: The data type of MultiplexSIMD vector elements.
@@ -55,7 +57,29 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     #------( Initialize )------#
     #
-    #--- Implicit
+    @always_inline # Coefficients
+    fn __init__(s: Self.Coef = 0, x: Self.Coef = 0, i: Self.Coef = 0, o: Self.Coef = 0) -> Self:
+        """Initializes a MultiplexSIMD from coefficients."""
+        return Self{s:s, x:x, i:i, o:o}
+
+    @always_inline # Coefficients
+    fn __init__(*c: SIMD[type,1]) -> Self:
+        """Initializes a MultiplexSIMD from a variadic argument of scalars."""
+        if len(c) == 1: return Self{s:c[0], x:0, i:0, o:0}
+        elif len(c) == 2: return Self{s:c[0], x:c[1], i:0, o:0}
+        elif len(c) == 3: return Self{s:c[0], x:c[1], i:c[2], o:0}
+        else: return Self{s:c[0], x:c[1], i:c[2], o:c[3]}
+    
+    @always_inline # Scalar
+    fn __init__(s: FloatLiteral) -> Self:
+        """Initializes a MultiplexSIMD from a FloatLiteral. Truncates if necessary."""
+        return Self{s:s, x:0, i:0, o:0}
+
+    @always_inline # Scalar
+    fn __init__(s: Int) -> Self:
+        """Initializes a MultiplexSIMD from an Int."""
+        return Self{s:s, x:0, i:0, o:0}
+
     @always_inline # Hybrid
     fn __init__[square: SIMD[type,1]](h: HybridSIMD[type,size,square]) -> Self:
         """Initializes a MultiplexSIMD from a HybridSIMD."""
@@ -67,11 +91,14 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
             constrained[False, "the hybrid is not a subalgebra of multiplex"]()
             return Self()
 
-    #--- Explicit
-    @always_inline # Scalar + x + i + o
-    fn __init__(s: Self.Coef = 0, x: Self.Coef = 0, i: Self.Coef = 0, o: Self.Coef = 0) -> Self:
-        """Initializes a MultiplexSIMD from coefficients."""
-        return Self{s:s, x:x, i:i, o:o}
+    @always_inline # Multiplex
+    fn __init__(*m: MultiplexSIMD[type,1]) -> Self:
+        """Initializes a MultiplexSIMD from a variadic argument of multiplex elements."""
+        var result: Self = Self{s:m[0].s, x:m[0].x, i:m[0].i, o:m[0].o}
+        for i in range(len(m)):
+            result.set_multiplex(i, m[i])
+        return result 
+
 
 
     #------( To )------#
@@ -104,41 +131,14 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         else:
             var result: String = ""
             @unroll
-            for index in range(size-1): result += self[index].__str__() + "\n"
-            return result + self[size-1].__str__()
+            for index in range(size-1): result += self.get_multiplex(index).__str__() + "\n"
+            return result + self.get_multiplex(size-1).__str__()
 
 
     #------( Get / Set )------#
     #
     @always_inline
-    fn __getitem__(self, idx: Int) -> MultiplexSIMD[type,1]:
-        """
-        Gets a multiplex element from the vector.
-
-        Args:
-            idx: The index of the multiplex element.
-
-        Returns:
-            The multiplex element at position `idx`.
-        """
-        return MultiplexSIMD[type,1](self.s[idx], self.x[idx], self.i[idx], self.o[idx])
-    
-    @always_inline
-    fn __setitem__(inout self, idx: Int, item: MultiplexSIMD[type,1]):
-        """
-        Sets a multiplex element in the vector.
-
-        Args:
-            idx: The index of the multiplex element.
-            item: The multiplex element to insert at position `idx`.
-        """
-        self.s[idx] = item.s
-        self.x[idx] = item.x
-        self.i[idx] = item.i
-        self.o[idx] = item.o
-
-    @always_inline
-    fn get_coef(self, idx: Int) -> Self.Coef:
+    fn __getitem__(self, idx: Int) -> Self.Coef:
         """
         Gets a coefficient at an index.
 
@@ -160,7 +160,7 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         return 0
     
     @always_inline
-    fn set_coef(inout self, idx: Int, coef: Self.Coef):
+    fn __setitem__(inout self, idx: Int, coef: Self.Coef):
         """
         Sets a coefficient at an index.
 
@@ -178,11 +178,38 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         elif idx == 2: self.i = coef
         elif idx == 3: self.o = coef
 
+    @always_inline
+    fn get_multiplex(self, idx: Int) -> MultiplexSIMD[type,1]:
+        """
+        Gets a multiplex element from the SIMD vector axis.
+
+        Args:
+            idx: The index of the multiplex element.
+
+        Returns:
+            The multiplex element at position `idx`.
+        """
+        return MultiplexSIMD[type,1](self.s[idx], self.x[idx], self.i[idx], self.o[idx])
+    
+    @always_inline
+    fn set_multiplex(inout self, idx: Int, item: MultiplexSIMD[type,1]):
+        """
+        Sets a multiplex element in the SIMD vector axis.
+
+        Args:
+            idx: The index of the multiplex element.
+            item: The multiplex element to insert at position `idx`.
+        """
+        self.s[idx] = item.s
+        self.x[idx] = item.x
+        self.i[idx] = item.i
+        self.o[idx] = item.o
+
 
     #------( Arithmetic )------#
     #
     fn __add__(self, other: Self.Coef) -> Self:
-        return Self(self.s + other[0], self.x, self.i, self.o)
+        return Self(self.s + other, self.x, self.i, self.o)
 
     fn __add__(self, *other: HybridSIMD[type,size,1]) -> Self:
         return Self(self.s + other[0].s, self.x + other[0].a, self.i, self.o)
@@ -193,8 +220,8 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     fn __add__(self, *other: HybridSIMD[type,size,0]) -> Self:
         return Self(self.s + other[0].s, self.x, self.i, self.o + other[0].a)
 
-    fn __add__(self, other: Self) -> Self:
-        return Self(self.s + other.s, self.x + other.x, self.i + other.i, self.o + other.o)
+    fn __add__(self, *other: Self) -> Self:
+        return Self(self.s + other[0].s, self.x + other[0].x, self.i + other[0].i, self.o + other[0].o)
 
     
     # #------( Reverse Arithmetic )------#

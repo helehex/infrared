@@ -52,6 +52,8 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     """
     Represents a hybrid small vector backed by hardware vector elements, with scalar and antiox parts.
 
+    Coefficients take precedence as the major axis istead of the SIMD axis.
+
     SIMD allows a single instruction to be executed across the multiple data elements of the vector.
 
     Parameterized on the antiox squared.
@@ -87,14 +89,16 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     
     #------( Initialize )------#
     #
-    #--- Implicit
-    @always_inline # Scalar
-    fn __init__(*s: SIMD[type,1]) -> Self:
-        """Initializes a HybridSIMD from a variadic argument of scalars."""
-        var result: Self = Self{s:s[0], a:0}
-        for i in range(1, len(s)):
-            result[i].s = s[i]
-        return result
+    @always_inline # Coefficients
+    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
+        """Initializes a HybridSIMD from coefficients."""
+        return Self{s:s, a:a}
+
+    @always_inline # Coefficients
+    fn __init__(*c: SIMD[type,1]) -> Self:
+        """Initializes a HybridSIMD from a variadic argument of coefficients."""
+        if len(c) == 1: return Self{s:c[0], a:0}
+        else: return Self{s:c[0], a:c[1]}
 
     @always_inline # Scalar
     fn __init__(s: FloatLiteral) -> Self:
@@ -111,7 +115,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         """Initializes a HybridSIMD from a variadic argument of hybrid elements."""
         var result: Self = Self{s:h[0].s, a:h[0].a}
         for i in range(len(h)):
-            result[i] = h[i]
+            result.set_hybrid(i, h[i])
         return result
 
     @always_inline # Hybrid
@@ -131,12 +135,6 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         """Initializes a HybridSIMD from a HybridInt."""
         constrain_square[type, square, h.square]()
         return Self{s:h.s, a:h.a}
-    
-    #--- Explicit
-    @always_inline # Scalar + Antiox
-    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
-        """Initializes a HybridSIMD from coefficients."""
-        return Self{s:s, a:a}
 
 
     #------( To )------#
@@ -175,39 +173,14 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         else:
             var result: String = ""
             @unroll
-            for index in range(size-1): result += self[index].__str__() + "\n"
-            return result + self[size-1].__str__()
+            for index in range(size-1): result += self.get_hybrid(index).__str__() + "\n"
+            return result + self.get_hybrid(size-1).__str__()
 
 
     #------( Get / Set )------#
     #
     @always_inline
-    fn __getitem__(self, idx: Int) -> HybridSIMD[type,1,square]:
-        """
-        Gets a hybrid element from the vector.
-
-        Args:
-            idx: The index of the hybrid element.
-
-        Returns:
-            The hybrid element at position `idx`.
-        """
-        return HybridSIMD[type,1,square](self.s[idx], self.a[idx])
-    
-    @always_inline
-    fn __setitem__(inout self, idx: Int, item: HybridSIMD[type,1,square]):
-        """
-        Sets a hybrid element in the vector.
-
-        Args:
-            idx: The index of the hybrid element.
-            item: The hybrid element to insert at position `idx`.
-        """
-        self.s[idx] = item.s
-        self.a[idx] = item.a
-
-    @always_inline
-    fn get_coef(self, idx: Int) -> Self.Coef:
+    fn __getitem__(self, idx: Int) -> Self.Coef:
         """
         Gets a coefficient at an index.
 
@@ -225,7 +198,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return 0
     
     @always_inline
-    fn set_coef(inout self, idx: Int, coef: Self.Coef):
+    fn __setitem__(inout self, idx: Int, coef: Self.Coef):
         """
         Sets a coefficient at an index.
 
@@ -238,6 +211,31 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         """
         if idx == 0: self.s = coef
         elif idx == 1: self.a = coef
+
+    @always_inline
+    fn get_hybrid(self, idx: Int) -> HybridSIMD[type,1,square]:
+        """
+        Gets a hybrid element from the SIMD vector axis.
+
+        Args:
+            idx: The index of the hybrid element.
+
+        Returns:
+            The hybrid element at position `idx`.
+        """
+        return HybridSIMD[type,1,square](self.s[idx], self.a[idx])
+    
+    @always_inline
+    fn set_hybrid(inout self, idx: Int, item: HybridSIMD[type,1,square]):
+        """
+        Sets a hybrid element in the SIMD vector axis.
+
+        Args:
+            idx: The index of the hybrid element.
+            item: The hybrid element to insert at position `idx`.
+        """
+        self.s[idx] = item.s
+        self.a[idx] = item.a
 
     
     #------( Arithmetic )------#

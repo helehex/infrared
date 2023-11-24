@@ -30,7 +30,7 @@ fn static_test_cc():
     let simd: SIMD[simd_type,simd_size] = SIMD[simd_type,simd_size](2)
     var hybrid_simd: HybridSIMD[simd_type,simd_size] = HybridSIMD[simd_type,simd_size](2)
 
-    var multiplex: Multiplex64 = Multiplex64(2)
+    var multiplex: MultiplexSIMD[simd_type,simd_size] = MultiplexSIMD[simd_type,simd_size](2)
 
 
     #------ hybrid_int_literal ------#
@@ -73,7 +73,7 @@ fn static_test_cc():
     hybrid_float_literal += float_literal
     hybrid_float_literal += hybrid_float_literal
 
-    #alias hybrid_float_literal_ = hybrid_float_literal + i
+    #hybrid_float_literal = hybrid_float_literal + i
 
 
     #------ hybrid_int ------#
@@ -111,7 +111,7 @@ fn static_test_cc():
     hybrid_simd = hybrid_int
     hybrid_simd = float
     hybrid_simd = hybrid_float
-    hybrid_simd = HybridSIMD[simd_type,simd_size](2,2)
+    hybrid_simd = HybridSIMD[simd_type,simd_size].__init__(float,float)
 
     hybrid_simd = hybrid_simd + int_literal
     hybrid_simd = int_literal + hybrid_simd
@@ -153,19 +153,32 @@ fn static_test_cc():
     hybrid_simd += simd
     hybrid_simd += hybrid_simd
 
-    hybrid_simd[0] = hybrid_int_literal
+    hybrid_simd.set_hybrid(0, hybrid_int_literal)
 
 
     #------ multiplex ------#
     #
     multiplex = Hyplex64(1,1) + Complex64(1,1) + Paraplex64(1,1)
+
+    # multiplex = int_literal
+    # multiplex = hybrid_int_literal
+    # multiplex = float_literal
+    # multiplex = hybrid_float_literal
+    # multiplex = int
+    # multiplex = hybrid_int
+    # multiplex = float
+    # multiplex = hybrid_float
+    # multiplex = simd
+    # multiplex = hybrid_simd
+
+    
     multiplex = multiplex + Hyplex64(1,1)
     multiplex = multiplex + Complex64(1,1)
     multiplex = multiplex + int_literal
     multiplex = multiplex + float_literal
     multiplex = multiplex + int
     multiplex = multiplex + float
-    #multiplex = multiplex + simd
+    multiplex = multiplex + simd
 
 
     #--- print ---#
@@ -176,6 +189,6 @@ fn static_test_cc():
     print(hybrid_float.__str__())
     print()
     print(hybrid_simd.__str__())
-    print(hybrid_simd[0].get_coef(1))
+    print(hybrid_simd[1][0])
     print()
     print(multiplex.__str__())
