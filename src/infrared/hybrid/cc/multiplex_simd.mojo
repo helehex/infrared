@@ -26,10 +26,7 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     #------( Initialize )------#
     #
-    @always_inline # Zero
-    fn __init__() -> Self:
-        return Self{s:0, x:0, i:0, o:0}
-
+    #--- Implicit
     @always_inline # Hybrid
     fn __init__[square: SIMD[type,1]](h: HybridSIMD[type,size,square]) -> Self:
         constrain_square[h.type, h.square]()
@@ -39,13 +36,17 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         elif h.square == 0: return Self{s:h.s, x:0, i:0, o:h.a}
         else: return Self()
 
+    #--- Explicit
     @always_inline # Scalar + x + i + o
-    fn __init__(s: Self.Coef, x: Self.Coef, i: Self.Coef, o: Self.Coef) -> Self:
+    fn __init__(s: Self.Coef = 0, x: Self.Coef = 0, i: Self.Coef = 0, o: Self.Coef = 0) -> Self:
         return Self{s:s, x:x, i:i, o:o}
 
 
     #------( Formatting )------#
     #
+    fn to_string(self) -> String:
+        return self.__str__()
+
     fn __str__(self) -> String:
         @parameter
         if size == 1:

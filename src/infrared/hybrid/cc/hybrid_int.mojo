@@ -1,5 +1,5 @@
 """
-Implements a hybrid integer type.
+Implements a hybrid integer type, parameterized on the antiox squared.
 """
 
 alias HyplexInt = HybridInt[1]
@@ -16,20 +16,21 @@ alias ParaplexInt = HybridInt[0]
 @register_passable("trivial")
 struct HybridInt[square: Int = 1]:
     """
-    A hybrid integer type with scalar and antiox parts.
+    Represent a hybrid integer type with scalar and antiox parts.
 
     Parameterized on the antiox squared.
 
-        antiox*antiox = square
+        square = antiox*antiox
     
     Parameters:
-        square: Equals the antiox squared.
+        square: The value of the antiox unit squared.
     """
+
 
     #------[ Alias ]------#
     #
     alias Coef = Int
-    """Represents an integer coefficient"""
+    """Represents an integer coefficient."""
 
 
     #------< Data >------#
@@ -44,38 +45,77 @@ struct HybridInt[square: Int = 1]:
     
     #------( Initialize )------#
     #
-    @always_inline # Zero
-    fn __init__() -> Self:
-        return Self{s:0, a:0}
-    
     #--- Implicit
-    @always_inline # Scalar
-    fn __init__(s: Self.Coef) -> Self:
-        return Self{s:s, a:0}
-
     @always_inline # Scalar
     fn __init__(h: HybridIntLiteral[square]) -> Self:
         return Self{s:h.s, a:h.a} 
 
     #--- Explicit
     @always_inline # Scalar + Antiox
-    fn __init__(s: Self.Coef, a: Self.Coef) -> Self:
+    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
         return Self{s:s, a:a}
     
     
     #------( To )------#
     #
-    fn to_int(self) -> Self:
-        return self
+    @always_inline
+    fn __bool__(self) -> Bool:
+        """Returns true when there are any non-zero parts."""
+        return self.s == 0 and self.a == 0
 
-    fn to_simd[type: DType, size: Int](self) -> HybridSIMD[type, size, square]:
-        return HybridSIMD[type,size,square](self.s, self.a)
+    @always_inline
+    fn to_tuple(self) -> StaticTuple[2, Self.Coef]:
+        """Creates a non-algebraic StaticTuple from the hybrids parts."""
+        return StaticTuple[2, Self.Coef](self.s, self.a)
 
 
     #------( Formatting )------#
     #
+    @always_inline
+    fn to_string(self) -> String:
+        """Formats the hybrid as a String."""
+        return self.__str__()
+
+    @always_inline
     fn __str__(self) -> String:
+        """Formats the hybrid as a String."""
         return String(self.s) + " + " + String(self.a) + symbol[square]()
+
+
+    #------( Get / Set )------#
+    #
+    @always_inline
+    fn get_coef(self, idx: Int) -> Self.Coef:
+        """
+        Gets an index based coefficient.
+
+            0: scalar
+            1: antiox
+
+        Args:
+            idx: The index of the coefficient.
+
+        Returns:
+            The coefficient at the given index.
+        """
+        if idx == 0: return self.s
+        if idx == 1: return self.a
+        return 0
+    
+    @always_inline
+    fn set_coef(inout self, idx: Int, coef: Self.Coef):
+        """
+        Sets an index based coefficient.
+
+            0: scalar
+            1: antiox
+
+        Args:
+            idx: The index of the coefficient.
+            coef: The new coefficient.
+        """
+        if idx == 0: self.s = coef
+        if idx == 1: self.a = coef
 
     
     #------( Arithmetic )------#

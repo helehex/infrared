@@ -1,3 +1,7 @@
+"""
+Implements Hyplex, Complex, Paraplex, and Multiplex types, backed by Hybrid.
+"""
+
 from .hybrid_int_literal import *
 from .hybrid_float_literal import *
 from .hybrid_int import *
@@ -81,11 +85,11 @@ fn static_test_cc():
     hybrid_int = hybrid_int + int_literal
     hybrid_int = int_literal + hybrid_int
 
-    hybrid_int = hybrid_int + int
-    hybrid_int = int + hybrid_int
-
     hybrid_int = hybrid_int + hybrid_int_literal
     hybrid_int = hybrid_int_literal + hybrid_int
+
+    hybrid_int = hybrid_int + int
+    hybrid_int = int + hybrid_int
 
     hybrid_int = hybrid_int + hybrid_int
 
