@@ -75,16 +75,8 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     alias Lane = HybridSIMD[type,1,square]
     """Represents a single SIMD vector element."""
 
-    alias Unital = HybridSIMD[type,size,sign[type,1,square]()]
-    """The normalized HybridSIMD."""
-
-    alias unital_square = sign[type,1,square]()
-    """The normalized square."""
-
-    # alias HybridInt = HybridInt[Self.integral_square]
-    # alias integral_square: Int = square.to_int()
-    # alias is_integral_square: Bool = SIMD[type,1](Self.integral_square) == square
-    # alias constrain_integral_square: fn()->None = constrained[Self.is_integral_square,"cannot convert from integral square to floating square"]  
+    alias unital_square: SIMD[type,1] = sign[type,1,square]()
+    """The normalized square."""  
     
 
     #------< Data >------#
@@ -152,25 +144,33 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         """Returns true when there are any non-zero parts."""
         return self.s == 0 and self.a == 0
 
+    @always_inline
     fn to_int(self) -> HybridInt[square.to_int()]:
         """Casts the value to a HybridInt. Any fractional components are truncated towards zero."""
         return HybridInt[square.to_int()](self.s.to_int(), self.a.to_int())
 
+    @always_inline
     fn to_tuple(self) -> StaticTuple[2, Self.Coef]:
         """Creates a non-algebraic StaticTuple from the hybrids parts."""
         return StaticTuple[2, Self.Coef](self.s, self.a)
 
+    @always_inline
     fn cast[target: DType](self) -> HybridSIMD[target, size, square.cast[target]()]:
         """Casts the elements of the HybridSIMD to the target element type."""
         return HybridSIMD[target,size,square.cast[target]()](self.s.cast[target](), self.a.cast[target]())
 
-    # this is acting kinda weird doing the way you might expect, but this seems to work like this
-    fn unitize[unital_square: SIMD[type,1] = Self.unital_square](self) -> HybridSIMD[type,size,unital_square]:
+    # wont compile if you try doing it the expected way (using Self.unital_square or sign[square] instead of parameter)
+    #not ideal, as if you choose to explicitly use the parameter, wont behave correctly
+    @always_inline
+    fn unitize[unital_square: SIMD[type,1] = Self.unital_square](self) -> HybridSIMD[type, size, unital_square]:
         """Unitize the HybridSIMD, this normalizes the square and adjusts the antiox coefficient."""
         @parameter
-        if unital_square == 1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(square))
-        elif unital_square == -1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(-square))
-        else: return HybridSIMD[type,size,unital_square](self.s, self.a)
+        if Self.unital_square == 1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(square))
+        elif Self.unital_square == -1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(-square))
+        elif Self.unital_square == 0: return HybridSIMD[type,size,unital_square](self.s, self.a)
+        else:
+            print("something went wrong (could not unitize hybrid)")
+            return 0
     
     
     #------( Formatting )------#

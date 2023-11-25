@@ -32,6 +32,9 @@ struct HybridInt[square: Int = 1]:
     alias Coef = Int
     """Represents an integer coefficient."""
 
+    alias unital_square: Int = sign[DType.index,1,square]().value
+    """The normalized square."""
+
 
     #------< Data >------#
     #
@@ -45,17 +48,17 @@ struct HybridInt[square: Int = 1]:
     
     #------( Initialize )------#
     #
-    #--- Implicit
+    @always_inline # Coefficients
+    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
+        """Initializes a HybridInt from coefficients."""
+        return Self{s:s, a:a}
+
     @always_inline # Scalar
     fn __init__(h: HybridIntLiteral[square]) -> Self:
         """Initializes a HybridInt from a HybridIntLiteral."""
         return Self{s:h.s, a:h.a} 
 
-    #--- Explicit
-    @always_inline # Scalar + Antiox
-    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
-        """Initializes a HybridInt from coefficients."""
-        return Self{s:s, a:a}
+
     
     
     #------( To )------#
@@ -69,6 +72,17 @@ struct HybridInt[square: Int = 1]:
     fn to_tuple(self) -> StaticTuple[2, Self.Coef]:
         """Creates a non-algebraic StaticTuple from the hybrids parts."""
         return StaticTuple[2, Self.Coef](self.s, self.a)
+
+    @always_inline
+    fn unitize[unital_square: Int = Self.unital_square](self) -> HybridInt[unital_square]:
+        """Unitize the HybridInt, this normalizes the square and adjusts the antiox coefficient."""
+        @parameter
+        if Self.unital_square == 1: return HybridInt[unital_square](self.s, self.a * sqrt[DType.index,1](square).value)
+        elif Self.unital_square == -1: return HybridInt[unital_square](self.s, self.a * sqrt[DType.index,1](-square).value)
+        elif Self.unital_square == 0: return HybridInt[unital_square](self.s, self.a)
+        else:
+            print("something went wrong (could not unitize hybrid)")
+            return 0
 
 
     #------( Formatting )------#

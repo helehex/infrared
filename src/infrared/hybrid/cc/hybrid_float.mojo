@@ -1,1 +1,1 @@
-# if you are reading this, send help
+# if you are reading this, send hat

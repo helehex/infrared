@@ -47,7 +47,7 @@ struct HybridIntLiteral[square: Int = 1]:
     
     #------( Initialize )------#
     #
-    @always_inline # Scalar + Antiox
+    @always_inline # Coefficients
     fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
         """Initializes a HybridIntLiteral from coefficients."""
         return Self{s:s, a:a}

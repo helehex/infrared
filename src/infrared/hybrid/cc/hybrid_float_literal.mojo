@@ -9,7 +9,10 @@ alias ParaplexFloatLiteral = HybridFloatLiteral[0]
 fn constrain_square[a: FloatLiteral, b: Int]():
     constrained[a == b, "mismatched 'square' parameter"]()
 
-
+fn integral_counterpart[square: FloatLiteral]() -> AnyType:
+    @parameter
+    if square == square.to_int(): return HybridIntLiteral[square.to_int()]
+    else: return NoneType
 
 
 #------------ Hybrid Float Literal ------------#
@@ -33,10 +36,6 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     #
     alias Coef = FloatLiteral
     """Represents a floating point literal coefficient."""
-
-    # alias integral_square: Int = square.to_int()
-    # alias is_integral_square: Bool = Float64(Self.integral_square) == square
-    # alias constrain_integral_square: fn()->None = constrained[Self.is_integral_square,"cannot convert from integral square to floating square"]
     
 
     #------< Data >------#
@@ -50,7 +49,11 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     
     #------( Initialize )------#
     #
-    #--- Implicit
+    @always_inline # Coefficients
+    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
+        """Initializes a HybridFloatLiteral from coefficients."""
+        return Self{s:s, a:a}
+
     @always_inline # Scalar
     fn __init__(s: IntLiteral) -> Self:
         """Initializes a HybridFloatLiteral from an IntLiteral."""
@@ -62,11 +65,12 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         constrain_square[square, h.square]()
         return Self{s:h.s, a:h.a}
     
-    #--- Explicit
-    @always_inline # Scalar + Antiox
-    fn __init__(s: Self.Coef = 0, a: Self.Coef = 0) -> Self:
-        """Initializes a HybridFloatLiteral from coefficients."""
-        return Self{s:s, a:a}
+    # @always_inline # Hybrid
+    # fn __init__(h: integral_counterpart[square]()) -> Self:
+    #     """Initializes a HybridFloatLiteral from a HybridIntLiteral."""
+    #     let h_ = rebind[HybridIntLiteral[square.to_int()], integral_counterpart[square]()](h)
+    #     constrain_square[square, h_.square]()
+    #     return Self{s:h_.s, a:h_.a}
 
 
     #------( To )------#

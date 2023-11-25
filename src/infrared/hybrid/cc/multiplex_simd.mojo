@@ -78,14 +78,24 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         return Self{s:s, x:0, i:0, o:0}
 
     @always_inline # Hybrid
+    fn __init__(h: HybridIntLiteral) -> Self:
+        """Initializes a MultiplexSIMD from a unital HybridSIMD."""
+        return Self() + HybridSIMD[type,size,h.square](h)
+
+    @always_inline # Hybrid
+    fn __init__(h: HybridFloatLiteral) -> Self:
+        """Initializes a MultiplexSIMD from a unital HybridIntLiteral."""
+        return Self() + HybridSIMD[type,size,h.square](h)
+
+    @always_inline # Hybrid
+    fn __init__(h: HybridInt) -> Self:
+        """Initializes a MultiplexSIMD from a unital HybridInt."""
+        return Self() + HybridSIMD[type,size,h.square](h)
+
+    @always_inline # Hybrid
     fn __init__[square: SIMD[type,1]](h: HybridSIMD[type,size,square]) -> Self:
         """Initializes a MultiplexSIMD from a unital HybridSIMD."""
         return Self() + h
-        # let unitized = h.unitize()
-        # @parameter
-        # if h.square == 1: return Self{s:h.s, x:h.a, i:0, o:0}
-        # elif h.square == -1: return Self{s:h.s, x:0, i:h.a, o:0}
-        # else: return Self{s:h.s, x:0, i:0, o:h.a}
 
     @always_inline # Multiplex
     fn __init__(*m: MultiplexSIMD[type,1]) -> Self:
@@ -214,7 +224,10 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         @parameter
         if unital.square == 1: return Self(self.s + unital.s, self.x + unital.a, self.i, self.o)
         elif unital.square == -1: return Self(self.s + unital.s, self.x, self.i + unital.a, self.o)
-        else: return Self(self.s + unital.s, self.x, self.i, self.o + unital.a)
+        elif unital.square == 0: return Self(self.s + unital.s, self.x, self.i, self.o + unital.a)
+        else:
+            print("something went wrong (hybrid is not unitized)")
+            return 0
 
     @always_inline # Multiplex + Multiplex
     fn __add__[__:None=None](self, other: Self) -> Self:
@@ -233,11 +246,14 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         @parameter
         if unital.square == 1: return Self(unital.s + self.s, unital.a + self.x, self.i, self.o)
         elif unital.square == -1: return Self(unital.s + self.s, self.x, unital.a + self.i, self.o)
-        else: return Self(unital.s + self.s, self.x, self.i, unital.a + self.o)
+        elif unital.square == 0: return Self(unital.s + self.s, self.x, self.i, unital.a + self.o)
+        else:
+            print("something went wrong (hybrid is not unitized)")
+            return 0
 
     @always_inline # Multiplex + Multiplex
     fn __radd__[__:None=None](self, other: Self) -> Self:
-        return Self(other.s + self.s, other.x + self.x, other.i + self.i, other.o + self.o)
+        return other + self
 
 
     #------( In Place Arithmetic )------#

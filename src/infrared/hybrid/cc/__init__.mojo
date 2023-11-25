@@ -163,11 +163,11 @@ fn static_test_cc():
     multiplex = Hyplex64(1,1) + Complex64(1,1) + Paraplex64(1,1)
 
     multiplex = int_literal
-    #multiplex = hybrid_int_literal
+    multiplex = hybrid_int_literal
     multiplex = float_literal
-    #multiplex = hybrid_float_literal
+    multiplex = hybrid_float_literal
     multiplex = int
-    #multiplex = hybrid_int
+    multiplex = hybrid_int
     multiplex = float
     #multiplex = hybrid_float
     multiplex = simd
@@ -185,14 +185,26 @@ fn static_test_cc():
     multiplex = multiplex + int_literal
     multiplex = int_literal + multiplex
 
+    multiplex = multiplex + hybrid_int_literal
+    multiplex = hybrid_int_literal + multiplex
+
     multiplex = multiplex + float_literal
     multiplex = float_literal + multiplex
+
+    multiplex = multiplex + hybrid_float_literal
+    multiplex = hybrid_float_literal + multiplex
 
     multiplex = multiplex + int
     multiplex = int + multiplex
 
+    multiplex = multiplex + hybrid_int
+    multiplex = hybrid_int + multiplex
+
     multiplex = multiplex + float
     multiplex = float + multiplex
+
+    multiplex = multiplex + hybrid_float
+    multiplex = hybrid_float + multiplex
 
     multiplex = multiplex + simd
     multiplex = simd + multiplex
@@ -215,4 +227,7 @@ fn static_test_cc():
     print()
     print(multiplex.__str__())
     print()
+    #var a: HybridSIMD[DType.float32,1,-1] = HybridSIMD[DType.float32,1,-2](0,3).unitize()
+    #let a: HybridInt[-1] = HybridInt[-2](0,3).unitize()
+    print(HybridInt[-2](0,3).unitize().__str__())
     print(HybridSIMD[DType.float32,1,-2](0,3).unitize().__str__())
