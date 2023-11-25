@@ -131,6 +131,10 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline # Scalar + Hybrid
     fn __radd__(self, other: Self.Coef) -> Self:
         return Self(other + self.s, self.a)
+
+    @always_inline # Hybrid + Hybrid
+    fn __radd__(self, other: Self) -> Self:
+        return other + self
     
     
     #------( In Place Arithmetic )------#

@@ -7,7 +7,9 @@ from .hybrid_float_literal import *
 from .hybrid_int import *
 from .hybrid_simd import *
 from .multiplex_simd import *
+
 from infrared import symbol
+#from infrared import 
 
 
 alias simd_type: DType = DType.float64
@@ -160,25 +162,45 @@ fn static_test_cc():
     #
     multiplex = Hyplex64(1,1) + Complex64(1,1) + Paraplex64(1,1)
 
-    # multiplex = int_literal
-    # multiplex = hybrid_int_literal
-    # multiplex = float_literal
-    # multiplex = hybrid_float_literal
-    # multiplex = int
-    # multiplex = hybrid_int
-    # multiplex = float
-    # multiplex = hybrid_float
-    # multiplex = simd
-    # multiplex = hybrid_simd
-
+    multiplex = int_literal
+    #multiplex = hybrid_int_literal
+    multiplex = float_literal
+    #multiplex = hybrid_float_literal
+    multiplex = int
+    #multiplex = hybrid_int
+    multiplex = float
+    #multiplex = hybrid_float
+    multiplex = simd
+    multiplex = hybrid_simd
     
-    multiplex = multiplex + Hyplex64(1,1)
+    multiplex = multiplex.__add__(Hyplex64(1,1))
+    multiplex = Hyplex64(1,1) + multiplex
+
     multiplex = multiplex + Complex64(1,1)
+    multiplex = Complex64(1,1) + multiplex
+
+    multiplex = multiplex + Paraplex64(1,1)
+    multiplex = Paraplex64(1,1) + multiplex
+
     multiplex = multiplex + int_literal
+    multiplex = int_literal + multiplex
+
     multiplex = multiplex + float_literal
+    multiplex = float_literal + multiplex
+
     multiplex = multiplex + int
+    multiplex = int + multiplex
+
     multiplex = multiplex + float
+    multiplex = float + multiplex
+
     multiplex = multiplex + simd
+    multiplex = simd + multiplex
+
+    multiplex = multiplex + hybrid_simd
+    multiplex = hybrid_simd + multiplex
+
+    multiplex = MultiplexSIMD[simd_type,1](1) + multiplex
 
 
     #--- print ---#
@@ -192,3 +214,5 @@ fn static_test_cc():
     print(hybrid_simd[1][0])
     print()
     print(multiplex.__str__())
+    print()
+    print(HybridSIMD[DType.float32,1,-2](0,3).unitize().__str__())

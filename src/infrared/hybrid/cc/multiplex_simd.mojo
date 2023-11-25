@@ -63,12 +63,9 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         return Self{s:s, x:x, i:i, o:o}
 
     @always_inline # Coefficients
-    fn __init__(*c: SIMD[type,1]) -> Self:
-        """Initializes a MultiplexSIMD from a variadic argument of scalars."""
-        if len(c) == 1: return Self{s:c[0], x:0, i:0, o:0}
-        elif len(c) == 2: return Self{s:c[0], x:c[1], i:0, o:0}
-        elif len(c) == 3: return Self{s:c[0], x:c[1], i:c[2], o:0}
-        else: return Self{s:c[0], x:c[1], i:c[2], o:c[3]}
+    fn __init__[__:None=None](s: SIMD[type,1] = 0, x: SIMD[type,1] = 0, i: SIMD[type,1] = 0, o: SIMD[type,1] = 0) -> Self:
+        """Initializes a MultiplexSIMD from coefficients."""
+        return Self{s:s, x:x, i:i, o:o}
     
     @always_inline # Scalar
     fn __init__(s: FloatLiteral) -> Self:
@@ -82,14 +79,13 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     @always_inline # Hybrid
     fn __init__[square: SIMD[type,1]](h: HybridSIMD[type,size,square]) -> Self:
-        """Initializes a MultiplexSIMD from a HybridSIMD."""
-        @parameter
-        if h.square == 1: return Self{s:h.s, x:h.a, i:0, o:0}
-        elif h.square == -1: return Self{s:h.s, x:0, i:h.a, o:0}
-        elif h.square == 0: return Self{s:h.s, x:0, i:0, o:h.a}
-        else:
-            constrained[False, "the hybrid is not a subalgebra of multiplex"]()
-            return Self()
+        """Initializes a MultiplexSIMD from a unital HybridSIMD."""
+        return Self() + h
+        # let unitized = h.unitize()
+        # @parameter
+        # if h.square == 1: return Self{s:h.s, x:h.a, i:0, o:0}
+        # elif h.square == -1: return Self{s:h.s, x:0, i:h.a, o:0}
+        # else: return Self{s:h.s, x:0, i:0, o:h.a}
 
     @always_inline # Multiplex
     fn __init__(*m: MultiplexSIMD[type,1]) -> Self:
@@ -208,35 +204,52 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     #------( Arithmetic )------#
     #
+    @always_inline # Multiplex + Scalar
     fn __add__(self, other: Self.Coef) -> Self:
         return Self(self.s + other, self.x, self.i, self.o)
 
-    fn __add__(self, *other: HybridSIMD[type,size,1]) -> Self:
-        return Self(self.s + other[0].s, self.x + other[0].a, self.i, self.o)
+    @always_inline # Multiplex + Hyplex
+    fn __add__[square: SIMD[type,1]](self, other: HybridSIMD[type,size,square]) -> Self:
+        let unital = other.unitize()
+        @parameter
+        if unital.square == 1: return Self(self.s + unital.s, self.x + unital.a, self.i, self.o)
+        elif unital.square == -1: return Self(self.s + unital.s, self.x, self.i + unital.a, self.o)
+        else: return Self(self.s + unital.s, self.x, self.i, self.o + unital.a)
 
-    fn __add__(self, *other: HybridSIMD[type,size,-1]) -> Self:
-        return Self(self.s + other[0].s, self.x, self.i + other[0].a, self.o)
-
-    fn __add__(self, *other: HybridSIMD[type,size,0]) -> Self:
-        return Self(self.s + other[0].s, self.x, self.i, self.o + other[0].a)
-
-    fn __add__(self, *other: Self) -> Self:
-        return Self(self.s + other[0].s, self.x + other[0].x, self.i + other[0].i, self.o + other[0].o)
+    @always_inline # Multiplex + Multiplex
+    fn __add__[__:None=None](self, other: Self) -> Self:
+        return Self(self.s + other.s, self.x + other.x, self.i + other.i, self.o + other.o)
 
     
-    # #------( Reverse Arithmetic )------#
-    # #
-    # fn __radd__(self, other: Self.Coef) -> Self:
-    #     return Self(self.s + other, self.x, self.i, self.o)
+    #------( Reverse Arithmetic )------#
+    #
+    @always_inline # Scalar + Multiplex
+    fn __radd__(self, other: Self.Coef) -> Self:
+        return Self(other + self.s, self.x, self.i, self.o)
 
-    # fn __radd__(self, other: HybridSIMD[type,size,1]) -> Self:
-    #     return Self(self.s + other.s, self.x + other.a, self.i, self.o)
+    @always_inline # Hyplex + Multiplex
+    fn __radd__[square: SIMD[type,1]](self, other: HybridSIMD[type,size,square]) -> Self:
+        let unital = other.unitize()
+        @parameter
+        if unital.square == 1: return Self(unital.s + self.s, unital.a + self.x, self.i, self.o)
+        elif unital.square == -1: return Self(unital.s + self.s, self.x, unital.a + self.i, self.o)
+        else: return Self(unital.s + self.s, self.x, self.i, unital.a + self.o)
 
-    # fn __radd__(self, other: HybridSIMD[type,size,-1]) -> Self:
-    #     return Self(self.s + other.s, self.x, self.i + other.a, self.o)
+    @always_inline # Multiplex + Multiplex
+    fn __radd__[__:None=None](self, other: Self) -> Self:
+        return Self(other.s + self.s, other.x + self.x, other.i + self.i, other.o + self.o)
 
-    # fn __radd__(self, other: HybridSIMD[type,size,0]) -> Self:
-    #     return Self(self.s + other.s, self.x, self.i, self.o + other.a)
 
-    # fn __radd__(self, other: Self) -> Self:
-    #     return Self(self.s + other.s, self.x + other.x, self.i + other.i, self.o + other.o)
+    #------( In Place Arithmetic )------#
+    #
+    @always_inline # Multiplex += Scalar
+    fn __iadd__(inout self, other: Self.Coef):
+        self = self + other
+
+    @always_inline # Multiplex += Hyplex
+    fn __iadd__[square: SIMD[type,1]](inout self, other: HybridSIMD[type,size,square]):
+        self = self + other
+    
+    @always_inline # Hybrid += Hybrid
+    fn __iadd__[__:None=None](inout self, other: Self):
+        self = self + other

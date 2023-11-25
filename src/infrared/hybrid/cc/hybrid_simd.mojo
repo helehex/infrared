@@ -72,6 +72,15 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     alias Coef = SIMD[type,size]
     """Represents a SIMD coefficient."""
 
+    alias Lane = HybridSIMD[type,1,square]
+    """Represents a single SIMD vector element."""
+
+    alias Unital = HybridSIMD[type,size,sign[type,1,square]()]
+    """The normalized HybridSIMD."""
+
+    alias unital_square = sign[type,1,square]()
+    """The normalized square."""
+
     # alias HybridInt = HybridInt[Self.integral_square]
     # alias integral_square: Int = square.to_int()
     # alias is_integral_square: Bool = SIMD[type,1](Self.integral_square) == square
@@ -95,10 +104,9 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return Self{s:s, a:a}
 
     @always_inline # Coefficients
-    fn __init__(*c: SIMD[type,1]) -> Self:
-        """Initializes a HybridSIMD from a variadic argument of coefficients."""
-        if len(c) == 1: return Self{s:c[0], a:0}
-        else: return Self{s:c[0], a:c[1]}
+    fn __init__[__:None=None](s: SIMD[type,1] = 0, a: SIMD[type,1] = 0) -> Self:
+        """Initializes a HybridSIMD from coefficients."""
+        return Self{s:s, a:a}
 
     @always_inline # Scalar
     fn __init__(s: FloatLiteral) -> Self:
@@ -155,6 +163,14 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     fn cast[target: DType](self) -> HybridSIMD[target, size, square.cast[target]()]:
         """Casts the elements of the HybridSIMD to the target element type."""
         return HybridSIMD[target,size,square.cast[target]()](self.s.cast[target](), self.a.cast[target]())
+
+    # this is acting kinda weird doing the way you might expect, but this seems to work like this
+    fn unitize[unital_square: SIMD[type,1] = Self.unital_square](self) -> HybridSIMD[type,size,unital_square]:
+        """Unitize the HybridSIMD, this normalizes the square and adjusts the antiox coefficient."""
+        @parameter
+        if unital_square == 1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(square))
+        elif unital_square == -1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(-square))
+        else: return HybridSIMD[type,size,unital_square](self.s, self.a)
     
     
     #------( Formatting )------#
@@ -237,6 +253,26 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         self.s[idx] = item.s
         self.a[idx] = item.a
 
+
+    #------( Min / Max )------#
+    #
+
+
+    #------( Lanes )------#
+    #
+
+
+    #------( Comparison )------#
+    #
+
+
+    #------( Unary )------#
+    #
+
+
+    #------( Products )------#
+    #
+
     
     #------( Arithmetic )------#
     #
@@ -245,20 +281,12 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return Self(self.s + other, self.a)
     
     @always_inline # Hybrid + Hybrid
-    fn __add__(self, *other: Self) -> Self:
-        return Self(self.s + other[0].s, self.a + other[0].a)
+    fn __add__[__:None=None](self, other: Self) -> Self:
+        return Self(self.s + other.s, self.a + other.a)
 
     @always_inline # Hybrid + Hyplex
-    fn __add__(self, other: Tuple[HybridSIMD[type,size,1]]) -> MultiplexSIMD[type,size]:
-        return MultiplexSIMD(self) + other.get[0,HybridSIMD[type,size,1]]()
-
-    @always_inline # Hybrid + Hyplex
-    fn __add__(self, other: Tuple[HybridSIMD[type,size,-1]]) -> MultiplexSIMD[type,size]:
-        return MultiplexSIMD(self) + other.get[0,HybridSIMD[type,size,-1]]()
-
-    @always_inline # Hybrid + Hyplex
-    fn __add__(self, other: Tuple[HybridSIMD[type,size,0]]) -> MultiplexSIMD[type,size]:
-        return MultiplexSIMD(self) + other.get[0,HybridSIMD[type,size,0]]()
+    fn __add__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
+        return MultiplexSIMD(self) + other
     
     
     #------( Reverse Arithmetic )------#
@@ -268,8 +296,12 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return Self(other + self.s, self.a)
 
     @always_inline # Hybrid + Hybrid
-    fn __radd__(self, *other: Self) -> Self:
-        return Self(other[0].s + self.s, other[0].a + self.a)
+    fn __radd__[__:None=None](self, other: Self) -> Self:
+        return other + self
+
+    # @always_inline # Hybrid + Hyplex
+    # fn __radd__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
+    #     return other + MultiplexSIMD(self)
     
     
     #------( In Place Arithmetic )------#
@@ -279,5 +311,5 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         self = self + other
     
     @always_inline # Hybrid += Hybrid
-    fn __iadd__(inout self, *other: Self):
-        self = self + other[0]
+    fn __iadd__[__:None=None](inout self, other: Self):
+        self = self + other

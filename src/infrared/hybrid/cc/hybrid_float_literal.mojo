@@ -147,8 +147,8 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         return Self(self.s + other, self.a)
     
     @always_inline # Hybrid + Hybrid
-    fn __add__(self, *other: Self) -> Self:
-        return Self(self.s + other[0].s, self.a + other[0].a)
+    fn __add__[__:None=None](self, other: Self) -> Self:
+        return Self(self.s + other.s, self.a + other.a)
     
     
     #------( Reverse Arithmetic )------#
@@ -158,8 +158,8 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         return Self(other + self.s, self.a)
 
     @always_inline # Hybrid + Hybrid
-    fn __radd__(self, *other: Self) -> Self:
-        return Self(other[0].s + self.s, other[0].a + self.a)
+    fn __radd__[__:None=None](self, other: Self) -> Self:
+        return other + self
     
     
     #------( In Place Arithmetic )------#
@@ -169,5 +169,5 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         self = self + other
     
     @always_inline # Hybrid += Hybrid
-    fn __iadd__(inout self, *other: Self):
-        self = self + other[0]
+    fn __iadd__[__:None=None](inout self, other: Self):
+        self = self + other

@@ -139,7 +139,7 @@ struct HybridInt[square: Int = 1]:
 
     @always_inline # Hybrid + Hybrid
     fn __radd__(self, other: Self) -> Self:
-        return Self(other.s + self.s, other.a + self.a)
+        return other + self
     
     
     #------( In Place Arithmetic )------#
