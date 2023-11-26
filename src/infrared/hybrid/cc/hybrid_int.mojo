@@ -32,8 +32,8 @@ struct HybridInt[square: Int = 1]:
     alias Coef = Int
     """Represents an integer coefficient."""
 
-    alias unital_square: SIMD[DType.float64,1] = sign(SIMD[DType.float64,1](square))
-    """The normalized square."""
+    #alias unital_square: IntLiteral = sign(square)
+    #"""The normalized square."""
 
 
     #------< Data >------#
@@ -377,6 +377,32 @@ struct HybridInt[square: Int = 1]:
     @always_inline # Hybrid - Hybrid
     fn __sub__(self, other: Self) -> Self:
         return Self(self.s - other.s, self.a - other.a)
+
+    #--- multiplication
+    @always_inline
+    fn __mul__(self, other: Self.Coef) -> Self:
+        return Self(self.s*other, self.a*other)
+
+    @always_inline
+    fn __mul__(self, other: Self) -> Self:
+        return Self(self.s*other.s + square*self.a*other.a, self.s*other.a + self.a*other.s)
+
+    #--- division
+    @always_inline
+    fn __truediv__(self, other: Self.Coef) -> HybridSIMD[DType.float64,1,square]:
+        return HybridSIMD[DType.float64,1,square](self) * (1/other)
+
+    @always_inline
+    fn __truediv__(self, other: Self) -> HybridSIMD[DType.float64,1,square]:
+        return self*other.conjugate() / other.denomer()
+
+    @always_inline
+    fn __floordiv__(self, other: Self.Coef) -> Self:
+        return Self(self.s // other, self.a // other)
+
+    @always_inline
+    fn __floordiv__(self, other: Self) -> Self:
+        return self*other.conjugate() // other.denomer()
     
     
     #------( Reverse Arithmetic )------#
@@ -398,6 +424,32 @@ struct HybridInt[square: Int = 1]:
     @always_inline # Hybrid - Hybrid
     fn __rsub__(self, other: Self) -> Self:
         return other - self
+
+    #--- multiplication
+    @always_inline
+    fn __rmul__(self, other: Self.Coef) -> Self:
+        return Self(other * self.s, other * self.a)
+
+    @always_inline
+    fn __rmul__(self, other: Self) -> Self:
+        return other * self
+
+    #--- division
+    @always_inline
+    fn __rtruediv__(self, other: Self.Coef) -> HybridSIMD[DType.float64,1,square]:
+        return other*self.conjugate() / self.denomer()
+
+    @always_inline
+    fn __rtruediv__(self, other: Self) -> HybridSIMD[DType.float64,1,square]:
+        return other / self
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self.Coef) -> Self:
+        return other*self.conjugate() // self.denomer()
+
+    @always_inline
+    fn __rfloordiv__(self, other: Self) -> Self:
+        return other // self
     
     
     #------( In Place Arithmetic )------#
@@ -419,3 +471,21 @@ struct HybridInt[square: Int = 1]:
     @always_inline # Hybrid -= Hybrid
     fn __isub__(inout self, other: Self):
         self = self - other
+
+    #--- multiplication
+    @always_inline # Hybrid *= Scalar
+    fn __imul__(inout self, other: Self.Coef):
+        self = self * other
+
+    @always_inline # Hybrid *= Hybrid
+    fn __imul__(inout self, other: Self):
+        self = self * other
+
+    #--- division
+    @always_inline # Hybrid //= Scalar
+    fn __ifloordiv__(inout self, other: Self.Coef):
+        self = self // other
+
+    @always_inline # Hybrid //= Hybrid
+    fn __ifloordiv__(inout self, other: Self):
+        self = self // other

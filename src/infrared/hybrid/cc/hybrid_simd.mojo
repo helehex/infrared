@@ -572,7 +572,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return Self(self.s*other, self.a*other)
 
     @always_inline
-    fn __mul__(self, other: Self) -> Self:
+    fn __mul__[__:None=None](self, other: Self) -> Self:
         return Self(self.s*other.s + square*self.a*other.a, self.s*other.a + self.a*other.s)
 
     #--- division
@@ -581,7 +581,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return self * (1/other)
 
     @always_inline
-    fn __truediv__(self, other: Self) -> Self:
+    fn __truediv__[__:None=None](self, other: Self) -> Self:
         return (self*other.conjugate()) / other.denomer()
 
     @always_inline
@@ -589,7 +589,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return Self(self.s // other, self.a // other)
 
     @always_inline
-    fn __floordiv__(self, other: Self) -> Self:
+    fn __floordiv__[__:None=None](self, other: Self) -> Self:
         return (self*other.conjugate()) // other.denomer()
     
     
@@ -627,7 +627,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return Self(other * self.s, other * self.a)
 
     @always_inline
-    fn __rmul__(self, other: Self) -> Self:
+    fn __rmul__[__:None=None](self, other: Self) -> Self:
         return other * self
 
     #--- division
@@ -636,7 +636,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return other*self.conjugate() / self.denomer()
 
     @always_inline
-    fn __rtruediv__(self, other: Self) -> Self:
+    fn __rtruediv__[__:None=None](self, other: Self) -> Self:
         return other / self
 
     @always_inline
@@ -644,7 +644,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         return other*self.conjugate() // self.denomer()
 
     @always_inline
-    fn __rfloordiv__(self, other: Self) -> Self:
+    fn __rfloordiv__[__:None=None](self, other: Self) -> Self:
         return other // self
     
     

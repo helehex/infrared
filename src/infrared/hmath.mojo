@@ -167,6 +167,14 @@ fn rsqrt(value: SIMD) -> SIMD[value.type, value.size]:
 from math import atan as _atan
 
 @always_inline
+fn atan(value: IntLiteral) -> FloatLiteral:
+    return atan(FloatLiteral(value))
+
+@always_inline
+fn atan(value: FloatLiteral) -> FloatLiteral:
+    return atan(SIMD[DType.float64,1](value)).value
+
+@always_inline
 fn atan(value: SIMD) -> SIMD[value.type, value.size]:
     return _atan(value)
 
@@ -176,6 +184,14 @@ fn atan(value: SIMD) -> SIMD[value.type, value.size]:
 #------( Logarithm )------#
 #
 from math import log as _log
+
+@always_inline
+fn log(value: IntLiteral) -> FloatLiteral:
+    return log(FloatLiteral(value))
+
+@always_inline
+fn log(value: FloatLiteral) -> FloatLiteral:
+    return log(SIMD[DType.float64,1](value)).value
 
 @always_inline
 fn log(value: SIMD) -> SIMD[value.type, value.size]:
@@ -282,6 +298,43 @@ fn compare(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
 # @always_inline
 # fn compare[type: DType, size: Int](a: SIMD[type, size], b: SIMD[type, size]) -> SIMD[type, size]:
 #     return (a > b).select(1,(a < b).select[type](-1, 0))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# dont look, Int to IntLiteral workaround
+
+@always_inline
+fn to_int_literal[value: Int]() -> IntLiteral:
+    @parameter
+    if value == 0: return 0
+    elif value == 1: return 1
+    elif value == -1: return -1
+    elif value == 2: return 2
+    elif value == -2: return -2
+    elif value == 3: return 3
+    elif value == -3: return -3
+    elif value == 4: return 4
+    elif value == -4: return -4
+    elif value == 5: return 5
+    elif value == -5: return -5
+    elif value == 6: return 6
+    elif value == -6: return -6
+    else:
+        print("oh no")
+        return 0
 
 
 
