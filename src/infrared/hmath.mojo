@@ -4,6 +4,91 @@ Implements the hmath module.
 Contains extra math functions.
 """
 
+from .hybrid.cc import HybridSIMD
+from math import nan, isnan
+# improve literal math
+
+
+
+
+#------------ Select ------------#
+#---
+#--- SIMD conditional select
+#---
+from math import select as _select
+
+@always_inline # mock
+fn select[type: DType, size: Int](cond: SIMD[DType.bool,size], true_case: SIMD[type,size], false_case: SIMD[type,size]) -> SIMD[type,size]:
+    return _select(cond, true_case, false_case)
+
+@always_inline
+fn select[type: DType, size: Int, square: SIMD[type,1]](cond: SIMD[DType.bool,size], true_case: HybridSIMD[type,size,square], false_case: HybridSIMD[type,size,square]) -> HybridSIMD[type,size,square]:
+    return HybridSIMD[type,size,square](select(cond, true_case.s, false_case.s), select(cond, true_case.a, false_case.a))
+
+
+#------( Min )------#
+#
+from math import min as _min
+
+@always_inline
+fn min(a: IntLiteral, b: IntLiteral) -> IntLiteral:
+    if a <= b: return a
+    return b
+
+@always_inline
+fn min(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral:
+    if a <= b: return a
+    return b
+
+@always_inline
+fn min(a: Int, b: Int) -> Int:
+    return _min(a, b)
+
+@always_inline
+fn min(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
+    return _min(a, b)
+
+@always_inline
+fn min[type: DType, size: Int, square: SIMD[type,1]](a: HybridSIMD[type, size, square], b: HybridSIMD[type, size, square]) -> HybridSIMD[type, size, square]:
+    let a_measure = a.measure()
+    let b_measure = b.measure()
+    let nans = isnan(a_measure) or isnan(b_measure)
+    let cond = a < b
+    return select(nans, HybridSIMD[type, size, square](nan[type](), nan[type]()), select(cond, a, b))
+
+
+
+
+#------( Max )------#
+#
+from math import max as _max
+
+@always_inline
+fn max(a: IntLiteral, b: IntLiteral) -> IntLiteral:
+    if a >= b: return a
+    return b
+
+@always_inline
+fn max(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral:
+    if a >= b: return a
+    return b
+
+@always_inline
+fn max(a: Int, b: Int) -> Int:
+    return _max(a, b)
+
+@always_inline
+fn max(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
+    return _max(a, b)
+
+@always_inline
+fn max[type: DType, size: Int, square: SIMD[type,1]](a: HybridSIMD[type, size, square], b: HybridSIMD[type, size, square]) -> HybridSIMD[type, size, square]:
+    let a_measure = a.measure()
+    let b_measure = b.measure()
+    let nans = isnan(a_measure) or isnan(b_measure)
+    let cond = a > b
+    return select(nans, HybridSIMD[type, size, square](nan[type](), nan[type]()), select(cond, a, b))
+
 
 
 
@@ -43,6 +128,28 @@ from math import rsqrt as _rsqrt
 @always_inline
 fn rsqrt(value: SIMD) -> SIMD[value.type, value.size]:
     return _rsqrt(value)
+
+
+
+
+#------( Arctangent )------#
+#
+from math import atan as _atan
+
+@always_inline
+fn atan(value: SIMD) -> SIMD[value.type, value.size]:
+    return _atan(value)
+
+
+
+
+#------( Logarithm )------#
+#
+from math import log as _log
+
+@always_inline
+fn log(value: SIMD) -> SIMD[value.type, value.size]:
+    return _log(value)
 
 
 
@@ -145,24 +252,6 @@ fn compare(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
 # @always_inline
 # fn compare[type: DType, size: Int](a: SIMD[type, size], b: SIMD[type, size]) -> SIMD[type, size]:
 #     return (a > b).select(1,(a < b).select[type](-1, 0))
-
-
-#------( Arctangent )------#
-#
-from math import atan as _atan
-
-@always_inline
-fn atan(value: SIMD) -> SIMD[value.type, value.size]:
-    return _atan(value)
-
-
-#------( Logarithm )------#
-#
-from math import log as _log
-
-@always_inline
-fn log(value: SIMD) -> SIMD[value.type, value.size]:
-    return _log(value)
 
 
 

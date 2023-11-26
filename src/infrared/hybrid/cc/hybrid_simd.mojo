@@ -257,6 +257,55 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
 
     #------( Min / Max )------#
     #
+    #--- min
+    @always_inline
+    fn min_coef(self) -> Self.Coef:
+        """Returns the coefficient which is closest to negative infinity."""
+        return min(self.s, self.a)
+    
+    @always_inline
+    fn reduce_min(self) -> HybridSIMD[type,1,square]:
+        """Returns the hybrid element with the smallest measure across the SIMD axis. Remind me to improve implementation."""
+        var result: HybridSIMD[type,1,square] = self.get_hybrid(0)
+        @unroll
+        for i in range(1, size):
+            result = min(result, self.get_hybrid(i))
+        return result
+
+    @always_inline
+    fn reduce_min_coef(self) -> SIMD[type,1]:
+        """Returns the smallest value across both the SIMD and Hybrid axis."""
+        return min(self.s.reduce_min(), self.a.reduce_min())
+
+    @always_inline
+    fn reduce_min_compose(self) -> HybridSIMD[type,1,square]:
+        """Returns the hybrid vector element which is the composition of the smallest scalar and the smallest antiox across the SIMD axis."""
+        return HybridSIMD[type,1,square](self.s.reduce_min(), self.a.reduce_min())
+    
+    #--- max
+    @always_inline
+    fn max_coef(self) -> Self.Coef:
+        """Returns the coefficient which is closest to positive infinity."""
+        return max(self.s, self.a)
+    
+    @always_inline
+    fn reduce_max(self) -> HybridSIMD[type,1,square]:
+        """Returns the hybrid element with the largest measure across the SIMD axis. Remind me to improve implementation."""
+        var result: HybridSIMD[type,1,square] = self.get_hybrid(0)
+        @unroll
+        for i in range(1, size):
+            result = max(result, self.get_hybrid(i))
+        return result
+
+    @always_inline
+    fn reduce_max_coef(self) -> SIMD[type,1]:
+        """Returns the largest value across both the SIMD and Hybrid axis."""
+        return max(self.s.reduce_max(), self.a.reduce_max())
+
+    @always_inline
+    fn reduce_max_compose(self) -> HybridSIMD[type,1,square]:
+        """Returns the hybrid vector element which is the composition of the largest scalar and the largest antiox across the SIMD axis."""
+        return HybridSIMD[type,1,square](self.s.reduce_max(), self.a.reduce_max())
 
 
     #------( SIMD Vector )------#
