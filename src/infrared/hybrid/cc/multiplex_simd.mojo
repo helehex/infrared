@@ -220,7 +220,7 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     @always_inline # Multiplex + Hyplex
     fn __add__[square: SIMD[type,1]](self, other: HybridSIMD[type,size,square]) -> Self:
-        let unital = other.unitize()
+        let unital = other.to_unital()
         @parameter
         if unital.square == 1: return Self(self.s + unital.s, self.x + unital.a, self.i, self.o)
         elif unital.square == -1: return Self(self.s + unital.s, self.x, self.i + unital.a, self.o)
@@ -242,7 +242,7 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     @always_inline # Hyplex + Multiplex
     fn __radd__[square: SIMD[type,1]](self, other: HybridSIMD[type,size,square]) -> Self:
-        let unital = other.unitize()
+        let unital = other.to_unital()
         @parameter
         if unital.square == 1: return Self(unital.s + self.s, unital.a + self.x, self.i, self.o)
         elif unital.square == -1: return Self(unital.s + self.s, self.x, unital.a + self.i, self.o)

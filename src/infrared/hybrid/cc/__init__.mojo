@@ -227,7 +227,11 @@ fn static_test_cc():
     print()
     print(multiplex.__str__())
     print()
+
+    # to_unital is totally screwed with alias problems in current version, but i kept the non-idea simd.to_unital workaround because i need it to construct multiplex without constraining
     #var a: HybridSIMD[DType.float32,1,-1] = HybridSIMD[DType.float32,1,-2](0,3).unitize()
-    #let a: HybridInt[-1] = HybridInt[-2](0,3).unitize()
-    print(HybridInt[-2](0,3).unitize().__str__())
-    print(HybridSIMD[DType.float32,1,-2](0,3).unitize().__str__())
+    #let a: HybridInt[-1] = HybridInt[-2](0,3).to_unital()
+    #print(HybridIntLiteral[-2](0,3).to_unital().__str__())
+    #print(HybridFloatLiteral[-2](0,3).to_unital().__str__())
+    #print(HybridInt[-2](0,3).to_unital().__str__())
+    print(HybridSIMD[DType.float32,1,-2](0,3).to_unital().__str__())

@@ -75,8 +75,8 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     alias Lane = HybridSIMD[type,1,square]
     """Represents a single SIMD vector element."""
 
-    alias unital_square: SIMD[type,1] = sign[type,1,square]()
-    """The normalized square."""  
+    alias unital_square = sign[type,1,square]()
+    """The normalized square."""
     
 
     #------< Data >------#
@@ -154,15 +154,11 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         """Creates a non-algebraic StaticTuple from the hybrids parts."""
         return StaticTuple[2, Self.Coef](self.s, self.a)
 
-    @always_inline
-    fn cast[target: DType](self) -> HybridSIMD[target, size, square.cast[target]()]:
-        """Casts the elements of the HybridSIMD to the target element type."""
-        return HybridSIMD[target,size,square.cast[target]()](self.s.cast[target](), self.a.cast[target]())
-
+    # to_unital is being really screwed up for the other types aswell, so i wont add it yet for them, but i need it for simd to construct multiplex without constraining
     # wont compile if you try doing it the expected way (using Self.unital_square or sign[square] instead of parameter)
-    #not ideal, as if you choose to explicitly use the parameter, wont behave correctly
+    # not ideal, as if you choose to explicitly use the parameter, wont behave correctly
     @always_inline
-    fn unitize[unital_square: SIMD[type,1] = Self.unital_square](self) -> HybridSIMD[type, size, unital_square]:
+    fn to_unital[unital_square: SIMD[type,1] = Self.unital_square](self) -> HybridSIMD[type, size, unital_square]:
         """Unitize the HybridSIMD, this normalizes the square and adjusts the antiox coefficient."""
         @parameter
         if Self.unital_square == 1: return HybridSIMD[type,size,unital_square](self.s, self.a * sqrt(square))
@@ -171,6 +167,11 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         else:
             print("something went wrong (could not unitize hybrid)")
             return 0
+
+    @always_inline
+    fn cast[target: DType](self) -> HybridSIMD[target, size, square.cast[target]()]:
+        """Casts the elements of the HybridSIMD to the target element type."""
+        return HybridSIMD[target,size,square.cast[target]()](self.s.cast[target](), self.a.cast[target]())
     
     
     #------( Formatting )------#

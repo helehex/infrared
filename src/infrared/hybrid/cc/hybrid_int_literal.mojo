@@ -35,6 +35,9 @@ struct HybridIntLiteral[square: Int = 1]:
     alias Coef = IntLiteral
     """Represents a integer literal coefficient."""
 
+    alias unital_square: Int = sign(square)
+    """The normalized square."""
+
 
     #------< Data >------#
     #
@@ -64,6 +67,19 @@ struct HybridIntLiteral[square: Int = 1]:
     fn to_tuple(self) -> StaticTuple[2, Self.Coef]:
         """Creates a non-algebraic StaticTuple from the hybrids parts."""
         return StaticTuple[2, Self.Coef](self.s, self.a)
+
+    # to_unital is being really screwed up so guess i wont add it yet
+    # error when changing change to: return HybridFloatLiteral[square](self).to_unital()
+    # @always_inline
+    # fn to_unital(self) -> HybridFloatLiteral[Self.unital_square]:
+    #     """Unitize the HybridInt, this normalizes the square and adjusts the antiox coefficient."""
+    #     @parameter
+    #     if Self.unital_square == 1: return HybridFloatLiteral[Self.unital_square](self.s, self.a * sqrt(FloatLiteral(square)))
+    #     elif Self.unital_square == -1: return HybridFloatLiteral[Self.unital_square](self.s, self.a * sqrt(FloatLiteral(-square)))
+    #     elif Self.unital_square == 0: return HybridFloatLiteral[Self.unital_square](self.s, self.a)
+    #     else:
+    #         print("something went wrong (could not unitize hybrid)")
+    #         return 0
     
     
     #------( Formatting )------#

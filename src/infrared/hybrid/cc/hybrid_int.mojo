@@ -32,7 +32,7 @@ struct HybridInt[square: Int = 1]:
     alias Coef = Int
     """Represents an integer coefficient."""
 
-    alias unital_square: Int = sign[DType.index,1,square]().value
+    alias unital_square: SIMD[DType.float64,1] = sign(SIMD[DType.float64,1](square))
     """The normalized square."""
 
 
@@ -73,16 +73,17 @@ struct HybridInt[square: Int = 1]:
         """Creates a non-algebraic StaticTuple from the hybrids parts."""
         return StaticTuple[2, Self.Coef](self.s, self.a)
 
-    @always_inline
-    fn unitize[unital_square: Int = Self.unital_square](self) -> HybridInt[unital_square]:
-        """Unitize the HybridInt, this normalizes the square and adjusts the antiox coefficient."""
-        @parameter
-        if Self.unital_square == 1: return HybridInt[unital_square](self.s, self.a * sqrt[DType.index,1](square).value)
-        elif Self.unital_square == -1: return HybridInt[unital_square](self.s, self.a * sqrt[DType.index,1](-square).value)
-        elif Self.unital_square == 0: return HybridInt[unital_square](self.s, self.a)
-        else:
-            print("something went wrong (could not unitize hybrid)")
-            return 0
+    # to_unital is being really screwed up so guess i wont add it yet
+    # @always_inline
+    # fn to_unital[unital_square: SIMD[type,1] = Self.unital_square](self) -> HybridSIMD[DType.float64,1,unital_square]:
+    #     """Unitize the HybridInt, this normalizes the square and adjusts the antiox coefficient."""
+    #     @parameter
+    #     if Self.unital_square == 1: return HybridSIMD[DType.float64,1,unital_square](self.s, self.a * sqrt(SIMD[DType.float64,1](square)))
+    #     elif Self.unital_square == -1: return HybridSIMD[DType.float64,1,unital_square](self.s, self.a * sqrt(SIMD[DType.float64,1](-square)))
+    #     elif Self.unital_square == 0: return HybridSIMD[DType.float64,1,unital_square](self.s, self.a)
+    #     else:
+    #         print("something went wrong (could not unitize hybrid)")
+    #         return 0
 
 
     #------( Formatting )------#
