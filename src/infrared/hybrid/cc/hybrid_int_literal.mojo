@@ -133,6 +133,7 @@ struct HybridIntLiteral[square: Int = 1]:
     
     #------( Arithmetic )------#
     #
+    #--- addition
     @always_inline # Hybrid + Scalar
     fn __add__(self, other: Self.Coef) -> Self:
         return Self(self.s + other, self.a)
@@ -140,10 +141,20 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline # Hybrid + Hybrid
     fn __add__(self, other: Self) -> Self:
         return Self(self.s + other.s, self.a + other.a)
+
+    #--- subtraction
+    @always_inline # Hybrid - Scalar
+    fn __sub__(self, other: Self.Coef) -> Self:
+        return Self(self.s - other, self.a)
+    
+    @always_inline # Hybrid - Hybrid
+    fn __sub__(self, other: Self) -> Self:
+        return Self(self.s - other.s, self.a - other.a)
     
     
     #------( Reverse Arithmetic )------#
     #
+    #--- addition
     @always_inline # Scalar + Hybrid
     fn __radd__(self, other: Self.Coef) -> Self:
         return Self(other + self.s, self.a)
@@ -151,10 +162,20 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline # Hybrid + Hybrid
     fn __radd__(self, other: Self) -> Self:
         return other + self
+
+    #--- subtraction
+    @always_inline # Scalar - Hybrid
+    fn __rsub__(self, other: Self.Coef) -> Self:
+        return Self(other - self.s, -self.a)
+
+    @always_inline # Hybrid - Hybrid
+    fn __rsub__(self, other: Self) -> Self:
+        return other - self
     
     
     #------( In Place Arithmetic )------#
     #
+    #--- addition
     @always_inline # Hybrid += Scalar
     fn __iadd__(inout self, other: Self.Coef):
         self = self + other
@@ -162,3 +183,12 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline # Hybrid += Hybrid
     fn __iadd__(inout self, other: Self):
         self = self + other
+
+    #--- subtraction
+    @always_inline # Hybrid -= Scalar
+    fn __isub__(inout self, other: Self.Coef):
+        self = self - other
+    
+    @always_inline # Hybrid -= Hybrid
+    fn __isub__(inout self, other: Self):
+        self = self - other

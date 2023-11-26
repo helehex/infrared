@@ -4,7 +4,7 @@ Implements the hmath module.
 Contains extra math functions.
 """
 
-from .hybrid.cc import HybridSIMD
+from .hybrid.cc import HybridIntLiteral, HybridFloatLiteral, HybridInt, HybridSIMD
 from math import nan, isnan
 # improve literal math
 
@@ -21,7 +21,15 @@ from math import select as _select
 fn select[type: DType, size: Int](cond: SIMD[DType.bool,size], true_case: SIMD[type,size], false_case: SIMD[type,size]) -> SIMD[type,size]:
     return _select(cond, true_case, false_case)
 
-@always_inline
+@always_inline # Hybrid _ Scalar
+fn select[type: DType, size: Int, square: SIMD[type,1]](cond: SIMD[DType.bool,size], true_case: HybridSIMD[type,size,square], false_case: SIMD[type,size]) -> HybridSIMD[type,size,square]:
+    return HybridSIMD[type,size,square](select(cond, true_case.s, false_case), select(cond, true_case.a, 0))
+
+@always_inline # Scalar _ Hybrid
+fn select[type: DType, size: Int, square: SIMD[type,1]](cond: SIMD[DType.bool,size], true_case: SIMD[type,size], false_case: HybridSIMD[type,size,square]) -> HybridSIMD[type,size,square]:
+    return HybridSIMD[type,size,square](select(cond, true_case, false_case.s), select(cond, 0, false_case.a))
+
+@always_inline # Hybrid _ Hybrid
 fn select[type: DType, size: Int, square: SIMD[type,1]](cond: SIMD[DType.bool,size], true_case: HybridSIMD[type,size,square], false_case: HybridSIMD[type,size,square]) -> HybridSIMD[type,size,square]:
     return HybridSIMD[type,size,square](select(cond, true_case.s, false_case.s), select(cond, true_case.a, false_case.a))
 
@@ -37,6 +45,7 @@ fn min(a: IntLiteral, b: IntLiteral) -> IntLiteral:
 
 @always_inline
 fn min(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral:
+    # check nan
     if a <= b: return a
     return b
 
@@ -48,11 +57,26 @@ fn min(a: Int, b: Int) -> Int:
 fn min(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
     return _min(a, b)
 
+# @always_inline
+# fn min[square: IntLiteral](a: HybridIntLiteral[square], b: HybridIntLiteral[square]) -> HybridIntLiteral[square]:
+#     if a < b: return a
+#     return b
+
+# @always_inline
+# fn min[square: FloatLiteral](a: HybridFloatLiteral[square], b: HybridFloatLiteral[square]) -> HybridFloatLiteral[square]:
+#     if a < b: return a
+#     return b
+
+@always_inline
+fn min[square: Int](a: HybridInt[square], b: HybridInt[square]) -> HybridInt[square]:
+    if a < b: return a
+    return b
+
 @always_inline
 fn min[type: DType, size: Int, square: SIMD[type,1]](a: HybridSIMD[type, size, square], b: HybridSIMD[type, size, square]) -> HybridSIMD[type, size, square]:
-    let a_measure = a.measure()
-    let b_measure = b.measure()
-    let nans = isnan(a_measure) or isnan(b_measure)
+    let a_denomer = a.denomer()
+    let b_denomer = b.denomer()
+    let nans = isnan(a_denomer) or isnan(b_denomer)
     let cond = a < b
     return select(nans, HybridSIMD[type, size, square](nan[type](), nan[type]()), select(cond, a, b))
 
@@ -70,6 +94,7 @@ fn max(a: IntLiteral, b: IntLiteral) -> IntLiteral:
 
 @always_inline
 fn max(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral:
+    # check nan
     if a >= b: return a
     return b
 
@@ -82,10 +107,15 @@ fn max(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
     return _max(a, b)
 
 @always_inline
+fn max[square: Int](a: HybridInt[square], b: HybridInt[square]) -> HybridInt[square]:
+    if a > b: return a
+    return b
+
+@always_inline
 fn max[type: DType, size: Int, square: SIMD[type,1]](a: HybridSIMD[type, size, square], b: HybridSIMD[type, size, square]) -> HybridSIMD[type, size, square]:
-    let a_measure = a.measure()
-    let b_measure = b.measure()
-    let nans = isnan(a_measure) or isnan(b_measure)
+    let a_denomer = a.denomer()
+    let b_denomer = b.denomer()
+    let nans = isnan(a_denomer) or isnan(b_denomer)
     let cond = a > b
     return select(nans, HybridSIMD[type, size, square](nan[type](), nan[type]()), select(cond, a, b))
 

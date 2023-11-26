@@ -1,5 +1,5 @@
 """
-Implements a HybridSIMD type, parameterized on the antiox squared.
+Implements hybrid types backed by SIMD vectors. Parameterized on the antiox squared.
 """
 
 alias HyplexInt8   = HybridSIMD[DType.int8,1,1]
@@ -38,8 +38,7 @@ alias Paraplex16     = HybridSIMD[DType.float16,1,0]
 alias Paraplex32     = HybridSIMD[DType.float32,1,0]
 alias Paraplex64     = HybridSIMD[DType.float64,1,0]
 
-fn constrain_square[type: DType, a: SIMD[type,1], b: FloatLiteral]():
-    constrained[a == b, "mismatched 'square' parameter"]()
+fn constrain_square[type: DType, a: SIMD[type,1], b: FloatLiteral](): constrained[a == b, "mismatched 'square' parameter"]()
 
 
 
@@ -321,22 +320,30 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline
     fn __lt__(self, other: Self) -> Bool:
         """Defines the `<` less-than operator. Returns true if the hybrids measure is less than the other's."""
-        return self.measure() < other.measure()
+        @parameter
+        if square == 0: return self.measure() < other.measure()
+        else: return self.denomer() < other.denomer()
 
     @always_inline
     fn __lt__(self, other: Self.Coef) -> Bool:
         """Defines the `<` less-than operator. Returns true if the hybrids measure is less than the other's."""
-        return self.measure() < other
+        @parameter
+        if square == 0: return self.measure() < abs(other)
+        else: return self.denomer() < other*other
 
     @always_inline
     fn __le__(self, other: Self) -> Bool:
         """Defines the `<=` less-than-or-equal operator. Returns true if the hybrids measure is less than or equal to the other's."""
-        return self.measure() <= other.measure()
+        @parameter
+        if square == 0: return self.measure() <= other.measure()
+        else: return self.denomer() <= other.denomer()
 
     @always_inline
     fn __le__(self, other: Self.Coef) -> Bool:
         """Defines the `<=` less-than-or-equal operator. Returns true if the hybrids measure is less than or equal to the other's."""
-        return self.measure() <= other
+        @parameter
+        if square == 0: return self.measure() <= abs(other)
+        else: return self.denomer() <= other*other
 
     @always_inline
     fn __eq__(self, other: Self) -> Bool:
@@ -361,22 +368,30 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline
     fn __gt__(self, other: Self) -> Bool:
         """Defines the `>` greater-than operator. Returns true if the hybrids measure is greater than the other's."""
-        return self.measure() > other.measure()
+        @parameter
+        if square == 0: return self.measure() > other.measure()
+        else: return self.denomer() > other.denomer()
 
     @always_inline
     fn __gt__(self, other: Self.Coef) -> Bool:
         """Defines the `>` greater-than operator. Returns true if the hybrids measure is greater than the other's."""
-        return self.measure() > other
+        @parameter
+        if square == 0: return self.measure() > abs(other)
+        else: return self.denomer() > other*other
 
     @always_inline
     fn __ge__(self, other: Self) -> Bool:
         """Defines the `>=` greater-than-or-equal operator. Returns true if the hybrids measure is greater than or equal to the other's."""
-        return self.measure() >= other.measure()
+        @parameter
+        if square == 0: return self.measure() >= other.measure()
+        else: return self.denomer() >= other.denomer()
 
     @always_inline
     fn __ge__(self, other: Self.Coef) -> Bool:
         """Defines the `>=` greater-than-or-equal operator. Returns true if the hybrids measure is greater than or equal to the other's."""
-        return self.measure() >= other
+        @parameter
+        if square == 0: return self.measure() >= abs(other)
+        else: return self.denomer() >= other*other
 
 
     #------( Unary )------#
