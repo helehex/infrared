@@ -214,6 +214,7 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
 
     #------( Arithmetic )------#
     #
+    #--- addition
     @always_inline # Multiplex + Scalar
     fn __add__(self, other: Self.Coef) -> Self:
         return Self(self.s + other, self.x, self.i, self.o)
@@ -233,9 +234,30 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     fn __add__[__:None=None](self, other: Self) -> Self:
         return Self(self.s + other.s, self.x + other.x, self.i + other.i, self.o + other.o)
 
+    #--- subtraction
+    @always_inline # Multiplex - Scalar
+    fn __sub__(self, other: Self.Coef) -> Self:
+        return Self(self.s - other, self.x, self.i, self.o)
+
+    @always_inline # Multiplex - Hyplex
+    fn __sub__[square: SIMD[type,1]](self, other: HybridSIMD[type,size,square]) -> Self:
+        let unital = other.to_unital()
+        @parameter
+        if unital.square == 1: return Self(self.s - unital.s, self.x - unital.a, self.i, self.o)
+        elif unital.square == -1: return Self(self.s - unital.s, self.x, self.i - unital.a, self.o)
+        elif unital.square == 0: return Self(self.s - unital.s, self.x, self.i, self.o - unital.a)
+        else:
+            print("something went wrong (hybrid is not unitized)")
+            return 0
+
+    @always_inline # Multiplex - Multiplex
+    fn __sub__[__:None=None](self, other: Self) -> Self:
+        return Self(self.s - other.s, self.x - other.x, self.i - other.i, self.o - other.o)
+
     
     #------( Reverse Arithmetic )------#
     #
+    #--- addition
     @always_inline # Scalar + Multiplex
     fn __radd__(self, other: Self.Coef) -> Self:
         return Self(other + self.s, self.x, self.i, self.o)
@@ -255,9 +277,30 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     fn __radd__[__:None=None](self, other: Self) -> Self:
         return other + self
 
+    #--- subtraction
+    @always_inline # Scalar - Multiplex
+    fn __rsub__(self, other: Self.Coef) -> Self:
+        return Self(other - self.s, -self.x, -self.i, -self.o)
+
+    @always_inline # Hyplex - Multiplex
+    fn __rsub__[square: SIMD[type,1]](self, other: HybridSIMD[type,size,square]) -> Self:
+        let unital = other.to_unital()
+        @parameter
+        if unital.square == 1:    return Self(unital.s - self.s, unital.a - self.x, -self.i, -self.o)
+        elif unital.square == -1: return Self(unital.s - self.s, -self.x, unital.a - self.i, -self.o)
+        elif unital.square == 0:  return Self(unital.s - self.s, -self.x, -self.i, unital.a - self.o)
+        else:
+            print("something went wrong (hybrid is not unitized)")
+            return 0
+
+    @always_inline # Multiplex - Multiplex
+    fn __rsub__[__:None=None](self, other: Self) -> Self:
+        return other - self
+
 
     #------( In Place Arithmetic )------#
     #
+    #--- addition
     @always_inline # Multiplex += Scalar
     fn __iadd__(inout self, other: Self.Coef):
         self = self + other
@@ -269,3 +312,16 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     @always_inline # Hybrid += Hybrid
     fn __iadd__[__:None=None](inout self, other: Self):
         self = self + other
+
+    #--- subtraction
+    @always_inline # Multiplex -= Scalar
+    fn __isub__(inout self, other: Self.Coef):
+        self = self - other
+
+    @always_inline # Multiplex -= Hyplex
+    fn __isub__[square: SIMD[type,1]](inout self, other: HybridSIMD[type,size,square]):
+        self = self - other
+    
+    @always_inline # Hybrid -= Hybrid
+    fn __isub__[__:None=None](inout self, other: Self):
+        self = self - other

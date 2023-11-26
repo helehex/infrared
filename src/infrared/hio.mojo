@@ -1,3 +1,8 @@
+from infrared.hybrid.cc import HybridSIMD as HybridSIMD_cc
+
+fn print_[type: DType, size: Int, square: SIMD[type,1]](value: HybridSIMD_cc[type, size, square]): print(value.__str__())
+
+
 # get the symbol for formatting
 fn symbol[square: IntLiteral]() -> String:
     """

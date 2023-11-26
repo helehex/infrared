@@ -8,7 +8,7 @@ from .hybrid_int import *
 from .hybrid_simd import *
 from .multiplex_simd import *
 
-from infrared import symbol
+#from infrared import symbol
 #from infrared import 
 
 
@@ -235,3 +235,37 @@ fn static_test_cc():
     #print(HybridFloatLiteral[-2](0,3).to_unital().__str__())
     #print(HybridInt[-2](0,3).to_unital().__str__())
     print(HybridSIMD[DType.float32,1,-2](0,3).to_unital().__str__())
+    print()
+
+
+fn math_test_cc():
+    print()
+    print("#------ hybrid denomer and measure ------#")
+    print()
+    print("1 ≈", Hyplex64(2.00,  1.7321).denomer())
+    print("1 ≈", Hyplex64(2.00,  1.7321).measure())
+    print("1 ≈", Hyplex64(1.20, -0.6633).denomer())
+    print("1 ≈", Hyplex64(1.20, -0.6633).measure())
+    print("4 ≈", Hyplex64(-3.0, -2.2360679775).denomer())
+    print("2 ≈", Hyplex64(-3.0, -2.2360679775).measure())
+    print("4 ≈", Hyplex64(-8.0, -7.74596669241).denomer())
+    print("2 ≈", Hyplex64(-8.0, -7.74596669241).measure())
+    print()
+    print("0.25 ≈", Complex64(0.3000,  0.4).denomer())
+    print("0.5  ≈", Complex64(0.3000,  0.4).measure())
+    print("0.25 ≈", Complex64(-0.130, -0.482804308183).denomer())
+    print("0.5  ≈", Complex64(-0.130, -0.482804308183).measure())
+    print("4.0  ≈", Complex64(0.5000, -1.9364916731).denomer())
+    print("2.0  ≈", Complex64(0.5000, -1.9364916731).measure())
+    print("4.0  ≈", Complex64(-1.700,  1.05356537529).denomer())
+    print("2.0  ≈", Complex64(-1.700,  1.05356537529).measure())
+    print()
+    print("0.25 ≈", Paraplex64(-0.50,  0.75).denomer())
+    print("0.5  ≈", Paraplex64(-0.50,  0.75).measure())
+    print("4.0  ≈", Paraplex64(2.000,  10.0).denomer())
+    print("2.0  ≈", Paraplex64(2.000,  10.0).measure())
+    print("2.56 ≈", Paraplex64(-1.60, -4.00).denomer())
+    print("1.6  ≈", Paraplex64(-1.60, -4.00).measure())
+    print("0.01 ≈", Paraplex64(0.100,  0.00).denomer())
+    print("0.1  ≈", Paraplex64(0.100,  0.00).measure())
+    print()

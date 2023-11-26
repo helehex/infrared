@@ -259,24 +259,224 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     #
 
 
-    #------( Lanes )------#
+    #------( SIMD Vector )------#
     #
+    @always_inline
+    fn __len__(self) -> Int:
+        """Returns the length of the SIMD axis. Guaranteed to be a power of 2."""
+        return size
 
 
     #------( Comparison )------#
     #
+    @always_inline
+    fn __lt__(self, other: Self) -> Bool:
+        """Defines the `<` less-than operator. Returns true if the hybrids measure is less than the other's."""
+        return self.measure() < other.measure()
+
+    @always_inline
+    fn __lt__(self, other: Self.Coef) -> Bool:
+        """Defines the `<` less-than operator. Returns true if the hybrids measure is less than the other's."""
+        return self.measure() < other
+
+    @always_inline
+    fn __le__(self, other: Self) -> Bool:
+        """Defines the `<=` less-than-or-equal operator. Returns true if the hybrids measure is less than or equal to the other's."""
+        return self.measure() <= other.measure()
+
+    @always_inline
+    fn __le__(self, other: Self.Coef) -> Bool:
+        """Defines the `<=` less-than-or-equal operator. Returns true if the hybrids measure is less than or equal to the other's."""
+        return self.measure() <= other
+
+    @always_inline
+    fn __eq__(self, other: Self) -> Bool:
+        """Defines the `==` equality operator. Returns true if the hybrid numbers are equal."""
+        return self.s == other.s and self.a == other.a
+
+    @always_inline
+    fn __eq__(self, other: Self.Coef) -> Bool:
+        """Defines the `==` equality operator. Returns true if the hybrid numbers are equal."""
+        return self.s == other and self.a == 0
+    
+    @always_inline
+    fn __ne__(self, other: Self) -> Bool:
+        """Defines the `!=` inequality operator. Returns true if the hybrid numbers are not equal."""
+        return self.s != other.s or self.a != other.a
+
+    @always_inline
+    fn __ne__(self, other: Self.Coef) -> Bool:
+        """Defines the `!=` inequality operator. Returns true if the hybrid numbers are not equal."""
+        return self.s != other or self.a != 0
+
+    @always_inline
+    fn __gt__(self, other: Self) -> Bool:
+        """Defines the `>` greater-than operator. Returns true if the hybrids measure is greater than the other's."""
+        return self.measure() > other.measure()
+
+    @always_inline
+    fn __gt__(self, other: Self.Coef) -> Bool:
+        """Defines the `>` greater-than operator. Returns true if the hybrids measure is greater than the other's."""
+        return self.measure() > other
+
+    @always_inline
+    fn __ge__(self, other: Self) -> Bool:
+        """Defines the `>=` greater-than-or-equal operator. Returns true if the hybrids measure is greater than or equal to the other's."""
+        return self.measure() >= other.measure()
+
+    @always_inline
+    fn __ge__(self, other: Self.Coef) -> Bool:
+        """Defines the `>=` greater-than-or-equal operator. Returns true if the hybrids measure is greater than or equal to the other's."""
+        return self.measure() >= other
 
 
     #------( Unary )------#
     #
+    @always_inline
+    fn __neg__(self) -> Self:
+        """Defines the unary `-` negative operator. Returns the negative of this hybrid number."""
+        return Self(-self.s, -self.a)
+    
+    @always_inline
+    fn __invert__(self) -> Self:
+        """
+        Defines the unary `~` invert operator. Performs bit-wise invert.
+        
+        SIMD type must be integral (or boolean).
+
+        Returns:
+            The inverted hybrid number.
+        """
+        return Self(~self.s, ~self.a) # could define different behaviour. bit invert is not used very often with complex types.
+    
+    @always_inline
+    fn conjugate(self) -> Self:
+        """
+        Gets the dual of this hybrid number.
+
+        This is also called the hodge dual, and reverses the order of coefficients.
+
+            dual(Hybrid(s,a)) = Hybrid(a,s)
+
+        Returns:
+            The hybrid's dual.
+        """
+        return Self(self.s, -self.a)
+
+    @always_inline
+    fn dual(self) -> Self:
+        """
+        Gets the dual of this hybrid number.
+
+        This is also called the hodge dual, and reverses the order of coefficients.
+
+            dual(Hybrid(s,a)) = Hybrid(a,s)
+
+        Returns:
+            The hybrid's dual.
+        """
+        return Self(self.a, self.s)
+
+    @always_inline
+    fn denomer[absolute: Bool = False](self) -> Self.Coef:
+        """
+        Gets the denomer of this hybrid number.
+
+        Equal to the measure squared for non-degenerate cases.
+
+            # coefficient math:
+            Hyplex   -> s*s - x*x
+            Complex  -> s*s + i*i
+            Paraplex -> s*s
+
+        Parameters:
+            absolute: Setting this to true will ensure a positive result by taking the absolute value.
+
+        Returns:
+            The hybrid denomer.
+        """
+        @parameter
+        if absolute: return abs(self.inner(self))
+        return self.inner(self)
+
+    @always_inline
+    fn measure[absolute: Bool = False](self) -> Self.Coef:
+        """
+        Gets the measure of this hybrid number.
+        
+        This is similar to magnitude, but is not guaranteed to be positive when the antiox squared is positive.
+
+        Equal to the square root of the denomer.
+
+            # coefficient math:
+            hyplex   -> sqrt(s*s - x*x)
+            complex  -> sqrt(s*s + i*i)
+            paraplex -> |s|
+
+        Parameters:
+            absolute: Setting this to true will ensure a positive result by using the absolute denomer.
+
+        Returns:
+            The hybrid measure.
+        """
+        @parameter
+        if square != 0: return sqrt(self.denomer[absolute]())
+        return abs(self.s)
+
+    @always_inline
+    fn argument(self) -> Self.Coef:
+        """Gets the argument of this hybrid number. *Work in progress, may change."""
+        @parameter
+        if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
+        elif square == -1: return atan(self.a/self.s)
+        elif square == 0: return self.a/self.s
+        else:
+            print("not implemented in general case, maybe unitize would work but it's broken")
+            return 0
 
 
     #------( Products )------#
     #
+    @always_inline
+    fn inner(self, other: Self) -> Self.Coef:
+        """
+        The inner product of two hybrid numbers.
+
+        This is the scalar part of the conjugate product.
+
+            (h1.conjugate()*h2).s
+
+        Args:
+            other: The other hybrid number.
+
+        Returns:
+            The result of taking the outer product.
+        """
+        @parameter
+        if square == 0: return self.s*other.s
+        return self.s*other.s - square*self.a*other.a
+
+    @always_inline
+    fn outer(self, other: Self) -> Self.Coef:
+        """
+        The outer product of two hybrid numbers.
+
+        This is the antiox part of the conjugate product.
+
+            (h1.conjugate()*h2).a
+
+        Args:
+            other: The other hybrid number.
+
+        Returns:
+            The result of taking the outer product.
+        """
+        return self.s*other.a - self.a*other.s
 
     
     #------( Arithmetic )------#
     #
+    #--- addition
     @always_inline # Hybrid + Scalar
     fn __add__(self, other: Self.Coef) -> Self:
         return Self(self.s + other, self.a)
@@ -285,13 +485,27 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     fn __add__[__:None=None](self, other: Self) -> Self:
         return Self(self.s + other.s, self.a + other.a)
 
-    @always_inline # Hybrid + Hyplex
+    @always_inline # Hybrid + Hybrid
     fn __add__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
         return MultiplexSIMD(self) + other
+
+    #--- subtraction
+    @always_inline # Hybrid - Scalar
+    fn __sub__(self, other: Self.Coef) -> Self:
+        return Self(self.s - other, self.a)
+    
+    @always_inline # Hybrid - Hybrid
+    fn __sub__[__:None=None](self, other: Self) -> Self:
+        return Self(self.s - other.s, self.a - other.a)
+
+    @always_inline # Hybrid - Hybrid
+    fn __sub__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
+        return MultiplexSIMD(self) - other
     
     
     #------( Reverse Arithmetic )------#
     #
+    #--- addition
     @always_inline # Scalar + Hybrid
     fn __radd__(self, other: Self.Coef) -> Self:
         return Self(other + self.s, self.a)
@@ -300,13 +514,27 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     fn __radd__[__:None=None](self, other: Self) -> Self:
         return other + self
 
-    # @always_inline # Hybrid + Hyplex
-    # fn __radd__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
-    #     return other + MultiplexSIMD(self)
+    @always_inline # Hybrid + Hybrid
+    fn __radd__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
+        return other + self
+
+    #--- subtraction
+    @always_inline # Scalar - Hybrid
+    fn __rsub__(self, other: Self.Coef) -> Self:
+        return Self(other - self.s, -self.a)
+
+    @always_inline # Hybrid - Hybrid
+    fn __rsub__[__:None=None](self, other: Self) -> Self:
+        return other - self
+
+    @always_inline # Hybrid - Hybrid
+    fn __rsub__[square: SIMD[type,1], __:None=None](self, other: HybridSIMD[type,size,square]) -> MultiplexSIMD[type,size]:
+        return other - self
     
     
     #------( In Place Arithmetic )------#
     #
+    #--- addition
     @always_inline # Hybrid += Scalar
     fn __iadd__(inout self, other: Self.Coef):
         self = self + other
@@ -314,3 +542,12 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline # Hybrid += Hybrid
     fn __iadd__[__:None=None](inout self, other: Self):
         self = self + other
+
+    #--- subtraction
+    @always_inline # Hybrid -= Scalar
+    fn __isub__(inout self, other: Self.Coef):
+        self = self - other
+    
+    @always_inline # Hybrid -= Hybrid
+    fn __isub__[__:None=None](inout self, other: Self):
+        self = self - other
