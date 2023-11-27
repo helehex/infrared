@@ -1,5 +1,5 @@
 """
-Implements Hyplex, Complex, Paraplex, and Multiplex types, backed by Hybrid.
+Implements Complex, Paraplex, Hyperplex, and Multiplex types, backed by Hybrid.
 """
 
 from .hybrid_int_literal import *
@@ -160,7 +160,7 @@ fn static_test_cc():
 
     #------ multiplex ------#
     #
-    multiplex = Hyplex64(1,1) + Complex64(1,1) + Paraplex64(1,1)
+    multiplex = Hyperplex64(1,1) + Complex64(1,1) + Paraplex64(1,1)
 
     multiplex = int_literal
     multiplex = hybrid_int_literal
@@ -173,8 +173,8 @@ fn static_test_cc():
     multiplex = simd
     multiplex = hybrid_simd
     
-    multiplex = multiplex.__add__(Hyplex64(1,1))
-    multiplex = Hyplex64(1,1) + multiplex
+    multiplex = multiplex.__add__(Hyperplex64(1,1))
+    multiplex = Hyperplex64(1,1) + multiplex
 
     multiplex = multiplex + Complex64(1,1)
     multiplex = Complex64(1,1) + multiplex
@@ -242,16 +242,6 @@ fn math_test_cc():
     print()
     print("#------ Hybrid denomer and measure ------#")
     print()
-    print("#--- Hyplex")
-    print("1 ≈", Hyplex64(2.00,  1.7321).denomer())
-    print("1 ≈", Hyplex64(2.00,  1.7321).measure())
-    print("1 ≈", Hyplex64(1.20, -0.6633).denomer())
-    print("1 ≈", Hyplex64(1.20, -0.6633).measure())
-    print("4 ≈", Hyplex64(-3.0, -2.2360679775).denomer())
-    print("2 ≈", Hyplex64(-3.0, -2.2360679775).measure())
-    print("4 ≈", Hyplex64(-8.0, -7.74596669241).denomer())
-    print("2 ≈", Hyplex64(-8.0, -7.74596669241).measure())
-    print()
     print("#--- Complex")
     print("0.25 ≈", Complex64(0.3000,  0.4).denomer())
     print("0.5  ≈", Complex64(0.3000,  0.4).measure())
@@ -272,6 +262,16 @@ fn math_test_cc():
     print("0.01 ≈", Paraplex64(0.100,  0.00).denomer())
     print("0.1  ≈", Paraplex64(0.100,  0.00).measure())
     print()
+    print("#--- Hyperplex")
+    print("1 ≈", Hyperplex64(2.00,  1.7321).denomer())
+    print("1 ≈", Hyperplex64(2.00,  1.7321).measure())
+    print("1 ≈", Hyperplex64(1.20, -0.6633).denomer())
+    print("1 ≈", Hyperplex64(1.20, -0.6633).measure())
+    print("4 ≈", Hyperplex64(-3.0, -2.2360679775).denomer())
+    print("2 ≈", Hyperplex64(-3.0, -2.2360679775).measure())
+    print("4 ≈", Hyperplex64(-8.0, -7.74596669241).denomer())
+    print("2 ≈", Hyperplex64(-8.0, -7.74596669241).measure())
+    print()
     print("#--- Hybrid[-2]")
     print("4 ≈", HybridSIMD[DType.float64,1,-2](1.5,0.935414346693).denomer())
     print("2 ≈", HybridSIMD[DType.float64,1,-2](1.5,0.935414346693).measure())
@@ -283,10 +283,6 @@ fn math_test_cc():
     print()
     print("#------ Hybrid min and max ------#")
     print()
-    print("#--- Hyplex")
-    print(min(Hyplex64(5,1).measure(), Hyplex64(9,-8).measure()),  "<",  max(Hyplex64(5,1).measure(), Hyplex64(9,-8).measure()))
-    print(min(Hyplex64(5,1),           Hyplex64(9,-8)).__str__(),  "<",  max(Hyplex64(5,1),           Hyplex64(9,-8)).__str__())
-    print()
     print("#--- Complex")
     print(min(Complex64(5,1).measure(), Complex64(9,-8).measure()),  "<",  max(Complex64(5,1).measure(), Complex64(9,-8).measure()))
     print(min(Complex64(5,1),           Complex64(9,-8)).__str__(),  "<",  max(Complex64(5,1),           Complex64(9,-8)).__str__())
@@ -295,13 +291,17 @@ fn math_test_cc():
     print(min(Paraplex64(3,85).measure(), Paraplex64(6,-6).measure()),  "<",  max(Paraplex64(3,85).measure(), Paraplex64(6,-6).measure()))
     print(min(Paraplex64(3,85),           Paraplex64(6,-6)).__str__(),  "<",  max(Paraplex64(3,85),           Paraplex64(6,-6)).__str__())
     print()
+    print("#--- Hyperplex")
+    print(min(Hyperplex64(5,1).measure(), Hyperplex64(9,-8).measure()),  "<",  max(Hyperplex64(5,1).measure(), Hyperplex64(9,-8).measure()))
+    print(min(Hyperplex64(5,1),           Hyperplex64(9,-8)).__str__(),  "<",  max(Hyperplex64(5,1),           Hyperplex64(9,-8)).__str__())
+    print()
     print("#--- min_coef")
-    print(HyplexInt64(3,6).min_coef(), "<", HyplexInt64(3,6).max_coef())
-    print(HyplexInt64(6,3).min_coef(), "<", HyplexInt64(6,3).max_coef())
+    print(HyperplexInt64(3,6).min_coef(), "<", HyperplexInt64(3,6).max_coef())
+    print(HyperplexInt64(6,3).min_coef(), "<", HyperplexInt64(6,3).max_coef())
     print()
     print("#--- reduce_min & reduce_max")
     let reduce_1 = HybridSIMD[DType.float64,4,-1](    Complex64(2,3),     Complex64(3,1),     Complex64(4,1),     Complex64(5,1))
-    let reduce_2 = HybridSIMD[DType.float64,4, 2](SuperHyplex64(2,0), SuperHyplex64(3,1), SuperHyplex64(4,1), SuperHyplex64(5,1))
+    let reduce_2 = HybridSIMD[DType.float64,4, 2](SuperHyperplex64(2,0), SuperHyperplex64(3,1), SuperHyperplex64(4,1), SuperHyperplex64(5,1))
     print(reduce_1.reduce_min().__str__(), "<", reduce_1.reduce_max().__str__())
     print(reduce_2.reduce_min().__str__(), "<", reduce_2.reduce_max().__str__())
     print()
@@ -316,39 +316,43 @@ fn math_test_cc():
     print()
     print("#------ Hybrid addition and subtraction ------#")
     print()
-    print((Hyplex64(1, 2) + Hyplex64(2, 4) + 3).__str__(), "= 6.0 + 6.0x")
-    print((10 - Hyplex64(5, 5) - Hyplex64(-1, 1)).__str__(), "= 6.0 - 6.0x")
+    print((Hyperplex64(1, 2) + Hyperplex64(2, 4) + 3).__str__(), "= 6.0 + 6.0x")
+    print((10 - Hyperplex64(5, 5) - Hyperplex64(-1, 1)).__str__(), "= 6.0 - 6.0x")
     print()
     print()
     print("#------ Hybrid multiplication and division ------#")
     print()
-    print((Hyplex64(0,2)*Hyplex64(0,2)).__str__(),     " =  4")
     print((Complex64(0,2)*Complex64(0,2)).__str__(),    "= -4")
     print((Paraplex64(0,2)*Paraplex64(0,2)).__str__(), " =  0")
-    print((Hyplex64(1,2)*Hyplex64(1,2)).__str__(),      " =  5 + 4x")
+    print((Hyperplex64(0,2)*Hyperplex64(0,2)).__str__(),     " =  4")
     print((Complex64(1,2)*Complex64(1,2)).__str__(),     "= -3 + 4i")
     print((Paraplex64(1,2)*Paraplex64(1,2)).__str__(),  " =  1 + 4o")
-    print((Hyplex64(1,-2)/Hyplex64(1,-2)).__str__(),      "=  1")
+    print((Hyperplex64(1,2)*Hyperplex64(1,2)).__str__(),      " =  5 + 4x")
     print((Complex64(1,-2)/Complex64(1,-2)).__str__(),   " =  1")
     print((Paraplex64(1,-2)/Paraplex64(1,-2)).__str__(), " =  1")
-    let div_hyplex = (Hyplex64(1,-2)/Hyplex64(-3,8))*Hyplex64(0,1)
+    print((Hyperplex64(1,-2)/Hyperplex64(1,-2)).__str__(),      "=  1")
     let div_complex = (Complex64(1,-2)/Complex64(-3,8))*Complex64(0,1)
     let div_paraplex = (Paraplex64(1,-2)/Paraplex64(-3,8))*Paraplex64(0,1)
-    print(div_hyplex.__str__(), "this", div_complex.__str__(), "that", div_paraplex.__str__(), "and lots of digits")
-    print((div_hyplex*Hyplex64(-3,8)/Hyplex64(1,-2)).__str__(),        " ≈  x")
-    print((div_complex*Complex64(-3,8)/Complex64(1,-2)).__str__(),    "  ≈  i")
-    print((div_paraplex*Paraplex64(-3,8)/Paraplex64(1,-2)).__str__(), "  ≈  o")
+    let div_hyperplex = (Hyperplex64(1,-2)/Hyperplex64(-3,8))*Hyperplex64(0,1)
+    print(div_complex.__str__(), "that", div_paraplex.__str__(), "this", div_hyperplex.__str__(), "and lots of digits")
+    print((div_complex*Complex64(-3,8)/Complex64(1,-2)).__str__(),      "  ≈  i")
+    print((div_paraplex*Paraplex64(-3,8)/Paraplex64(1,-2)).__str__(),   "  ≈  o")
+    print((div_hyperplex*Hyperplex64(-3,8)/Hyperplex64(1,-2)).__str__(), " ≈  x")
     print()
-    print((HyplexIntLiteral(1,2)*HyplexIntLiteral(1,1)).__str__())
-    print(HybridFloatLiteral[1](HyplexIntLiteral(1,1)).__str__())
+    print((HyperplexIntLiteral(1,2)*HyperplexIntLiteral(1,1)).__str__())
+    print(HybridFloatLiteral[1](HyperplexIntLiteral(1,1)).__str__())
     print()
     print((Complex64(1,1)**Complex64(1,2)).__str__(), "= 0.0270820575 + 0.2927360563i")
-    print((Hyplex64(0,1)**2).__str__(), "= 1")
-    print((Complex64(0,1)**2).__str__(), "= -1")
+    print((Complex64(0,1)**2).__str__(), "=", (Complex64(0,1)**Complex64(2,0)).__str__(), "= -1")
     print((Paraplex64(0,1)**2).__str__(), "=", (Paraplex64(0,1)**Paraplex64(2,0)).__str__(), "= 0")
-    print((Hyplex64(2,1)**2).__str__(), "=", (Hyplex64(2,1)**Hyplex64(2,0)).__str__(), "=", (Hyplex64(2,1)*Hyplex64(2,1)).__str__())
+    print((Hyperplex64(0,1)**2).__str__(), "=", (Hyperplex64(0,1)**Hyperplex64(2,0)).__str__(), "= 1")
     print((Complex64(2,1)**2).__str__(), "=", (Complex64(2,1)**Complex64(2,0)).__str__(), "=", (Complex64(2,1)*Complex64(2,1)).__str__())
     print((Paraplex64(2,1)**2).__str__(), "=", (Paraplex64(2,1)**Paraplex64(2,0)).__str__(), "=", (Paraplex64(2,1)*Paraplex64(2,1)).__str__())
+    print((Hyperplex64(2,1)**2).__str__(), "=", (Hyperplex64(2,1)**Hyperplex64(2,0)).__str__(), "=", (Hyperplex64(2,1)*Hyperplex64(2,1)).__str__())
     print((e**Complex64(0,hfpi)).__str__(), "= i")
+    print()
+    print()
+    print("#------ Multiplex ------#")
+    print((Complex64(1,1) + Paraplex64(1,1) + Hyperplex64(1,1)).__str__())
 
-alias SuperHyplex64 = HybridSIMD[DType.float64,1,2] # next gen game system
+alias SuperHyperplex64 = HybridSIMD[DType.float64,1,2] # next gen game system

@@ -2,13 +2,14 @@
 Implements a hybrid integer literal, parameterized on the antiox squared.
 """
 
-alias HyplexIntLiteral = HybridIntLiteral
+
 alias ComplexIntLiteral = HybridIntLiteral[-1]
 alias ParaplexIntLiteral = HybridIntLiteral[0]
+alias HyperplexIntLiteral = HybridIntLiteral[1]
 
-alias x: HyplexIntLiteral = HyplexIntLiteral(0,1)
 alias i: ComplexIntLiteral = ComplexIntLiteral(0,1)
 alias o: ParaplexIntLiteral = ParaplexIntLiteral(0,1)
+alias x: HyperplexIntLiteral = HyperplexIntLiteral(0,1)
 
 
 
@@ -17,7 +18,7 @@ alias o: ParaplexIntLiteral = ParaplexIntLiteral(0,1)
 #---
 #---
 @register_passable("trivial")
-struct HybridIntLiteral[square: Int = 1]:
+struct HybridIntLiteral[square: Int = -1]:
     """
     Represent a hybrid integer literal with scalar and antiox parts.
 
@@ -131,6 +132,85 @@ struct HybridIntLiteral[square: Int = 1]:
         elif idx == 1: self.a = coef
 
 
+    #------( Comparison )------#
+    #
+    @always_inline
+    fn __lt__(self, other: Self) -> Bool:
+        """Defines the `<` less-than operator. Returns true if the hybrids measure is less than the other's."""
+        @parameter
+        if square == 0: return self.measure() < other.measure()
+        else: return self.denomer() < other.denomer()
+
+    @always_inline
+    fn __lt__(self, other: Self.Coef) -> Bool:
+        """Defines the `<` less-than operator. Returns true if the hybrids measure is less than the other's."""
+        @parameter
+        if square == 0: return self.measure() < abs(other)
+        else: return self.denomer() < other*other
+
+    @always_inline
+    fn __le__(self, other: Self) -> Bool:
+        """Defines the `<=` less-than-or-equal operator. Returns true if the hybrids measure is less than or equal to the other's."""
+        @parameter
+        if square == 0: return self.measure() <= other.measure()
+        else: return self.denomer() <= other.denomer()
+
+    @always_inline
+    fn __le__(self, other: Self.Coef) -> Bool:
+        """Defines the `<=` less-than-or-equal operator. Returns true if the hybrids measure is less than or equal to the other's."""
+        @parameter
+        if square == 0: return self.measure() <= abs(other)
+        else: return self.denomer() <= other*other
+
+    @always_inline
+    fn __eq__(self, other: Self) -> Bool:
+        """Defines the `==` equality operator. Returns true if the hybrid numbers are equal."""
+        return self.s == other.s and self.a == other.a
+
+    @always_inline
+    fn __eq__(self, other: Self.Coef) -> Bool:
+        """Defines the `==` equality operator. Returns true if the hybrid numbers are equal."""
+        return self.s == other and self.a == 0
+    
+    @always_inline
+    fn __ne__(self, other: Self) -> Bool:
+        """Defines the `!=` inequality operator. Returns true if the hybrid numbers are not equal."""
+        return self.s != other.s or self.a != other.a
+
+    @always_inline
+    fn __ne__(self, other: Self.Coef) -> Bool:
+        """Defines the `!=` inequality operator. Returns true if the hybrid numbers are not equal."""
+        return self.s != other or self.a != 0
+
+    @always_inline
+    fn __gt__(self, other: Self) -> Bool:
+        """Defines the `>` greater-than operator. Returns true if the hybrids measure is greater than the other's."""
+        @parameter
+        if square == 0: return self.measure() > other.measure()
+        else: return self.denomer() > other.denomer()
+
+    @always_inline
+    fn __gt__(self, other: Self.Coef) -> Bool:
+        """Defines the `>` greater-than operator. Returns true if the hybrids measure is greater than the other's."""
+        @parameter
+        if square == 0: return self.measure() > abs(other)
+        else: return self.denomer() > other*other
+
+    @always_inline
+    fn __ge__(self, other: Self) -> Bool:
+        """Defines the `>=` greater-than-or-equal operator. Returns true if the hybrids measure is greater than or equal to the other's."""
+        @parameter
+        if square == 0: return self.measure() >= other.measure()
+        else: return self.denomer() >= other.denomer()
+
+    @always_inline
+    fn __ge__(self, other: Self.Coef) -> Bool:
+        """Defines the `>=` greater-than-or-equal operator. Returns true if the hybrids measure is greater than or equal to the other's."""
+        @parameter
+        if square == 0: return self.measure() >= abs(other)
+        else: return self.denomer() >= other*other
+
+
     #------( Unary )------#
     #
     @always_inline
@@ -146,37 +226,21 @@ struct HybridIntLiteral[square: Int = 1]:
         SIMD type must be integral (or boolean).
 
         Returns:
-            The inverted hybrid number.
+            The bit-wise inverted hybrid number.
         """
         return Self(~self.s, ~self.a) # could define different behaviour. bit invert is not used very often with complex types.
     
     @always_inline
     fn conjugate(self) -> Self:
         """
-        Gets the dual of this hybrid number.
+        Gets the conjugate of this hybrid number.
 
-        This is also called the hodge dual, and reverses the order of coefficients.
-
-            dual(Hybrid(s,a)) = Hybrid(a,s)
+            conjugate(Hybrid(s,a)) = Hybrid(s,-a)
 
         Returns:
-            The hybrid's dual.
+            The hybrid conjugate.
         """
         return Self(self.s, -self.a)
-
-    @always_inline
-    fn dual(self) -> Self:
-        """
-        Gets the dual of this hybrid number.
-
-        This is also called the hodge dual, and reverses the order of coefficients.
-
-            dual(Hybrid(s,a)) = Hybrid(a,s)
-
-        Returns:
-            The hybrid's dual.
-        """
-        return Self(self.a, self.s)
 
     @always_inline
     fn denomer[absolute: Bool = False](self) -> Self.Coef:
@@ -186,9 +250,9 @@ struct HybridIntLiteral[square: Int = 1]:
         Equal to the measure squared for non-degenerate cases.
 
             # coefficient math:
-            Hyplex   -> s*s - x*x
-            Complex  -> s*s + i*i
-            Paraplex -> s*s
+            Complex   -> c[0]*c[0] + c[1]*c[1]
+            Paraplex  -> c[0]*c[0]
+            Hyperplex -> c[0]*c[0] - c[1]*c[1]
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by taking the absolute value.
@@ -210,9 +274,9 @@ struct HybridIntLiteral[square: Int = 1]:
         Equal to the square root of the denomer.
 
             # coefficient math:
-            hyplex   -> sqrt(s*s - x*x)
-            complex  -> sqrt(s*s + i*i)
-            paraplex -> |s|
+            Complex   -> sqrt(c[0]*c[0] + c[1]*c[1])
+            Paraplex  -> sqrt(c[0]*c[0])
+            Hyperplex -> sqrt(c[0]*c[0] - c[1]*c[1])
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by using the absolute denomer.
@@ -228,9 +292,9 @@ struct HybridIntLiteral[square: Int = 1]:
     fn argument[interval: Int = 0](self) -> FloatLiteral:
         """Gets the argument of this hybrid number. *Work in progress, may change."""
         @parameter
-        if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-        elif square == -1: return atan2(FloatLiteral(self.a), FloatLiteral(self.s)) + interval*tau
+        if square == -1: return atan2(FloatLiteral(self.a), FloatLiteral(self.s)) + interval*tau
         elif square == 0: return FloatLiteral(self.a)/FloatLiteral(self.s)
+        elif square == 1: return log(abs(self.s + self.a) / self.measure[True]())
         else:
             print("not implemented in general case, maybe unitize would work but it's broken")
             return 0

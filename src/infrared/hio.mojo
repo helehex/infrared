@@ -53,11 +53,11 @@ fn symbol[type: DType, square: SIMD[type,1]]() -> String:
     """
 
     @parameter
-    if square == 1:
-        return "x"
-    elif square == -1:
+    if square == -1:
         return "i"
     elif square == 0:
         return "o"
+    elif square == 1:
+        return "x"
     else:
         return "[" + String(square) + "]"

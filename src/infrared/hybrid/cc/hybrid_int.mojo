@@ -2,9 +2,10 @@
 Implements a hybrid integer type, parameterized on the antiox squared.
 """
 
-alias HyplexInt = HybridInt[1]
+
 alias ComplexInt = HybridInt[-1]
 alias ParaplexInt = HybridInt[0]
+alias HyperplexInt = HybridInt[1]
 
 
 
@@ -14,7 +15,7 @@ alias ParaplexInt = HybridInt[0]
 #--- not really necessary, but thats ok, it does allow for Int/Int to give a SIMD[DType.float64,1], thats the only thing i can really see
 #---
 @register_passable("trivial")
-struct HybridInt[square: Int = 1]:
+struct HybridInt[square: Int = -1]:
     """
     Represent a hybrid integer type with scalar and antiox parts.
 
@@ -229,37 +230,21 @@ struct HybridInt[square: Int = 1]:
         SIMD type must be integral (or boolean).
 
         Returns:
-            The inverted hybrid number.
+            The bit-wise inverted hybrid number.
         """
         return Self(~self.s, ~self.a) # could define different behaviour. bit invert is not used very often with complex types.
     
     @always_inline
     fn conjugate(self) -> Self:
         """
-        Gets the dual of this hybrid number.
+        Gets the conjugate of this hybrid number.
 
-        This is also called the hodge dual, and reverses the order of coefficients.
-
-            dual(Hybrid(s,a)) = Hybrid(a,s)
+            conjugate(Hybrid(s,a)) = Hybrid(s,-a)
 
         Returns:
-            The hybrid's dual.
+            The hybrid conjugate.
         """
         return Self(self.s, -self.a)
-
-    @always_inline
-    fn dual(self) -> Self:
-        """
-        Gets the dual of this hybrid number.
-
-        This is also called the hodge dual, and reverses the order of coefficients.
-
-            dual(Hybrid(s,a)) = Hybrid(a,s)
-
-        Returns:
-            The hybrid's dual.
-        """
-        return Self(self.a, self.s)
 
     @always_inline
     fn denomer[absolute: Bool = False](self) -> Self.Coef:
@@ -269,9 +254,9 @@ struct HybridInt[square: Int = 1]:
         Equal to the measure squared for non-degenerate cases.
 
             # coefficient math:
-            Hyplex   -> s*s - x*x
-            Complex  -> s*s + i*i
-            Paraplex -> s*s
+            Complex   -> c[0]*c[0] + c[1]*c[1]
+            Paraplex  -> c[0]*c[0]
+            Hyperplex -> c[0]*c[0] - c[1]*c[1]
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by taking the absolute value.
@@ -293,9 +278,9 @@ struct HybridInt[square: Int = 1]:
         Equal to the square root of the denomer.
 
             # coefficient math:
-            hyplex   -> sqrt(s*s - x*x)
-            complex  -> sqrt(s*s + i*i)
-            paraplex -> |s|
+            Complex   -> sqrt(c[0]*c[0] + c[1]*c[1])
+            Paraplex  -> sqrt(c[0]*c[0])
+            Hyperplex -> sqrt(c[0]*c[0] - c[1]*c[1])
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by using the absolute denomer.
@@ -311,9 +296,9 @@ struct HybridInt[square: Int = 1]:
     fn argument[interval: Int = 0](self) -> SIMD[DType.float64,1]:
         """Gets the argument of this hybrid number. *Work in progress, may change."""
         @parameter
-        if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-        elif square == -1: return atan2(self.a, self.s) + interval*tau
+        if square == -1: return atan2(self.a, self.s) + interval*tau
         elif square == 0: return self.a/self.s
+        elif square == 1: return log(abs(self.s + self.a) / self.measure[True]())
         else:
             print("not implemented in general case, maybe unitize would work but it's broken")
             return 0

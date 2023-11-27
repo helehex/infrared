@@ -2,17 +2,6 @@
 Implements hybrid types backed by SIMD vectors. Parameterized on the antiox squared.
 """
 
-alias HyplexInt8   = HybridSIMD[DType.int8,1,1]
-alias HyplexUInt8  = HybridSIMD[DType.uint8,1,1]
-alias HyplexInt16  = HybridSIMD[DType.int16,1,1]
-alias HyplexUInt16 = HybridSIMD[DType.uint16,1,1]
-alias HyplexInt32  = HybridSIMD[DType.int32,1,1]
-alias HyplexUInt32 = HybridSIMD[DType.uint32,1,1]
-alias HyplexInt64  = HybridSIMD[DType.int64,1,1]
-alias HyplexUInt64 = HybridSIMD[DType.uint64,1,1]
-alias Hyplex16     = HybridSIMD[DType.float16,1,1]
-alias Hyplex32     = HybridSIMD[DType.float32,1,1]
-alias Hyplex64     = HybridSIMD[DType.float64,1,1]
 
 alias ComplexInt8   = HybridSIMD[DType.int8,1,-1]
 alias ComplexUInt8  = HybridSIMD[DType.uint8,1,-1]
@@ -38,6 +27,18 @@ alias Paraplex16     = HybridSIMD[DType.float16,1,0]
 alias Paraplex32     = HybridSIMD[DType.float32,1,0]
 alias Paraplex64     = HybridSIMD[DType.float64,1,0]
 
+alias HyperplexInt8   = HybridSIMD[DType.int8,1,1]
+alias HyperplexUInt8  = HybridSIMD[DType.uint8,1,1]
+alias HyperplexInt16  = HybridSIMD[DType.int16,1,1]
+alias HyperplexUInt16 = HybridSIMD[DType.uint16,1,1]
+alias HyperplexInt32  = HybridSIMD[DType.int32,1,1]
+alias HyperplexUInt32 = HybridSIMD[DType.uint32,1,1]
+alias HyperplexInt64  = HybridSIMD[DType.int64,1,1]
+alias HyperplexUInt64 = HybridSIMD[DType.uint64,1,1]
+alias Hyperplex16     = HybridSIMD[DType.float16,1,1]
+alias Hyperplex32     = HybridSIMD[DType.float32,1,1]
+alias Hyperplex64     = HybridSIMD[DType.float64,1,1]
+
 fn constrain_square[type: DType, a: SIMD[type,1], b: FloatLiteral](): constrained[a == b, "mismatched 'square' parameter"]()
 
 
@@ -47,7 +48,7 @@ fn constrain_square[type: DType, a: SIMD[type,1], b: FloatLiteral](): constraine
 #---
 #---
 @register_passable("trivial")
-struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIMD[type,1] = 1]:
+struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIMD[type,1] = -1]:
     """
     Represents a hybrid small vector backed by hardware vector elements, with scalar and antiox parts.
 
@@ -409,37 +410,21 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         SIMD type must be integral (or boolean).
 
         Returns:
-            The inverted hybrid number.
+            The bit-wise inverted hybrid number.
         """
         return Self(~self.s, ~self.a) # could define different behaviour. bit invert is not used very often with complex types.
     
     @always_inline
     fn conjugate(self) -> Self:
         """
-        Gets the dual of this hybrid number.
+        Gets the conjugate of this hybrid number.
 
-        This is also called the hodge dual, and reverses the order of coefficients.
-
-            dual(Hybrid(s,a)) = Hybrid(a,s)
+            conjugate(Hybrid(s,a)) = Hybrid(s,-a)
 
         Returns:
-            The hybrid's dual.
+            The hybrid conjugate.
         """
         return Self(self.s, -self.a)
-
-    @always_inline
-    fn dual(self) -> Self:
-        """
-        Gets the dual of this hybrid number.
-
-        This is also called the hodge dual, and reverses the order of coefficients.
-
-            dual(Hybrid(s,a)) = Hybrid(a,s)
-
-        Returns:
-            The hybrid's dual.
-        """
-        return Self(self.a, self.s)
 
     @always_inline
     fn denomer[absolute: Bool = False](self) -> Self.Coef:
@@ -449,9 +434,9 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         Equal to the measure squared for non-degenerate cases.
 
             # coefficient math:
-            Hyplex   -> s*s - x*x
-            Complex  -> s*s + i*i
-            Paraplex -> s*s
+            Complex   -> c[0]*c[0] + c[1]*c[1]
+            Paraplex  -> c[0]*c[0]
+            Hyperplex -> c[0]*c[0] - c[1]*c[1]
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by taking the absolute value.
@@ -473,9 +458,9 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         Equal to the square root of the denomer.
 
             # coefficient math:
-            hyplex   -> sqrt(s*s - x*x)
-            complex  -> sqrt(s*s + i*i)
-            paraplex -> |s|
+            Complex   -> sqrt(c[0]*c[0] + c[1]*c[1])
+            Paraplex  -> sqrt(c[0]*c[0])
+            Hyperplex -> sqrt(c[0]*c[0] - c[1]*c[1])
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by using the absolute denomer.
