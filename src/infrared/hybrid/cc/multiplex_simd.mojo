@@ -13,7 +13,7 @@ alias MultiplexUInt64 = MultiplexSIMD[DType.uint64]
 alias Multiplex16     = MultiplexSIMD[DType.float16]
 alias Multiplex32     = MultiplexSIMD[DType.float32]
 alias Multiplex64     = MultiplexSIMD[DType.float64]
- 
+
 
 
 
@@ -251,7 +251,7 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         Equal to the measure squared for non-degenerate cases.
 
             # coefficient math:
-            s*s + (i-o)**2 - o*o - x*x
+            c[0]*c[0] + (c[1]-c[2])**2 - c[2]*c[2] - c[3]*c[3]
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by taking the absolute value.
@@ -283,20 +283,20 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         return sqrt(self.denomer[absolute]())
 
     @always_inline
-    fn hybridian[absolute: Bool = False](self) -> Self.Coef:
+    fn antidenomer[absolute: Bool = False](self) -> Self.Coef:
         """
-        Gets the hybridian of this multiplex number.
+        Gets the antidenomer of this multiplex number.
         
-        Together with measure, this multiplex number can be characterized.
+        Equal to the antimeasure squared for non-degenerate cases.
 
             # coefficient math:
-            sqrt(-(i-o)**2 + o*o + x*x)
+            -(c[1]-c[2])**2 + c[2]*c[2] + c[3]*c[3])
 
         Parameters:
             absolute: Setting this to true will ensure a positive result by using the absolute before the sqrt.
 
         Returns:
-            The multiplex hybridian.
+            The multiplex antidenomer.
         """
         let io = self.i-self.o
         let result = -io*io + self.o*self.o + self.x*self.x
@@ -304,19 +304,34 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
         if absolute: return abs(result)
         else: return result
 
+    @always_inline
+    fn antimeasure[absolute: Bool = False](self) -> Self.Coef:
+        """
+        Gets the hybridian of this multiplex number.
+        
+        Together with measure, this multiplex number can be characterized.
+
+        Equal to the square root of the antidenomer.
+
+        Parameters:
+            absolute: Setting this to true will ensure a positive result by using the absolute before the sqrt.
+
+        Returns:
+            The multiplex antimeasure.
+        """
+        return sqrt(self.antidenomer[absolute]())
+
     # @always_inline
     # fn characterize() -> StaticIntTuple[2]
 
     # @always_inline
     # fn argument[interval: Int = 0](self) -> Self.Coef:
-    #     """Gets the argument of this hybrid number. *Work in progress, may change."""
-    #     @parameter
-    #     if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-    #     elif square == -1: return atan2(self.a, self.s) + interval*tau
-    #     elif square == 0: return self.a/self.s
-    #     else:
-    #         print("not implemented in general case, maybe unitize would work but it's broken")
-    #         return 0
+    #     """Gets the argument of this multiplex number."""
+    #     let m = self.antidenomer()
+    #     if m < 0:
+    #         if self.s < 0: return pi - atan2(self.antimeasure(), self.s)
+    #         else: return atan2(self.antimeasure(), self.s)
+    #     elif m > 0
 
 
     # #------( Products )------#
@@ -400,6 +415,36 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     fn __sub__[__:None=None](self, other: Self) -> Self:
         return Self(self.s - other.s, self.i - other.i, self.o - other.o, self.x - other.x)
 
+    #--- multiplication
+    @always_inline # Multiplex * Scalar
+    fn __mul__(self, other: Self.Coef) -> Self:
+        return Self(self.s*other, self.i*other, self.o*other, self.x*other)
+
+    @always_inline # Multiplex * Multiplex
+    fn __mul__[__:None=None](self, other: Self) -> Self:
+        return Self(
+            self.s*other.s - self.i*other.i + self.i*other.o + self.o*other.i + self.x*other.x,
+            self.s*other.i + self.i*other.s + self.i*other.x - self.x*other.i,
+            self.s*other.o + self.i*other.x + self.o*other.s - self.o*other.x - self.x*other.i + self.x*other.o,
+            self.s*other.x - self.i*other.o + self.o*other.i + self.x*other.s)
+
+    #--- division
+    @always_inline # Multiplex / Scalar
+    fn __truediv__(self, other: Self.Coef) -> Self:
+        return self * (1/other)
+
+    @always_inline # Multiplex / Multiplex
+    fn __truediv__[__:None=None](self, other: Self) -> Self:
+        return self*other.conjugate() / other.denomer()
+
+    @always_inline # Multiplex // Scalar
+    fn __floordiv__(self, other: Self.Coef) -> Self:
+        return Self(self.s//other, self.i//other, self.o//other, self.x//other)
+
+    @always_inline # Multiplex // Multiplex
+    fn __floordiv__[__:None=None](self, other: Self) -> Self:
+        return self*other.conjugate() // other.denomer()
+
     
     #------( Reverse Arithmetic )------#
     #
@@ -443,6 +488,32 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     fn __rsub__[__:None=None](self, other: Self) -> Self:
         return other - self
 
+    #--- multiplication
+    @always_inline # Scalar * Multiplex
+    fn __rmul__(self, other: Self.Coef) -> Self:
+        return Self(other*self.s, other*self.i, other*self.o, other*self.x)
+
+    @always_inline # Multiplex * Multiplex
+    fn __rmul__[__:None=None](self, other: Self) -> Self:
+        return other * self
+
+    #--- division
+    @always_inline # Scalar / Multiplex
+    fn __rtruediv__(self, other: Self.Coef) -> Self:
+        return other*self.conjugate() / self.denomer()
+
+    @always_inline # Multiplex / Multiplex
+    fn __rtruediv__[__:None=None](self, other: Self) -> Self:
+        return other / self
+
+    @always_inline # Scalar // Multiplex
+    fn __rfloordiv__(self, other: Self.Coef) -> Self:
+        return other*self.conjugate() // self.denomer()
+
+    @always_inline # Multiplex // Multiplex
+    fn __rfloordiv__[__:None=None](self, other: Self) -> Self:
+        return other // self
+
 
     #------( In Place Arithmetic )------#
     #
@@ -471,3 +542,29 @@ struct MultiplexSIMD[type: DType, size: Int = 1]:
     @always_inline # Multiplex -= Multiplex
     fn __isub__[__:None=None](inout self, other: Self):
         self = self - other
+
+    #--- multiplication
+    @always_inline # Multiplex *= Scalar
+    fn __imul__(inout self, other: Self.Coef):
+        self = self * other
+    
+    @always_inline # Multiplex *= Multiplex
+    fn __imul__[__:None=None](inout self, other: Self):
+        self = self * other
+
+    #--- division
+    @always_inline # Multiplex /= Scalar
+    fn __itruediv__(inout self, other: Self.Coef):
+        self = self / other
+    
+    @always_inline # Multiplex /= Multiplex
+    fn __itruediv__[__:None=None](inout self, other: Self):
+        self = self / other
+
+    @always_inline # Multiplex //= Scalar
+    fn __ifloordiv__(inout self, other: Self.Coef):
+        self = self // other
+    
+    @always_inline # Multiplex //= Multiplex
+    fn __ifloordiv__[__:None=None](inout self, other: Self):
+        self = self // other
