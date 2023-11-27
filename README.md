@@ -1,14 +1,15 @@
 # Infrared 🔥
 Geometric Algebra for Mojo
 
-Tested on mojo version 0.5.0
+-- Moving hybrid types to their own Moplex module, so not much to see here right now.
+
+I'll start playing with some more GA like structures soon though. Big plans!
 
 ## package layout:
 
-- infrared.hybrid
-  - Hybrid complex types, parameterized on the Antiscalar square. Each with Int, Float, and SIMD variants.
+- ~~hybrid~~
 
-## hybrid example: 
+## (deprecated) hybrid example: 
 
 ```Python
 from infrared.hybrid import Hyplex, Complex, Paraplex
@@ -43,7 +44,7 @@ _print(ro)       #: 0.5 + 1o
 _print(ro * ro)  #: 0.25 + 1o
 ```
 
-I'll probably move away from this, but heres a naming convention which is suggestive of what each basis element squares to:
+Naming convention which is suggestive of what each basis element squares to:
 
 hybrid:
 | signature | structure | name     |
