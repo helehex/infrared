@@ -378,7 +378,7 @@ struct HybridIntLiteral[square: Int = 1]:
         return other // self
 
     #--- exponentiation
-    @always_inline # Hybrid ** Scalar
+    @always_inline # Scalar ** Hybrid
     fn __rpow__(self, other: Self.Coef) -> HybridFloatLiteral[square]:
         return pow(FloatLiteral(other), HybridFloatLiteral[square](self.s, self.a)) # <------ fix, looks strange, alias problems with direct construction
     

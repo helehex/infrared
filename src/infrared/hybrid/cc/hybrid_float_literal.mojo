@@ -108,10 +108,6 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     
     #------( Formatting )------#
     #
-    # @staticmethod
-    # fn try_from_string(string: String) -> Self:
-    #     pass
-
     @always_inline
     fn to_string(self) -> String:
         """Formats the hybrid as a String."""
@@ -312,30 +308,39 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         return Self(self.s - other.s, self.a - other.a)
 
     #--- multiplication
-    @always_inline
+    @always_inline # Hybrid * Scalar
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.s*other, self.a*other)
 
-    @always_inline
+    @always_inline # Hybrid * Hybrid
     fn __mul__[__:None=None](self, other: Self) -> Self:
         return Self(self.s*other.s + square*self.a*other.a, self.s*other.a + self.a*other.s)
 
     #--- division
-    @always_inline
+    @always_inline # Hybrid / Scalar
     fn __truediv__(self, other: Self.Coef) -> Self:
         return self * (1/other)
 
-    @always_inline
+    @always_inline # Hybrid / Hybrid
     fn __truediv__[__:None=None](self, other: Self) -> Self:
         return self*other.conjugate() / other.denomer()
 
-    @always_inline
+    @always_inline # Hybrid // Scalar
     fn __floordiv__(self, other: Self.Coef) -> Self:
         return Self(self.s // other, self.a // other)
 
-    @always_inline
+    @always_inline # Hybrid // Hybrid
     fn __floordiv__[__:None=None](self, other: Self) -> Self:
         return self*other.conjugate() // other.denomer()
+
+    #--- exponentiation
+    @always_inline # Hybrid ** Scalar
+    fn __pow__(self, other: Self.Coef) -> Self:
+        return pow(self, other)
+
+    @always_inline # Hybrid ** Hybrid
+    fn __pow__(self, other: Self) -> Self:
+        return pow(self, other)
     
     
     #------( Reverse Arithmetic )------#
@@ -359,30 +364,39 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         return other - self
 
     #--- multiplication
-    @always_inline
+    @always_inline # Scalar * Hybrid
     fn __rmul__(self, other: Self.Coef) -> Self:
         return Self(other * self.s, other * self.a)
 
-    @always_inline
+    @always_inline # Hybrid * Hybrid
     fn __rmul__[__:None=None](self, other: Self) -> Self:
         return other * self
 
     #--- division
-    @always_inline
+    @always_inline # Scalar / Hybrid
     fn __rtruediv__(self, other: Self.Coef) -> Self:
         return other*self.conjugate() / self.denomer()
 
-    @always_inline
+    @always_inline # Hybrid / Hybrid
     fn __rtruediv__[__:None=None](self, other: Self) -> Self:
         return other / self
 
-    @always_inline
+    @always_inline # Scalar // Hybrid
     fn __rfloordiv__(self, other: Self.Coef) -> Self:
         return other*self.conjugate() // self.denomer()
 
-    @always_inline
+    @always_inline # Hybrid // Hybrid
     fn __rfloordiv__[__:None=None](self, other: Self) -> Self:
         return other // self
+
+    #--- exponentiation
+    @always_inline # Scalar ** Hybrid
+    fn __rpow__(self, other: Self.Coef) -> Self:
+        return pow(other, self)
+
+    @always_inline # Hybrid ** Hybrid
+    fn __rpow__(self, other: Self) -> Self:
+        return pow(other, self)
     
     
     #------( In Place Arithmetic )------#
@@ -430,3 +444,12 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
     @always_inline # Hybrid //= Hybrid
     fn __ifloordiv__[__:None=None](inout self, other: Self):
         self = self // other
+
+    #--- exponentiation
+    @always_inline # Hybrid **= Scalar
+    fn __ipow__(inout self, other: Self.Coef):
+        self = self ** other
+
+    @always_inline # Hybrid **= Hybrid
+    fn __ipow__[__:None=None](inout self, other: Self):
+        self = self ** other
