@@ -492,7 +492,7 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
         """Gets the argument of this hybrid number. *Work in progress, may change."""
         @parameter
         if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-        elif square == -1: return atan(self.a/self.s)
+        elif square == -1: return atan2(self.a, self.s)
         elif square == 0: return self.a/self.s
         else:
             print("not implemented in general case, maybe unitize would work but it's broken")
@@ -591,6 +591,15 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline
     fn __floordiv__[__:None=None](self, other: Self) -> Self:
         return (self*other.conjugate()) // other.denomer()
+
+    #--- exponentiation
+    @always_inline
+    fn __pow__(self, other: Self.Coef) -> Self:
+        return pow(self, other)
+
+    @always_inline
+    fn __pow__[__:None=None](self, other: Self) -> Self:
+        return pow(self, other)
     
     
     #------( Reverse Arithmetic )------#
@@ -646,6 +655,15 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline
     fn __rfloordiv__[__:None=None](self, other: Self) -> Self:
         return other // self
+
+    #--- exponentiation
+    @always_inline
+    fn __rpow__(self, other: Self.Coef) -> Self:
+        return pow(other, self)
+
+    @always_inline
+    fn __rpow__[__:None=None](self, other: Self) -> Self:
+        return pow(other, self)
     
     
     #------( In Place Arithmetic )------#
@@ -693,3 +711,12 @@ struct HybridSIMD[type: DType, size: Int = (simdwidthof[type]()//2), square: SIM
     @always_inline # Hybrid //= Hybrid
     fn __ifloordiv__[__:None=None](inout self, other: Self):
         self = self // other
+
+    #--- exponentiation
+    @always_inline # Hybrid **= Scalar
+    fn __ipow__(inout self, other: Self.Coef):
+        self = self ** other
+
+    @always_inline # Hybrid **= Hybrid
+    fn __ipow__[__:None=None](inout self, other: Self):
+        self = self ** other

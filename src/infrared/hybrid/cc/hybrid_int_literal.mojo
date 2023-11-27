@@ -307,7 +307,7 @@ struct HybridIntLiteral[square: Int = 1]:
     #--- division
     @always_inline
     fn __truediv__(self, other: Self.Coef) -> HybridFloatLiteral[square]:
-        return HybridFloatLiteral[square](self.s, self.a) * FloatLiteral((1/other).value) # <------ fix, acting strange
+        return HybridFloatLiteral[square](self.s, self.a) * FloatLiteral((1/other).value) # <------ fix, looks strange, alias problems with direct construction
 
     @always_inline
     fn __truediv__(self, other: Self) -> HybridFloatLiteral[square]:
@@ -388,3 +388,21 @@ struct HybridIntLiteral[square: Int = 1]:
     @always_inline # Hybrid -= Hybrid
     fn __isub__(inout self, other: Self):
         self = self - other
+
+    #--- multiplication
+    @always_inline # Hybrid *= Scalar
+    fn __imul__(inout self, other: Self.Coef):
+        self = self * other
+
+    @always_inline # Hybrid *= Hybrid
+    fn __imul__(inout self, other: Self):
+        self = self * other
+
+    #--- division
+    @always_inline # Hybrid //= Scalar
+    fn __ifloordiv__(inout self, other: Self.Coef):
+        self = self // other
+
+    @always_inline # Hybrid //= Hybrid
+    fn __ifloordiv__(inout self, other: Self):
+        self = self // other

@@ -6,6 +6,7 @@ Contains extra math functions.
 
 from .hybrid.cc import HybridIntLiteral, HybridFloatLiteral, HybridInt, HybridSIMD
 from math import nan, isnan
+from .sequences import pi, tau
 # improve literal math
 
 
@@ -162,9 +163,105 @@ fn rsqrt(value: SIMD) -> SIMD[value.type, value.size]:
 
 
 
+#------( Sine )------#
+#
+from math import sin as _sin
+
+@always_inline
+fn sin(value: IntLiteral) -> FloatLiteral:
+    return sin(FloatLiteral(value))
+
+@always_inline
+fn sin(value: FloatLiteral) -> FloatLiteral:
+    return sin(SIMD[DType.float64,1](value)).value
+
+@always_inline
+fn sin(value: SIMD) -> SIMD[value.type, value.size]:
+    return _sin(value)
+
+
+
+
+#------ Cosine ------#
+#
+from math import cos as _cos
+
+@always_inline
+fn cos(value: IntLiteral) -> FloatLiteral:
+    return cos(FloatLiteral(value))
+
+@always_inline
+fn cos(value: FloatLiteral) -> FloatLiteral:
+    return cos(SIMD[DType.float64,1](value)).value
+
+@always_inline
+fn cos(value: SIMD) -> SIMD[value.type, value.size]:
+    return _cos(value)
+
+
+
+
+#------ Hyperbolic Sine ------#
+#
+from math import sinh as _sinh
+
+@always_inline
+fn sinh(value: IntLiteral) -> FloatLiteral:
+    return sinh(FloatLiteral(value))
+
+@always_inline
+fn sinh(value: FloatLiteral) -> FloatLiteral:
+    return sinh(SIMD[DType.float64,1](value)).value
+
+@always_inline
+fn sinh(value: SIMD) -> SIMD[value.type, value.size]:
+    return _sinh(value)
+
+
+
+
+#------ Hyperbolic Cosine ------#
+#
+from math import cosh as _cosh
+
+@always_inline
+fn cosh(value: IntLiteral) -> FloatLiteral:
+    return cosh(FloatLiteral(value))
+
+@always_inline
+fn cosh(value: FloatLiteral) -> FloatLiteral:
+    return cosh(SIMD[DType.float64,1](value)).value
+
+@always_inline
+fn cosh(value: SIMD) -> SIMD[value.type, value.size]:
+    return _cosh(value)
+
+
+
+
+#------( Tangent )------#
+#
+from math import tan as _tan
+
+@always_inline
+fn tan(value: IntLiteral) -> FloatLiteral:
+    return tan(FloatLiteral(value))
+
+@always_inline
+fn tan(value: FloatLiteral) -> FloatLiteral:
+    return tan(SIMD[DType.float64,1](value)).value
+
+@always_inline
+fn tan(value: SIMD) -> SIMD[value.type, value.size]:
+    return _tan(value)
+
+
+
+
 #------( Arctangent )------#
 #
 from math import atan as _atan
+from math import atan2 as _atan2
 
 @always_inline
 fn atan(value: IntLiteral) -> FloatLiteral:
@@ -178,10 +275,51 @@ fn atan(value: FloatLiteral) -> FloatLiteral:
 fn atan(value: SIMD) -> SIMD[value.type, value.size]:
     return _atan(value)
 
+@always_inline
+fn atan2(a: IntLiteral, b: IntLiteral) -> FloatLiteral:
+    return atan2(FloatLiteral(a), FloatLiteral(b))
+
+@always_inline
+fn atan2(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral:
+    return atan2(SIMD[DType.float64,1](a), SIMD[DType.float64,1](b)).value
+
+@always_inline
+fn atan2(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
+    return _atan2(a,b)
 
 
 
-#------( Logarithm )------#
+
+#------ Natural Exponential ------#
+#
+from math import exp as _exp
+
+@always_inline
+fn exp(value: IntLiteral) -> FloatLiteral:
+    return exp(FloatLiteral(value))
+
+@always_inline
+fn exp(value: FloatLiteral) -> FloatLiteral:
+    return exp(SIMD[DType.float64,1](value)).value
+
+@always_inline # mock
+fn exp(value: SIMD) -> SIMD[value.type, value.size]:
+    return _exp(value)
+
+@always_inline
+fn exp[type: DType, size: Int, square: SIMD[type,1]](value: HybridSIMD[type, size, square]) -> HybridSIMD[type, size, square]:
+    @parameter
+    if square == 1: return exp(value.s) * HybridSIMD[type, size, square](cosh(value.a), sinh(value.a))
+    elif square == -1: return exp(value.s) * HybridSIMD[type, size, square](cos(value.a), sin(value.a))
+    elif square == 0: return exp(value.s) * HybridSIMD[type, size, square](1, value.a)
+    else:
+        print("not implemented, unitize")
+        return 0
+
+
+
+
+#------ Logarithm ------#
 #
 from math import log as _log
 
@@ -196,6 +334,40 @@ fn log(value: FloatLiteral) -> FloatLiteral:
 @always_inline
 fn log(value: SIMD) -> SIMD[value.type, value.size]:
     return _log(value)
+
+@always_inline
+fn log[type: DType, size: Int, square: SIMD[type,1], interval: Int = 0](value: HybridSIMD[type,size,square]) -> HybridSIMD[type,size,square]:
+    return HybridSIMD[type,size,square](log(value.measure()), value.argument() + interval*tau)
+
+
+
+#------ Power ------#
+#
+from math import pow as _pow
+
+@always_inline
+fn pow(a: IntLiteral, b: IntLiteral) -> FloatLiteral:
+    return pow(FloatLiteral(a), FloatLiteral(b))
+
+@always_inline
+fn pow(a: FloatLiteral, b: FloatLiteral) -> FloatLiteral:
+    return pow(SIMD[DType.float64,1](a), SIMD[DType.float64,1](b)).value
+
+@always_inline
+fn pow(a: SIMD, b: SIMD[a.type, a.size]) -> SIMD[a.type, a.size]:
+    return _pow(a, b)
+
+@always_inline
+fn pow[type: DType, size: Int, square: SIMD[type,1], interval: Int = 0](a: SIMD[type,size], b: HybridSIMD[type,size,square]) -> HybridSIMD[type,size,square]:
+    return exp(b*log(a))
+
+@always_inline
+fn pow[type: DType, size: Int, square: SIMD[type,1], interval: Int = 0](a: HybridSIMD[type,size,square], b: SIMD[type,size]) -> HybridSIMD[type,size,square]:
+    return exp(b*log(a))
+
+@always_inline
+fn pow[type: DType, size: Int, square: SIMD[type,1], interval: Int = 0](a: HybridSIMD[type,size,square], b: HybridSIMD[type,size,square]) -> HybridSIMD[type,size,square]:
+    return exp(b*log[interval = interval](a))
 
 
 
