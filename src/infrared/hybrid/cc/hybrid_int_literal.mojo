@@ -225,11 +225,11 @@ struct HybridIntLiteral[square: Int = 1]:
         return abs(self.s)
 
     @always_inline
-    fn argument(self) -> FloatLiteral:
+    fn argument[interval: Int = 0](self) -> FloatLiteral:
         """Gets the argument of this hybrid number. *Work in progress, may change."""
         @parameter
         if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-        elif square == -1: return atan(FloatLiteral(self.a)/FloatLiteral(self.s))
+        elif square == -1: return atan2(FloatLiteral(self.a), FloatLiteral(self.s)) + interval*tau
         elif square == 0: return FloatLiteral(self.a)/FloatLiteral(self.s)
         else:
             print("not implemented in general case, maybe unitize would work but it's broken")
@@ -296,31 +296,40 @@ struct HybridIntLiteral[square: Int = 1]:
         return Self(self.s - other.s, self.a - other.a)
 
     #--- multiplication
-    @always_inline
+    @always_inline # Hybrid * Scalar
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.s*other, self.a*other)
 
-    @always_inline
+    @always_inline # Hybrid * Hybrid
     fn __mul__(self, other: Self) -> Self:
         return Self(self.s*other.s + to_int_literal[square]()*self.a*other.a, self.s*other.a + self.a*other.s)
 
     #--- division
-    @always_inline
+    @always_inline # Hybrid / Scalar
     fn __truediv__(self, other: Self.Coef) -> HybridFloatLiteral[square]:
         return HybridFloatLiteral[square](self.s, self.a) * FloatLiteral((1/other).value) # <------ fix, looks strange, alias problems with direct construction
 
-    @always_inline
+    @always_inline # Hybrid / Hybrid
     fn __truediv__(self, other: Self) -> HybridFloatLiteral[square]:
         return self*other.conjugate() / other.denomer()
 
-    @always_inline
+    @always_inline # Hybrid // Scalar
     fn __floordiv__(self, other: Self.Coef) -> Self:
         return Self(self.s // other, self.a // other)
 
-    @always_inline
+    @always_inline # Hybrid // Hybrid
     fn __floordiv__(self, other: Self) -> Self:
         return self*other.conjugate() // other.denomer()
+
+    #--- exponentiation
+    @always_inline # Hybrid ** Scalar
+    fn __pow__(self, other: Self.Coef) -> HybridFloatLiteral[square]:
+        return pow(HybridFloatLiteral[square](self.s, self.a), FloatLiteral(other)) # <------ fix, looks strange, alias problems with direct construction
     
+    @always_inline # Hybrid ** Hybrid
+    fn __pow__(self, other: Self) -> HybridFloatLiteral[square]:
+        return pow(HybridFloatLiteral[square](self.s, self.a), HybridFloatLiteral[square](other.s, other.a)) # <------ fix, looks strange, alias problems with direct construction
+
     
     #------( Reverse Arithmetic )------#
     #
@@ -343,30 +352,39 @@ struct HybridIntLiteral[square: Int = 1]:
         return other - self
 
     #--- multiplication
-    @always_inline
+    @always_inline # Scalar * Hybrid
     fn __rmul__(self, other: Self.Coef) -> Self:
         return Self(other * self.s, other * self.a)
 
-    @always_inline
+    @always_inline # Hybrid * Hybrid
     fn __rmul__(self, other: Self) -> Self:
         return other * self
 
     #--- division
-    @always_inline
+    @always_inline # Scalar / Hybrid
     fn __rtruediv__(self, other: Self.Coef) -> HybridFloatLiteral[square]:
         return other*self.conjugate() / self.denomer()
 
-    @always_inline
+    @always_inline # Hybrid / Hybrid
     fn __rtruediv__(self, other: Self) -> HybridFloatLiteral[square]:
         return other / self
 
-    @always_inline
+    @always_inline # Scalar // Hybrid
     fn __rfloordiv__(self, other: Self.Coef) -> Self:
         return other*self.conjugate() // self.denomer()
 
-    @always_inline
+    @always_inline # Hybrid // Hybrid
     fn __rfloordiv__(self, other: Self) -> Self:
         return other // self
+
+    #--- exponentiation
+    @always_inline # Hybrid ** Scalar
+    fn __rpow__(self, other: Self.Coef) -> HybridFloatLiteral[square]:
+        return pow(FloatLiteral(other), HybridFloatLiteral[square](self.s, self.a)) # <------ fix, looks strange, alias problems with direct construction
+    
+    @always_inline # Hybrid ** Hybrid
+    fn __rpow__(self, other: Self) -> HybridFloatLiteral[square]:
+        return pow(HybridFloatLiteral[square](other.s, other.a), HybridFloatLiteral[square](self.s, self.a)) # <------ fix, looks strange, alias problems with direct construction
     
     
     #------( In Place Arithmetic )------#

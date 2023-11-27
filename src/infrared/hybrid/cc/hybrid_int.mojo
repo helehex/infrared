@@ -308,11 +308,11 @@ struct HybridInt[square: Int = 1]:
         return abs(self.s)
 
     @always_inline
-    fn argument(self) -> SIMD[DType.float64,1]:
+    fn argument[interval: Int = 0](self) -> SIMD[DType.float64,1]:
         """Gets the argument of this hybrid number. *Work in progress, may change."""
         @parameter
         if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-        elif square == -1: return atan(self.a/self.s)
+        elif square == -1: return atan2(self.a, self.s) + interval*tau
         elif square == 0: return self.a/self.s
         else:
             print("not implemented in general case, maybe unitize would work but it's broken")
@@ -379,30 +379,39 @@ struct HybridInt[square: Int = 1]:
         return Self(self.s - other.s, self.a - other.a)
 
     #--- multiplication
-    @always_inline
+    @always_inline # Hybrid * Scalar
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.s*other, self.a*other)
 
-    @always_inline
+    @always_inline # Hybrid * Hybrid
     fn __mul__(self, other: Self) -> Self:
         return Self(self.s*other.s + square*self.a*other.a, self.s*other.a + self.a*other.s)
 
     #--- division
-    @always_inline
+    @always_inline # Hybrid / Scalar
     fn __truediv__(self, other: Self.Coef) -> HybridSIMD[DType.float64,1,square]:
         return HybridSIMD[DType.float64,1,square](self) * (1/other)
 
-    @always_inline
+    @always_inline # Hybrid / Hybrid
     fn __truediv__(self, other: Self) -> HybridSIMD[DType.float64,1,square]:
         return self*other.conjugate() / other.denomer()
 
-    @always_inline
+    @always_inline # Hybrid // Scalar
     fn __floordiv__(self, other: Self.Coef) -> Self:
         return Self(self.s // other, self.a // other)
 
-    @always_inline
+    @always_inline # Hybrid // Hybrid
     fn __floordiv__(self, other: Self) -> Self:
         return self*other.conjugate() // other.denomer()
+
+    #--- exponentiation
+    @always_inline # Hybrid ** Scalar
+    fn __pow__(self, other: Self.Coef) -> HybridSIMD[DType.float64,1,square]:
+        return pow[DType.float64,1,square](self, other)
+
+    @always_inline # Hybrid ** Hybrid
+    fn __pow__(self, other: Self) -> HybridSIMD[DType.float64,1,square]:
+        return pow[DType.float64,1,square](self, other)
     
     
     #------( Reverse Arithmetic )------#
@@ -426,30 +435,39 @@ struct HybridInt[square: Int = 1]:
         return other - self
 
     #--- multiplication
-    @always_inline
+    @always_inline # Scalar * Hybrid
     fn __rmul__(self, other: Self.Coef) -> Self:
         return Self(other * self.s, other * self.a)
 
-    @always_inline
+    @always_inline # Hybrid * Hybrid
     fn __rmul__(self, other: Self) -> Self:
         return other * self
 
     #--- division
-    @always_inline
+    @always_inline # Scalar / Hybrid
     fn __rtruediv__(self, other: Self.Coef) -> HybridSIMD[DType.float64,1,square]:
         return other*self.conjugate() / self.denomer()
 
-    @always_inline
+    @always_inline # Hybrid / Hybrid
     fn __rtruediv__(self, other: Self) -> HybridSIMD[DType.float64,1,square]:
         return other / self
 
-    @always_inline
+    @always_inline # Scalar // Hybrid
     fn __rfloordiv__(self, other: Self.Coef) -> Self:
         return other*self.conjugate() // self.denomer()
 
-    @always_inline
+    @always_inline # Hybrid // Hybrid
     fn __rfloordiv__(self, other: Self) -> Self:
         return other // self
+
+    #--- exponentiation
+    @always_inline # Scalar ** Hybrid
+    fn __rpow__(self, other: Self.Coef) -> HybridSIMD[DType.float64,1,square]:
+        return pow[DType.float64,1,square](other, self)
+
+    @always_inline # Hybrid ** Hybrid
+    fn __rpow__(self, other: Self) -> HybridSIMD[DType.float64,1,square]:
+        return pow[DType.float64,1,square](other, self)
     
     
     #------( In Place Arithmetic )------#

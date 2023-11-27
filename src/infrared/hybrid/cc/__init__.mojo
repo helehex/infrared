@@ -343,7 +343,12 @@ fn math_test_cc():
     print(HybridFloatLiteral[1](HyplexIntLiteral(1,1)).__str__())
     print()
     print((Complex64(1,1)**Complex64(1,2)).__str__(), "= 0.0270820575 + 0.2927360563i")
+    print((Hyplex64(0,1)**2).__str__(), "= 1")
+    print((Complex64(0,1)**2).__str__(), "= -1")
+    print((Paraplex64(0,1)**2).__str__(), "=", (Paraplex64(0,1)**Paraplex64(2,0)).__str__(), "= 0")
     print((Hyplex64(2,1)**2).__str__(), "=", (Hyplex64(2,1)**Hyplex64(2,0)).__str__(), "=", (Hyplex64(2,1)*Hyplex64(2,1)).__str__())
+    print((Complex64(2,1)**2).__str__(), "=", (Complex64(2,1)**Complex64(2,0)).__str__(), "=", (Complex64(2,1)*Complex64(2,1)).__str__())
     print((Paraplex64(2,1)**2).__str__(), "=", (Paraplex64(2,1)**Paraplex64(2,0)).__str__(), "=", (Paraplex64(2,1)*Paraplex64(2,1)).__str__())
+    print((e**Complex64(0,hfpi)).__str__(), "= i")
 
 alias SuperHyplex64 = HybridSIMD[DType.float64,1,2] # next gen game system

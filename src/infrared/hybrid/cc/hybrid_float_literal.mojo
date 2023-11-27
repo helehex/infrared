@@ -241,11 +241,11 @@ struct HybridFloatLiteral[square: FloatLiteral = 1]:
         return abs(self.s)
 
     @always_inline
-    fn argument(self) -> Self.Coef:
+    fn argument[interval: Int = 0](self) -> Self.Coef:
         """Gets the argument of this hybrid number. *Work in progress, may change."""
         @parameter
         if square == 1: return log(abs(self.s + self.a) / self.measure[True]())
-        elif square == -1: return atan(self.a/self.s)
+        elif square == -1: return atan2(self.a, self.s) + interval*tau
         elif square == 0: return self.a/self.s
         else:
             print("not implemented in general case, maybe unitize would work but it's broken")
