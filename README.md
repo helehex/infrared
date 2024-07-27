@@ -5,5 +5,5 @@ Geometric Algebra for Mojo
 
 - math
 - algebra
-    - g2 (temporary, needs more work)
+    - g2 hard coded
 - io

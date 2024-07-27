@@ -3,4 +3,4 @@
 # | Copyright (c) 2024 Helehex
 # x--------------------------------------------------------------------------x #
 
-from .g2 import MultivectorG2, VectorG2
+import .g2

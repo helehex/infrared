@@ -10,3 +10,4 @@ A mojo package for geometric algebra.
 
 from .io import *
 from .math import *
+from .algebra import *

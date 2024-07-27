@@ -16,100 +16,218 @@ def main():
 
 
 def test_add[type: DType]():
-    assert_equal(MultivectorG2[type](1, 2, 3, 4).__add__(MultivectorG2[type](5, 4, 3, 2)), MultivectorG2[type](6, 6, 6, 6))
-    assert_equal(VectorG2[type](2, 3).__add__(VectorG2[type](4, 3)), VectorG2[type](6, 6))
-    assert_equal(RotorG2[type](1, 4).__add__(RotorG2[type](5, 2)), RotorG2[type](6, 6))
-    assert_equal(RotorG2[type](1, 4).__add__(VectorG2[type](2, 3)), MultivectorG2[type](1, 2, 3, 4))
-    assert_equal(VectorG2[type](2, 3).__add__(RotorG2[type](1, 4)), MultivectorG2[type](1, 2, 3, 4))
+    assert_equal(Multivector[type](1, 2, 3, 4).__add__(Multivector[type](5, 4, 3, 2)), Multivector[type](6, 6, 6, 6))
+    assert_equal(Vector[type](2, 3).__add__(Vector[type](4, 3)), Vector[type](6, 6))
+    assert_equal(Rotor[type](1, 4).__add__(Rotor[type](5, 2)), Rotor[type](6, 6))
+    assert_equal(Rotor[type](1, 4).__add__(Vector[type](2, 3)), Multivector[type](1, 2, 3, 4))
+    assert_equal(Vector[type](2, 3).__add__(Rotor[type](1, 4)), Multivector[type](1, 2, 3, 4))
 
 
 def test_sub[type: DType]():
-    assert_equal(MultivectorG2[type](6, 6, 6, 6).__sub__(MultivectorG2[type](5, 4, 3, 2)), MultivectorG2[type](1, 2, 3, 4))
-    assert_equal(VectorG2[type](6, 6).__sub__(VectorG2[type](4, 3)), VectorG2[type](2, 3))
-    assert_equal(RotorG2[type](6, 6).__sub__(RotorG2[type](5, 2)), RotorG2[type](1, 4))
-    assert_equal(RotorG2[type](1, 4).__sub__(VectorG2[type](2, 3)), MultivectorG2[type](1, -2, -3, 4))
-    assert_equal(VectorG2[type](2, 3).__sub__(RotorG2[type](1, 4)), MultivectorG2[type](-1, 2, 3, -4))
+    assert_equal(Multivector[type](6, 6, 6, 6).__sub__(Multivector[type](5, 4, 3, 2)), Multivector[type](1, 2, 3, 4))
+    assert_equal(Vector[type](6, 6).__sub__(Vector[type](4, 3)), Vector[type](2, 3))
+    assert_equal(Rotor[type](6, 6).__sub__(Rotor[type](5, 2)), Rotor[type](1, 4))
+    assert_equal(Rotor[type](1, 4).__sub__(Vector[type](2, 3)), Multivector[type](1, -2, -3, 4))
+    assert_equal(Vector[type](2, 3).__sub__(Rotor[type](1, 4)), Multivector[type](-1, 2, 3, -4))
 
 
 def test_mul[type: DType]():
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__mul__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](1, 0, 0, 0))
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__mul__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](0, 1, 0, 0))
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__mul__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](0, 0, 1, 0))
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__mul__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](0, 0, 0, 1))
+    # +--- multivector * multivector
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 0, 1))
 
-    assert_equal(MultivectorG2[type](0, 1, 0, 0).__mul__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](0, 1, 0, 0))
-    assert_equal(MultivectorG2[type](0, 1, 0, 0).__mul__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](1, 0, 0, 0))
-    assert_equal(MultivectorG2[type](0, 1, 0, 0).__mul__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](0, 0, 0, 1))
-    assert_equal(MultivectorG2[type](0, 1, 0, 0).__mul__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 1, 0))
 
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__mul__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](0, 0, 1, 0))
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__mul__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](0, 0, 0, -1))
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__mul__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](1, 0, 0, 0))
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__mul__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](0, -1, 0, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 0, -1))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, -1, 0, 0))
 
-    assert_equal(MultivectorG2[type](0, 0, 0, 1).__mul__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](0, 0, 0, 1))
-    assert_equal(MultivectorG2[type](0, 0, 0, 1).__mul__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](0, 0, 1, 0))
-    assert_equal(MultivectorG2[type](0, 0, 0, 1).__mul__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](0, -1, 0, 0))
-    assert_equal(MultivectorG2[type](0, 0, 0, 1).__mul__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](-1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, -1, 0, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](-1, 0, 0, 0))
 
-    assert_equal(VectorG2[type](1, 0).__mul__(VectorG2[type](1, 0)), RotorG2[type](1, 0))
-    assert_equal(VectorG2[type](1, 0).__mul__(VectorG2[type](0, 1)), RotorG2[type](0, 1))
-    assert_equal(VectorG2[type](0, 1).__mul__(VectorG2[type](1, 0)), RotorG2[type](0, -1))
-    assert_equal(VectorG2[type](0, 1).__mul__(VectorG2[type](0, 1)), RotorG2[type](1, 0))
+    # +--- multivector * vector
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Vector[type](1, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Vector[type](0, 1)), Multivector[type](0, 0, 1, 0))
 
-    assert_equal(VectorG2[type](1, 0).__mul__(RotorG2[type](1, 0)), VectorG2[type](1, 0))
-    assert_equal(VectorG2[type](1, 0).__mul__(RotorG2[type](0, 1)), VectorG2[type](0, 1))
-    assert_equal(VectorG2[type](0, 1).__mul__(RotorG2[type](1, 0)), VectorG2[type](0, 1))
-    assert_equal(VectorG2[type](0, 1).__mul__(RotorG2[type](0, 1)), VectorG2[type](-1, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Vector[type](1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Vector[type](0, 1)), Multivector[type](0, 0, 0, 1))
 
-    assert_equal(RotorG2[type](1, 0).__mul__(VectorG2[type](1, 0)), VectorG2[type](1, 0))
-    assert_equal(RotorG2[type](1, 0).__mul__(VectorG2[type](0, 1)), VectorG2[type](0, 1))
-    assert_equal(RotorG2[type](0, 1).__mul__(VectorG2[type](1, 0)), VectorG2[type](0, 1))
-    assert_equal(RotorG2[type](0, 1).__mul__(VectorG2[type](0, 1)), VectorG2[type](-1, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Vector[type](1, 0)), Multivector[type](0, 0, 0, -1))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Vector[type](0, 1)), Multivector[type](1, 0, 0, 0))
 
-    assert_equal(RotorG2[type](1, 0).__mul__(RotorG2[type](1, 0)), RotorG2[type](1, 0))
-    assert_equal(RotorG2[type](1, 0).__mul__(RotorG2[type](0, 1)), RotorG2[type](0, 1))
-    assert_equal(RotorG2[type](0, 1).__mul__(RotorG2[type](1, 0)), RotorG2[type](0, 1))
-    assert_equal(RotorG2[type](0, 1).__mul__(RotorG2[type](0, 1)), RotorG2[type](-1, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Vector[type](1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Vector[type](0, 1)), Multivector[type](0, -1, 0, 0))
+
+    # +--- multivector * rotor
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Rotor[type](1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__mul__(Rotor[type](0, 1)), Multivector[type](0, 0, 0, 1))
+
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Rotor[type](1, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__mul__(Rotor[type](0, 1)), Multivector[type](0, 0, 1, 0))
+
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Rotor[type](1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__mul__(Rotor[type](0, 1)), Multivector[type](0, -1, 0, 0))
+
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Rotor[type](1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, 0, 0, 1).__mul__(Rotor[type](0, 1)), Multivector[type](-1, 0, 0, 0))
+
+    # +--- vector * multivector
+    assert_equal(Vector[type](1, 0).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Vector[type](1, 0).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Vector[type](1, 0).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Vector[type](1, 0).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 1, 0))
+
+    assert_equal(Vector[type](0, 1).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Vector[type](0, 1).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 0, -1))
+    assert_equal(Vector[type](0, 1).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Vector[type](0, 1).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, -1, 0, 0))
+
+    # +--- vector * vector
+    assert_equal(Vector[type](1, 0).__mul__(Vector[type](1, 0)), Rotor[type](1, 0))
+    assert_equal(Vector[type](1, 0).__mul__(Vector[type](0, 1)), Rotor[type](0, 1))
+    assert_equal(Vector[type](0, 1).__mul__(Vector[type](1, 0)), Rotor[type](0, -1))
+    assert_equal(Vector[type](0, 1).__mul__(Vector[type](0, 1)), Rotor[type](1, 0))
+
+    # +--- vector * rotor
+    assert_equal(Vector[type](1, 0).__mul__(Rotor[type](1, 0)), Vector[type](1, 0))
+    assert_equal(Vector[type](1, 0).__mul__(Rotor[type](0, 1)), Vector[type](0, 1))
+    assert_equal(Vector[type](0, 1).__mul__(Rotor[type](1, 0)), Vector[type](0, 1))
+    assert_equal(Vector[type](0, 1).__mul__(Rotor[type](0, 1)), Vector[type](-1, 0))
+
+    # +--- rotor * multivector
+    assert_equal(Rotor[type](1, 0).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Rotor[type](1, 0).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Rotor[type](1, 0).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Rotor[type](1, 0).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 0, 1))
+
+    assert_equal(Rotor[type](0, 1).__mul__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Rotor[type](0, 1).__mul__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Rotor[type](0, 1).__mul__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, -1, 0, 0))
+    assert_equal(Rotor[type](0, 1).__mul__(Multivector[type](0, 0, 0, 1)), Multivector[type](-1, 0, 0, 0))
+
+    # +--- rotor * vector
+    assert_equal(Rotor[type](1, 0).__mul__(Vector[type](1, 0)), Vector[type](1, 0))
+    assert_equal(Rotor[type](1, 0).__mul__(Vector[type](0, 1)), Vector[type](0, 1))
+    assert_equal(Rotor[type](0, 1).__mul__(Vector[type](1, 0)), Vector[type](0, 1))
+    assert_equal(Rotor[type](0, 1).__mul__(Vector[type](0, 1)), Vector[type](-1, 0))
+
+    # +--- rotor * rotor
+    assert_equal(Rotor[type](1, 0).__mul__(Rotor[type](1, 0)), Rotor[type](1, 0))
+    assert_equal(Rotor[type](1, 0).__mul__(Rotor[type](0, 1)), Rotor[type](0, 1))
+    assert_equal(Rotor[type](0, 1).__mul__(Rotor[type](1, 0)), Rotor[type](0, 1))
+    assert_equal(Rotor[type](0, 1).__mul__(Rotor[type](0, 1)), Rotor[type](-1, 0))
 
 
 def test_truediv[type: DType]():
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__truediv__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](1, 0, 0, 0))
-    assert_equal(MultivectorG2[type](0, 1, 0, 0).__truediv__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](1, 0, 0, 0))
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__truediv__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](1, 0, 0, 0))
-    assert_equal(MultivectorG2[type](0, 0, 0, 1).__truediv__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](1, 0, 0, 0))
+    # +--- multivector * multivector
+    assert_equal(Multivector[type](1, 0, 0, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](1, 0, 0, 0))
 
-    assert_equal(MultivectorG2[type](0, 1, 0, 0).__truediv__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](0, 1, 0, 0))
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__truediv__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](0, 1, 0, 0))
-    # assert_equal(MultivectorG2[type](0, 0, 0, 1).__truediv__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](0, 1, 0, 0))
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__truediv__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 1, 0, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 1, 0, 0))
 
-    assert_equal(MultivectorG2[type](0, 0, 1, 0).__truediv__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](0, 0, 1, 0))
-    # assert_equal(MultivectorG2[type](0, 0, 0, -1).__truediv__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](0, 0, 1, 0))
-    assert_equal(MultivectorG2[type](1, 0, 0, 0).__truediv__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](0, 0, 1, 0))
-    assert_equal(MultivectorG2[type](0, -1, 0, 0).__truediv__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, 0, 0, -1).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, -1, 0, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 1, 0))
 
-    assert_equal(MultivectorG2[type](0, 0, 0, 1).__truediv__(MultivectorG2[type](1, 0, 0, 0)), MultivectorG2[type](0, 0, 0, 1))
-    # assert_equal(MultivectorG2[type](0, 0, 1, 0).__truediv__(MultivectorG2[type](0, 1, 0, 0)), MultivectorG2[type](0, 0, 0, 1))
-    # assert_equal(MultivectorG2[type](0, -1, 0, 0).__truediv__(MultivectorG2[type](0, 0, 1, 0)), MultivectorG2[type](0, 0, 0, 1))
-    assert_equal(MultivectorG2[type](-1, 0, 0, 0).__truediv__(MultivectorG2[type](0, 0, 0, 1)), MultivectorG2[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, 0, 0, 1).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, -1, 0, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](-1, 0, 0, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 0, 1))
 
-    assert_equal(VectorG2[type](1, 0).__truediv__(VectorG2[type](1, 0)), RotorG2[type](1, 0))
-    assert_equal(VectorG2[type](0, 1).__truediv__(VectorG2[type](0, 1)), RotorG2[type](1, 0))
-    # assert_equal(VectorG2[type](0, 1).__truediv__(VectorG2[type](1, 0)), RotorG2[type](0, 1))
-    # assert_equal(VectorG2[type](-1, 0).__truediv__(VectorG2[type](0, 1)), RotorG2[type](0, 1))
+    # +--- multivector * vector
+    assert_equal(Multivector[type](0, 1, 0, 0).__truediv__(Vector[type](1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Vector[type](0, 1)), Multivector[type](1, 0, 0, 0))
 
-    assert_equal(VectorG2[type](1, 0).__truediv__(RotorG2[type](1, 0)), VectorG2[type](1, 0))
-    assert_equal(VectorG2[type](0, 1).__truediv__(RotorG2[type](0, 1)), VectorG2[type](1, 0))
-    assert_equal(VectorG2[type](0, 1).__truediv__(RotorG2[type](1, 0)), VectorG2[type](0, 1))
-    assert_equal(VectorG2[type](-1, 0).__truediv__(RotorG2[type](0, 1)), VectorG2[type](0, 1))
+    assert_equal(Multivector[type](1, 0, 0, 0).__truediv__(Vector[type](1, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__truediv__(Vector[type](0, 1)), Multivector[type](0, 1, 0, 0))
 
-    assert_equal(RotorG2[type](1, 0).__truediv__(VectorG2[type](1, 0)), VectorG2[type](1, 0))
-    # assert_equal(RotorG2[type](0, 1).__truediv__(VectorG2[type](0, 1)), VectorG2[type](1, 0))
-    # assert_equal(RotorG2[type](0, -1).__truediv__(VectorG2[type](1, 0)), VectorG2[type](0, 1))
-    assert_equal(RotorG2[type](1, 0).__truediv__(VectorG2[type](0, 1)), VectorG2[type](0, 1))
+    assert_equal(Multivector[type](0, 0, 0, -1).__truediv__(Vector[type](1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](1, 0, 0, 0).__truediv__(Vector[type](0, 1)), Multivector[type](0, 0, 1, 0))
 
-    assert_equal(RotorG2[type](1, 0).__truediv__(RotorG2[type](1, 0)), RotorG2[type](1, 0))
-    assert_equal(RotorG2[type](0, 1).__truediv__(RotorG2[type](0, 1)), RotorG2[type](1, 0))
-    assert_equal(RotorG2[type](0, 1).__truediv__(RotorG2[type](1, 0)), RotorG2[type](0, 1))
-    assert_equal(RotorG2[type](-1, 0).__truediv__(RotorG2[type](0, 1)), RotorG2[type](0, 1))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Vector[type](1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](0, -1, 0, 0).__truediv__(Vector[type](0, 1)), Multivector[type](0, 0, 0, 1))
+
+    # +--- multivector * rotor
+    assert_equal(Multivector[type](1, 0, 0, 0).__truediv__(Rotor[type](1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Multivector[type](0, 0, 0, 1).__truediv__(Rotor[type](0, 1)), Multivector[type](1, 0, 0, 0))
+
+    assert_equal(Multivector[type](0, 1, 0, 0).__truediv__(Rotor[type](1, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Rotor[type](0, 1)), Multivector[type](0, 1, 0, 0))
+
+    assert_equal(Multivector[type](0, 0, 1, 0).__truediv__(Rotor[type](1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Multivector[type](0, -1, 0, 0).__truediv__(Rotor[type](0, 1)), Multivector[type](0, 0, 1, 0))
+
+    assert_equal(Multivector[type](0, 0, 0, 1).__truediv__(Rotor[type](1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Multivector[type](-1, 0, 0, 0).__truediv__(Rotor[type](0, 1)), Multivector[type](0, 0, 0, 1))
+
+    # +--- vector * multivector
+    assert_equal(Vector[type](1, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Vector[type](0, 1).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](1, 0, 0, 0))
+
+    assert_equal(Vector[type](1, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Vector[type](0, 1).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 1, 0, 0))
+
+    assert_equal(Vector[type](0, 1).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Vector[type](-1, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 1, 0))
+
+    assert_equal(Vector[type](0, 1).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Vector[type](-1, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 0, 1))
+
+    # +--- vector * vector
+    assert_equal(Vector[type](1, 0).__truediv__(Vector[type](1, 0)), Rotor[type](1, 0))
+    assert_equal(Vector[type](0, 1).__truediv__(Vector[type](0, 1)), Rotor[type](1, 0))
+    assert_equal(Vector[type](0, 1).__truediv__(Vector[type](1, 0)), Rotor[type](0, 1))
+    assert_equal(Vector[type](-1, 0).__truediv__(Vector[type](0, 1)), Rotor[type](0, 1))
+
+    # +--- vector * rotor
+    assert_equal(Vector[type](1, 0).__truediv__(Rotor[type](1, 0)), Vector[type](1, 0))
+    assert_equal(Vector[type](0, 1).__truediv__(Rotor[type](0, 1)), Vector[type](1, 0))
+    assert_equal(Vector[type](0, 1).__truediv__(Rotor[type](1, 0)), Vector[type](0, 1))
+    assert_equal(Vector[type](-1, 0).__truediv__(Rotor[type](0, 1)), Vector[type](0, 1))
+
+    # +--- rotor * multivector
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Rotor[type](1, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Rotor[type](0, 1).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](1, 0, 0, 0))
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](1, 0, 0, 0))
+
+    assert_equal(Rotor[type](1, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 1, 0, 0))
+    assert_equal(Rotor[type](0, 1).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 1, 0, 0))
+
+    assert_equal(Rotor[type](0, 1).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 1, 0))
+    assert_equal(Rotor[type](-1, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 1, 0))
+
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](1, 0, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Rotor[type](0, 1).__truediv__(Multivector[type](0, 1, 0, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Rotor[type](-1, 0).__truediv__(Multivector[type](0, 0, 1, 0)), Multivector[type](0, 0, 0, 1))
+    assert_equal(Rotor[type](0, 0).__truediv__(Multivector[type](0, 0, 0, 1)), Multivector[type](0, 0, 0, 1))
+
+    # +--- rotor * vector
+    assert_equal(Rotor[type](1, 0).__truediv__(Vector[type](1, 0)), Vector[type](1, 0))
+    assert_equal(Rotor[type](0, 1).__truediv__(Vector[type](0, 1)), Vector[type](1, 0))
+    assert_equal(Rotor[type](0, -1).__truediv__(Vector[type](1, 0)), Vector[type](0, 1))
+    assert_equal(Rotor[type](1, 0).__truediv__(Vector[type](0, 1)), Vector[type](0, 1))
+
+    # +--- rotor * rotor
+    assert_equal(Rotor[type](1, 0).__truediv__(Rotor[type](1, 0)), Rotor[type](1, 0))
+    assert_equal(Rotor[type](0, 1).__truediv__(Rotor[type](0, 1)), Rotor[type](1, 0))
+    assert_equal(Rotor[type](0, 1).__truediv__(Rotor[type](1, 0)), Rotor[type](0, 1))
+    assert_equal(Rotor[type](-1, 0).__truediv__(Rotor[type](0, 1)), Rotor[type](0, 1))
