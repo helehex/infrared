@@ -132,7 +132,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn __eq__[__: None = None](self, other: Self) -> Bool:
-        return all(self.__eq__(other))
+        return self.__eq__(other).reduce_and()
 
     @always_inline("nodebug")
     fn __ne__(self, other: Self) -> SIMD[DType.bool, size]:
@@ -140,7 +140,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn __ne__[__: None = None](self, other: Self) -> Bool:
-        return any(self.__ne__(other))
+        return self.__ne__(other).reduce_or()
 
     # +------( Unary )------+ #
     #
@@ -150,7 +150,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn __invert__(self) -> Self:
-        return self.coj() / self.det()
+        return self.coj() / self.den()
 
     @always_inline("nodebug")
     fn rev(self) -> Self:
@@ -170,11 +170,15 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn den(self) -> Self.Coef:
+        return (self.s * self.s) - (self.v.x * self.v.x) - (self.v.y * self.v.y) + (self.i * self.i)
+
+    @always_inline("nodebug")
+    fn inn(self) -> Self.Coef:
         return (self.s * self.s) + (self.v.x * self.v.x) + (self.v.y * self.v.y) + (self.i * self.i)
 
     @always_inline("nodebug")
     fn nom(self) -> Self.Coef:
-        return sqrt(self.den())
+        return sqrt(self.inn())
 
     # +------( Arithmetic )------+ #
     #
@@ -218,8 +222,8 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
     fn __mul__(self, other: Self.Vect) -> Self:
         return Self(
             self.v.x * other.x + self.v.y * other.y,
-            self.s * other.x - self.i * other.y,
-            self.s * other.y + self.i * other.x,
+            self.s * other.x+ self.i * other.y,
+            self.s * other.y - self.i * other.x,
             self.v.x * other.y - self.v.y * other.x,
         )
 
@@ -236,8 +240,8 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
     fn __mul__(self, other: Self) -> Self:
         return Self(
             self.s * other.s + self.v.x * other.v.x + self.v.y * other.v.y - self.i * other.i,
-            self.s * other.v.x + self.v.x * other.s - self.i * other.v.y - self.v.y * other.i,
-            self.s * other.v.y + self.v.y * other.s + self.i * other.v.x + self.v.x * other.i,
+            self.s * other.v.x + self.v.x * other.s + self.i * other.v.y - self.v.y * other.i,
+            self.s * other.v.y + self.v.y * other.s - self.i * other.v.x + self.v.x * other.i,
             self.s * other.i + self.i * other.s + self.v.x * other.v.y - self.v.y * other.v.x,
         )
 
@@ -514,11 +518,15 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn den(self) -> Self.Coef:
+        return -(self.x * self.x) - (self.y * self.y) 
+
+    @always_inline("nodebug")
+    fn inn(self) -> Self.Coef:
         return (self.x * self.x) + (self.y * self.y)
 
     @always_inline("nodebug")
     fn nom(self) -> Self.Coef:
-        return sqrt(self.den())
+        return sqrt(self.inn())
 
     # +------( Products )------+ #
     #
@@ -569,13 +577,6 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
         return Self(self.x * other, self.y * other)
 
     @always_inline("nodebug")
-    fn __mul__(self, other: Self.Roto) -> Self:
-        return Self(
-            self.x * other.s - self.y * other.i,
-            self.y * other.s + self.x * other.i,
-        )
-
-    @always_inline("nodebug")
     fn __mul__(self, other: Self) -> Self.Roto:
         return Self.Roto(
             self.x * other.x + self.y * other.y,
@@ -583,11 +584,18 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
         )
 
     @always_inline("nodebug")
+    fn __mul__(self, other: Self.Roto) -> Self:
+        return Self(
+            self.x * other.s - self.y * other.i,
+            self.y * other.s + self.x * other.i,
+        )
+
+    @always_inline("nodebug")
     fn __mul__(self, other: Self.Multi) -> Self.Multi:
         return Self.Multi(
             self.x * other.v.x + self.y * other.v.y,
             self.x * other.s - self.y * other.i,
-            self.x * other.i + self.y * other.s,
+            self.y * other.s + self.x * other.i,
             self.x * other.v.y - self.y * other.v.x,
         )
 
@@ -763,8 +771,12 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
         return (self.s * self.s) + (self.i * self.i)
 
     @always_inline("nodebug")
+    fn inn(self) -> Self.Coef:
+        return (self.s * self.s) + (self.i * self.i)
+
+    @always_inline("nodebug")
     fn nom(self) -> Self.Coef:
-        return sqrt(self.den())
+        return sqrt(self.inn())
 
     # +------( Operations )------+ #
     #
@@ -807,8 +819,8 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     @always_inline("nodebug")
     fn __mul__(self, other: Self.Vect) -> Self.Vect:
         return Self.Vect(
-            self.s * other.x - self.i * other.y,
-            self.s * other.y + self.i * other.x,
+            self.s * other.x + self.i * other.y,
+            self.s * other.y - self.i * other.x,
         )
 
     @always_inline("nodebug")
@@ -822,9 +834,9 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     fn __mul__(self, other: Self.Multi) -> Self.Multi:
         return Self.Multi(
             self.s * other.s - self.i * other.i,
-            self.s * other.v.x - self.i * other.v.y,
-            self.s * other.v.y + self.i * other.v.x,
-            self.i * other.s + self.s * other.i,
+            self.s * other.v.x + self.i * other.v.y,
+            self.s * other.v.y - self.i * other.v.x,
+            self.s * other.i + self.i * other.s,
         )
 
     @always_inline("nodebug")
