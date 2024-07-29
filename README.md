@@ -1,9 +1,10 @@
-# Infrared 🔥
-Geometric Algebra for Mojo
+# Infrared 🔆
+Geometric Algebra for Mojo 🔥
 
 ## package layout:
 
-- math
 - algebra
-    - g2 hard coded
+    - G2 (Hard-coded)
+    - G3 (Hard-coded)
+- math
 - io
