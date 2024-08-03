@@ -17,6 +17,10 @@ def main():
     simd_run[DType.float32, 2]()
     simd_run[DType.float32, 4]()
 
+    simd_run[DType.index, 1]()
+    simd_run[DType.index, 2]()
+    simd_run[DType.index, 4]()
+
 
 def simd_run[type: DType, size: Int]():
     test_eq[type, size]()

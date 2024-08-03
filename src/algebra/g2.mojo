@@ -6,9 +6,7 @@
 
 Cl(2,0,0) ⇔ Mat2x2
 
-`x*x = 1`
-
-`y*y = 1`
+`x*x = y*y = 1`
 
 `x*y = i`
 
@@ -16,6 +14,8 @@ Cl(2,0,0) ⇔ Mat2x2
 
 `i*i = -1`
 """
+
+from math import cos, sin
 
 
 # +----------------------------------------------------------------------------------------------+ #
@@ -97,8 +97,36 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
         self.v.y[index] = value.v.y
         self.i[index] = value.i
 
+    @always_inline("nodebug")
+    fn vector(self) -> Self.Vect:
+        return Self.Vect(self.v.x, self.v.y)
+
+    @always_inline("nodebug")
+    fn rotor(self) -> Self.Roto:
+        return Self.Roto(self.s, self.i)
+
     # +------( Cast )------+ #
     #
+    @always_inline("nodebug")
+    fn __all__(self) -> Bool:
+        return self.__simd_bool__().reduce_and()
+
+    @always_inline("nodebug")
+    fn __any__(self) -> Bool:
+        return self.__simd_bool__().reduce_or()
+
+    @always_inline("nodebug")
+    fn __bool__(self) -> Bool:
+        return self.__simd_bool__().__bool__()
+
+    @always_inline("nodebug")
+    fn __simd_bool__(self) -> SIMD[DType.bool, size]:
+        return self.is_null()
+
+    @always_inline("nodebug")
+    fn is_null(self) -> SIMD[DType.bool, size]:
+        return self.nom() == 0
+
     @always_inline("nodebug")
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.s == 0) & self.v.is_zero() & (self.i == 0)
@@ -230,6 +258,14 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
     fn nom(self) -> Self.Coef:
         return sqrt(self.inn())
 
+    @always_inline("nodebug")
+    fn normalized[degen: Optional[Self] = None](self) -> Self:
+        @parameter
+        if degen:
+            if self.is_zero():
+                return degen.unsafe_value()
+        return self / self.nom()
+
     # +------( Arithmetic )------+ #
     #
     @always_inline("nodebug")
@@ -310,6 +346,24 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
     @always_inline("nodebug")
     fn __truediv__(self, other: Self) -> Self:
         return self * ~other
+
+    # +------( Reverse Arithmetic )------+ #
+    #
+    @always_inline("nodebug")
+    fn __radd__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs + rhs.s, rhs.v, rhs.i)
+
+    @always_inline("nodebug")
+    fn __rsub__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs - rhs.s, -rhs.v, -rhs.i)
+
+    @always_inline("nodebug")
+    fn __rmul__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs * rhs.s, lhs * rhs.v, lhs * rhs.i)
+
+    @always_inline("nodebug")
+    fn __rtruediv__(rhs, lhs: Self.Coef) -> Self:
+        return (lhs * rhs.coj()) / rhs.den()
 
     # +------( In-place Arithmetic )------+ #
     #
@@ -450,7 +504,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Rotor[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, EqualityComparable
+    StringableCollectionElement, Formattable, EqualityComparable
 ):
     """The real and anti parts of a Multivector G2. Useful for rotating vectors."""
 
@@ -486,6 +540,11 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
         self.s = v.s
         self.i = v.i
 
+    @always_inline("nodebug")
+    fn __init__(inout self, *, angle: Self.Coef):
+        self.s = cos(angle)
+        self.i = sin(angle)
+
     # +------( Subscript )------+ #
     #
     @always_inline("nodebug")
@@ -500,6 +559,26 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     # +------( Cast )------+ #
     #
     @always_inline("nodebug")
+    fn __all__(self) -> Bool:
+        return self.__simd_bool__().reduce_and()
+
+    @always_inline("nodebug")
+    fn __any__(self) -> Bool:
+        return self.__simd_bool__().reduce_or()
+
+    @always_inline("nodebug")
+    fn __bool__(self) -> Bool:
+        return self.__simd_bool__().__bool__()
+
+    @always_inline("nodebug")
+    fn __simd_bool__(self) -> SIMD[DType.bool, size]:
+        return self.is_null()
+
+    @always_inline("nodebug")
+    fn is_null(self) -> SIMD[DType.bool, size]:
+        return self.nom() == 0
+
+    @always_inline("nodebug")
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.s == 0) & (self.i == 0)
 
@@ -507,22 +586,24 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return self.to_string()
+        return String.format_sequence(self)
 
     @no_inline
-    fn to_string[
-        separator: StringLiteral = " ", simd_separator: StringLiteral = "\n"
-    ](self) -> String:
+    fn format_to(self, inout writer: Formatter):
+        self.format_to["\n"](writer)
+
+    @no_inline
+    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
         @parameter
         if size == 1:
-            return str(self.s) + "s" + separator + str(self.i) + "i"
+            writer.write(self.s, " + ", self.i, "i")
         else:
-            var result: String = ""
 
             @parameter
-            for index in range(size - 1):
-                result += str(self.get_lane(index)) + simd_separator
-            return result + str(self.get_lane(size))
+            for lane in range(size - 1):
+                self.get_lane(lane).format_to(writer)
+                writer.write(sep)
+            self.get_lane(size - 1).format_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -612,6 +693,14 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     fn nom(self) -> Self.Coef:
         return sqrt(self.inn())
 
+    @always_inline("nodebug")
+    fn normalized[degen: Optional[Self] = None](self) -> Self:
+        @parameter
+        if degen:
+            if self.is_zero():
+                return degen.unsafe_value()
+        return self / self.nom()
+
     # +------( Operations )------+ #
     #
     @always_inline("nodebug")
@@ -689,6 +778,24 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     fn __truediv__(self, other: Self.Multi) -> Self.Multi:
         return self * ~other
 
+    # +------( Reverse Arithmetic )------+ #
+    #
+    @always_inline("nodebug")
+    fn __radd__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs + rhs.s, rhs.i)
+
+    @always_inline("nodebug")
+    fn __rsub__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs - rhs.s, rhs.i)
+
+    @always_inline("nodebug")
+    fn __rmul__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs * rhs.s, lhs * rhs.i)
+
+    @always_inline("nodebug")
+    fn __rtruediv__(rhs, lhs: Self.Coef) -> Self:
+        return (lhs * rhs.coj()) / rhs.den()
+
     # +------( In-place Arithmetic )------+ #
     #
     @always_inline("nodebug")
@@ -724,14 +831,13 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
         self = self / other
 
 
-
 # +--------------------------------------------------------------------------+ #
 # | G2 Vector
 # +--------------------------------------------------------------------------+ #
 #
 @register_passable("trivial")
 struct Vector[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, EqualityComparable
+    StringableCollectionElement, Formattable, EqualityComparable
 ):
     # +------[ Alias ]------+ #
     #
@@ -779,6 +885,26 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     # +------( Cast )------+ #
     #
     @always_inline("nodebug")
+    fn __all__(self) -> Bool:
+        return self.__simd_bool__().reduce_and()
+
+    @always_inline("nodebug")
+    fn __any__(self) -> Bool:
+        return self.__simd_bool__().reduce_or()
+
+    @always_inline("nodebug")
+    fn __bool__(self) -> Bool:
+        return self.__simd_bool__().__bool__()
+
+    @always_inline("nodebug")
+    fn __simd_bool__(self) -> SIMD[DType.bool, size]:
+        return self.is_null()
+
+    @always_inline("nodebug")
+    fn is_null(self) -> SIMD[DType.bool, size]:
+        return self.nom() == 0
+
+    @always_inline("nodebug")
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.x == 0) & (self.y == 0)
 
@@ -786,22 +912,24 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return self.to_string()
+        return String.format_sequence(self)
 
     @no_inline
-    fn to_string[
-        separator: StringLiteral = " ", simd_separator: StringLiteral = "\n"
-    ](self) -> String:
+    fn format_to(self, inout writer: Formatter):
+        self.format_to["\n"](writer)
+
+    @no_inline
+    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
         @parameter
         if size == 1:
-            return str(self.x) + "x" + separator + str(self.y) + "y"
+            writer.write(self.x, "x + ", self.y, "y")
         else:
-            var result: String = ""
 
             @parameter
-            for index in range(size - 1):
-                result += str(self.get_lane(index)) + simd_separator
-            return result + str(self.get_lane(size))
+            for lane in range(size - 1):
+                self.get_lane(lane).format_to(writer)
+                writer.write(sep)
+            self.get_lane(size - 1).format_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -875,6 +1003,14 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     fn nom(self) -> Self.Coef:
         return sqrt(self.inn())
 
+    @always_inline("nodebug")
+    fn normalized[degen: Optional[Self] = None](self) -> Self:
+        @parameter
+        if degen:
+            if self.is_zero():
+                return degen.unsafe_value()
+        return self / self.nom()
+
     # +------( Products )------+ #
     #
     @always_inline("nodebug")
@@ -888,8 +1024,7 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn reger(self, other: Self) -> Self.Coef:
-        # Negate
-        return self.x * other.y - self.y * other.x
+        return self.y * other.x - self.x * other.y
 
     # +------( Arithmetic )------+ #
     #
@@ -967,6 +1102,24 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     @always_inline("nodebug")
     fn __truediv__(self, other: Self.Multi) -> Self.Multi:
         return self * ~other
+
+    # +------( Reverse Arithmetic )------+ #
+    #
+    @always_inline("nodebug")
+    fn __radd__(rhs, lhs: Self.Coef) -> Self.Multi:
+        return Self.Multi(lhs, rhs, 0)
+
+    @always_inline("nodebug")
+    fn __rsub__(rhs, lhs: Self.Coef) -> Self.Multi:
+        return Self.Multi(lhs, -rhs, 0)
+
+    @always_inline("nodebug")
+    fn __rmul__(rhs, lhs: Self.Coef) -> Self:
+        return Self(lhs * rhs.x, lhs * rhs.y)
+
+    @always_inline("nodebug")
+    fn __rtruediv__(rhs, lhs: Self.Coef) -> Self:
+        return (lhs * rhs.coj()) / rhs.den()
 
     # +------( In-place Arithmetic )------+ #
     #

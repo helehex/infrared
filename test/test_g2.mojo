@@ -173,6 +173,13 @@ def test_mul[type: DType, size: Int]():
     assert_equal(Multivector[type, size](0, 0, 0, 1).__mul__(Rotor[type, size](1, 0)), Multivector[type, size](0, 0, 0, 1))
     assert_equal(Multivector[type, size](0, 0, 0, 1).__mul__(Rotor[type, size](0, 1)), Multivector[type, size](-1, 0, 0, 0))
 
+    # +--- multivector * scalar
+    assert_equal(Multivector[type, size](1, 0, 0, 0).__mul__(2), Multivector[type, size](2, 0, 0, 0))
+    assert_equal(Multivector[type, size](0, 1, 0, 0).__mul__(2), Multivector[type, size](0, 2, 0, 0))
+    assert_equal(Multivector[type, size](0, 0, 1, 0).__mul__(2), Multivector[type, size](0, 0, 2, 0))
+    assert_equal(Multivector[type, size](0, 0, 0, 1).__mul__(2), Multivector[type, size](0, 0, 0, 2))
+    assert_equal(Multivector[type, size](1, 2, 3, 4).__mul__(2), Multivector[type, size](2, 4, 6, 8))
+
     # +--- vector * multivector
     assert_equal(Vector[type, size](1, 0).__mul__(Multivector[type, size](1, 0, 0, 0)), Multivector[type, size](0, 1, 0, 0))
     assert_equal(Vector[type, size](1, 0).__mul__(Multivector[type, size](0, 1, 0, 0)), Multivector[type, size](1, 0, 0, 0))
@@ -197,6 +204,11 @@ def test_mul[type: DType, size: Int]():
 
     assert_equal(Vector[type, size](0, 1).__mul__(Rotor[type, size](1, 0)), Vector[type, size](0, 1))
     assert_equal(Vector[type, size](0, 1).__mul__(Rotor[type, size](0, 1)), Vector[type, size](-1, 0))
+
+    # +--- vector * scalar
+    assert_equal(Vector[type, size](1, 0).__mul__(2), Vector[type, size](2, 0))
+    assert_equal(Vector[type, size](0, 1).__mul__(2), Vector[type, size](0, 2))
+    assert_equal(Vector[type, size](2, 3).__mul__(2), Vector[type, size](4, 6))
 
     # +--- rotor * multivector
     assert_equal(Rotor[type, size](1, 0).__mul__(Multivector[type, size](1, 0, 0, 0)), Multivector[type, size](1, 0, 0, 0))
@@ -223,9 +235,28 @@ def test_mul[type: DType, size: Int]():
     assert_equal(Rotor[type, size](0, 1).__mul__(Rotor[type, size](1, 0)), Rotor[type, size](0, 1))
     assert_equal(Rotor[type, size](0, 1).__mul__(Rotor[type, size](0, 1)), Rotor[type, size](-1, 0))
 
+    # +--- rotor * scalar
+    assert_equal(Rotor[type, size](1, 0).__mul__(2), Rotor[type, size](2, 0))
+    assert_equal(Rotor[type, size](0, 1).__mul__(2), Rotor[type, size](0, 2))
+    assert_equal(Rotor[type, size](1, 4).__mul__(2), Rotor[type, size](2, 8))
+
+    # +--- scalar * multivector
+    assert_equal(Multivector[type, size](1, 0, 0, 0).__rmul__(2), Multivector[type, size](2, 0, 0, 0))
+    assert_equal(Multivector[type, size](0, 1, 0, 0).__rmul__(2), Multivector[type, size](0, 2, 0, 0))
+    assert_equal(Multivector[type, size](0, 0, 1, 0).__rmul__(2), Multivector[type, size](0, 0, 2, 0))
+    assert_equal(Multivector[type, size](0, 0, 0, 1).__rmul__(2), Multivector[type, size](0, 0, 0, 2))
+
+    # +--- scalar * vector
+    assert_equal(Vector[type, size](1, 0).__rmul__(2), Vector[type, size](2, 0))
+    assert_equal(Vector[type, size](0, 1).__rmul__(2), Vector[type, size](0, 2))
+
+    # +--- scalar * rotor
+    assert_equal(Rotor[type, size](1, 0).__rmul__(2), Rotor[type, size](2, 0))
+    assert_equal(Rotor[type, size](0, 1).__rmul__(2), Rotor[type, size](0, 2))
+
 
 def test_truediv[type: DType, size: Int]():
-    # +--- multivector * multivector
+    # +--- multivector / multivector
     assert_equal(Multivector[type, size](1, 0, 0, 0).__truediv__(Multivector[type, size](1, 0, 0, 0)), Multivector[type, size](1, 0, 0, 0))
     assert_equal(Multivector[type, size](0, 1, 0, 0).__truediv__(Multivector[type, size](0, 1, 0, 0)), Multivector[type, size](1, 0, 0, 0))
     assert_equal(Multivector[type, size](0, 0, 1, 0).__truediv__(Multivector[type, size](0, 0, 1, 0)), Multivector[type, size](1, 0, 0, 0))
@@ -246,7 +277,7 @@ def test_truediv[type: DType, size: Int]():
     assert_equal(Multivector[type, size](0, 1, 0, 0).__truediv__(Multivector[type, size](0, 0, 1, 0)), Multivector[type, size](0, 0, 0, 1))
     assert_equal(Multivector[type, size](-1, 0, 0, 0).__truediv__(Multivector[type, size](0, 0, 0, 1)), Multivector[type, size](0, 0, 0, 1))
 
-    # +--- multivector * vector
+    # +--- multivector / vector
     assert_equal(Multivector[type, size](0, 1, 0, 0).__truediv__(Vector[type, size](1, 0)), Multivector[type, size](1, 0, 0, 0))
     assert_equal(Multivector[type, size](0, 0, 1, 0).__truediv__(Vector[type, size](0, 1)), Multivector[type, size](1, 0, 0, 0))
 
@@ -259,7 +290,7 @@ def test_truediv[type: DType, size: Int]():
     assert_equal(Multivector[type, size](0, 0, -1, 0).__truediv__(Vector[type, size](1, 0)), Multivector[type, size](0, 0, 0, 1))
     assert_equal(Multivector[type, size](0, 1, 0, 0).__truediv__(Vector[type, size](0, 1)), Multivector[type, size](0, 0, 0, 1))
 
-    # +--- multivector * rotor
+    # +--- multivector / rotor
     assert_equal(Multivector[type, size](1, 0, 0, 0).__truediv__(Rotor[type, size](1, 0)), Multivector[type, size](1, 0, 0, 0))
     assert_equal(Multivector[type, size](0, 0, 0, 1).__truediv__(Rotor[type, size](0, 1)), Multivector[type, size](1, 0, 0, 0))
 
@@ -272,7 +303,14 @@ def test_truediv[type: DType, size: Int]():
     assert_equal(Multivector[type, size](0, 0, 0, 1).__truediv__(Rotor[type, size](1, 0)), Multivector[type, size](0, 0, 0, 1))
     assert_equal(Multivector[type, size](-1, 0, 0, 0).__truediv__(Rotor[type, size](0, 1)), Multivector[type, size](0, 0, 0, 1))
 
-    # +--- vector * multivector
+    # +--- multivector / scalar
+    assert_equal(Multivector[type, size](2, 0, 0, 0).__truediv__(2), Multivector[type, size](1, 0, 0, 0))
+    assert_equal(Multivector[type, size](0, 2, 0, 0).__truediv__(2), Multivector[type, size](0, 1, 0, 0))
+    assert_equal(Multivector[type, size](0, 0, 2, 0).__truediv__(2), Multivector[type, size](0, 0, 1, 0))
+    assert_equal(Multivector[type, size](0, 0, 0, 2).__truediv__(2), Multivector[type, size](0, 0, 0, 1))
+    assert_equal(Multivector[type, size](2, 4, 6, 8).__truediv__(2), Multivector[type, size](1, 2, 3, 4))
+
+    # +--- vector / multivector
     assert_equal(Vector[type, size](1, 0).__truediv__(Multivector[type, size](0, 1, 0, 0)), Multivector[type, size](1, 0, 0, 0))
     assert_equal(Vector[type, size](0, 1).__truediv__(Multivector[type, size](0, 0, 1, 0)), Multivector[type, size](1, 0, 0, 0))
 
@@ -285,21 +323,26 @@ def test_truediv[type: DType, size: Int]():
     assert_equal(Vector[type, size](0, -1).__truediv__(Multivector[type, size](0, 1, 0, 0)), Multivector[type, size](0, 0, 0, 1))
     assert_equal(Vector[type, size](1, 0).__truediv__(Multivector[type, size](0, 0, 1, 0)), Multivector[type, size](0, 0, 0, 1))
 
-    # +--- vector * vector
+    # +--- vector / vector
     assert_equal(Vector[type, size](1, 0).__truediv__(Vector[type, size](1, 0)), Rotor[type, size](1, 0))
     assert_equal(Vector[type, size](0, 1).__truediv__(Vector[type, size](0, 1)), Rotor[type, size](1, 0))
 
     assert_equal(Vector[type, size](0, -1).__truediv__(Vector[type, size](1, 0)), Rotor[type, size](0, 1))
     assert_equal(Vector[type, size](1, 0).__truediv__(Vector[type, size](0, 1)), Rotor[type, size](0, 1))
 
-    # +--- vector * rotor
+    # +--- vector / rotor
     assert_equal(Vector[type, size](1, 0).__truediv__(Rotor[type, size](1, 0)), Vector[type, size](1, 0))
     assert_equal(Vector[type, size](0, 1).__truediv__(Rotor[type, size](0, 1)), Vector[type, size](1, 0))
 
     assert_equal(Vector[type, size](0, 1).__truediv__(Rotor[type, size](1, 0)), Vector[type, size](0, 1))
     assert_equal(Vector[type, size](-1, 0).__truediv__(Rotor[type, size](0, 1)), Vector[type, size](0, 1))
 
-    # +--- rotor * multivector
+    # +--- vector / scalar
+    assert_equal(Vector[type, size](2, 0).__truediv__(2), Vector[type, size](1, 0))
+    assert_equal(Vector[type, size](0, 2).__truediv__(2), Vector[type, size](0, 1))
+    assert_equal(Vector[type, size](2, 4).__truediv__(2), Vector[type, size](1, 2))
+
+    # +--- rotor / multivector
     assert_equal(Rotor[type, size](1, 0).__truediv__(Multivector[type, size](1, 0, 0, 0)), Multivector[type, size](1, 0, 0, 0))
     assert_equal(Rotor[type, size](0, 1).__truediv__(Multivector[type, size](0, 0, 0, 1)), Multivector[type, size](1, 0, 0, 0))
 
@@ -312,14 +355,14 @@ def test_truediv[type: DType, size: Int]():
     assert_equal(Rotor[type, size](0, 1).__truediv__(Multivector[type, size](1, 0, 0, 0)), Multivector[type, size](0, 0, 0, 1))
     assert_equal(Rotor[type, size](-1, 0).__truediv__(Multivector[type, size](0, 0, 0, 1)), Multivector[type, size](0, 0, 0, 1))
 
-    # +--- rotor * vector
+    # +--- rotor / vector
     assert_equal(Rotor[type, size](1, 0).__truediv__(Vector[type, size](1, 0)), Vector[type, size](1, 0))
     assert_equal(Rotor[type, size](0, 1).__truediv__(Vector[type, size](0, 1)), Vector[type, size](1, 0))
 
     assert_equal(Rotor[type, size](0, -1).__truediv__(Vector[type, size](1, 0)), Vector[type, size](0, 1))
     assert_equal(Rotor[type, size](1, 0).__truediv__(Vector[type, size](0, 1)), Vector[type, size](0, 1))
 
-    # +--- rotor * rotor
+    # +--- rotor / rotor
     assert_equal(Rotor[type, size](1, 0).__truediv__(Rotor[type, size](1, 0)), Rotor[type, size](1, 0))
     assert_equal(Rotor[type, size](0, 1).__truediv__(Rotor[type, size](0, 1)), Rotor[type, size](1, 0))
 
@@ -331,3 +374,16 @@ def test_truediv[type: DType, size: Int]():
 
     assert_equal(Rotor[type, size](0, 1).__truediv__(Rotor[type, size](1, 0)), Rotor[type, size](0, 1))
     assert_equal(Rotor[type, size](-1, 0).__truediv__(Rotor[type, size](0, 1)), Rotor[type, size](0, 1))
+
+    # +--- rotor / scalar
+    assert_equal(Rotor[type, size](2, 0).__truediv__(2), Rotor[type, size](1, 0))
+    assert_equal(Rotor[type, size](0, 2).__truediv__(2), Rotor[type, size](0, 1))
+    assert_equal(Rotor[type, size](2, 8).__truediv__(2), Rotor[type, size](1, 4))
+
+    # +--- scalar / multivector
+
+
+    # +--- scalar / vector
+
+
+    # +--- rotor / scalar

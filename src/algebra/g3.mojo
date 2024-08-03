@@ -6,11 +6,7 @@
 
 Cl(3,0,0) ⇔ Mat2x2(C)
 
-`x*x = 1`
-
-`y*y = 1`
-
-`z*z = 1`
+`x*x = y*y = z*z = 1`
 
 `x*y = i`
 
@@ -18,7 +14,7 @@ Cl(3,0,0) ⇔ Mat2x2(C)
 
 `y*z = k`
 
-`i*i = -1`
+`i*i = j*j = k*k = a*a = -1`
 """
 
 
@@ -27,7 +23,9 @@ Cl(3,0,0) ⇔ Mat2x2(C)
 # +----------------------------------------------------------------------------------------------+ #
 #
 @register_passable("trivial")
-struct Multivector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
+struct Multivector[type: DType = DType.float64, size: Int = 1](
+    StringableCollectionElement, Formattable, EqualityComparable
+):
     """A G3 Multivector."""
 
     # +------[ Alias ]------+ #
@@ -290,7 +288,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](EqualityComparabl
 
     fn __mul__(self, other: Self) -> Self:
         return (
-            + self.s * other.s
+            +self.s * other.s
             + self.s * other.v
             + self.s * other.b
             + self.s * other.a
@@ -310,34 +308,24 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](EqualityComparabl
 
     fn __mul__(self, other: Self.Rotor) -> Self:
         return (
-            + self.s.__mul__(other.s)
+            +self.s * other.s
             + self.s * other.b
-            + self.v.__mul__(other.s)
-            + self.v.__mul__(other.b)
-            + self.b.__mul__(other.s)
-            + self.b.__mul__(other.b)
-            + self.a.__mul__(other.s)
-            + self.a.__mul__(other.b)
+            + self.v * other.s
+            + self.v * other.b
+            + self.b * other.s
+            + self.b * other.b
+            + self.a * other.s
+            + self.a * other.b
         )
 
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.s * other, self.v * other, self.b * other, self.a * other)
 
     fn __mul__(self, other: Self.Vect) -> Self:
-        return (
-            + self.s * other
-            + self.v * other
-            + self.b * other
-            + self.a * other
-        )
+        return +self.s * other + self.v * other + self.b * other + self.a * other
 
     fn __mul__(self, other: Self.Bive) -> Self:
-        return (
-            + self.s * other
-            + self.v * other
-            + self.b * other
-            + self.a * other
-        )
+        return +self.s * other + self.v * other + self.b * other + self.a * other
 
     fn __mul__(self, other: Self.Anti) -> Self:
         return Self(self.a * other, self.b * other, self.v * other, self.s * other)
@@ -359,7 +347,9 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](EqualityComparabl
 # +----------------------------------------------------------------------------------------------+ #
 #
 @register_passable("trivial")
-struct Rotor[type: DType = DType.float64, size: Int = 1](EqualityComparable):
+struct Rotor[type: DType = DType.float64, size: Int = 1](
+    StringableCollectionElement, Formattable, EqualityComparable
+):
     """A G3 Rotor. The even sub-algebra of G3. Isomorphic with Quaternions."""
 
     # +------[ Alias ]------+ #
@@ -527,19 +517,19 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](EqualityComparable):
         return Self.Multi(self.s, None, self.b, -other)
 
     fn __mul__(self, other: Self.Multi) -> Self.Multi:
-        return self.s*other + self.b*other
+        return self.s * other + self.b * other
 
     fn __mul__(self, other: Self) -> Self:
-        return self.s*other + self.b*other
+        return self.s * other + self.b * other
 
     fn __mul__(self, other: Self.Vect) -> Self.Multi:
-        return self.s*other + self.b*other
+        return self.s * other + self.b * other
 
     fn __mul__(self, other: Self.Bive) -> Self:
-        return self.s*other + self.b*other
+        return self.s * other + self.b * other
 
     fn __mul__(self, other: Self.Anti) -> Self.Multi:
-        return self.s*other + self.b*other
+        return self.s * other + self.b * other
 
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.s * other, self.b * other)
@@ -561,7 +551,9 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](EqualityComparable):
 # +----------------------------------------------------------------------------------------------+ #
 #
 @register_passable("trivial")
-struct Vector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
+struct Vector[type: DType = DType.float64, size: Int = 1](
+    StringableCollectionElement, Formattable, EqualityComparable
+):
     """A G3 Vector."""
 
     # +------[ Alias ]------+ #
@@ -703,10 +695,10 @@ struct Vector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
         return Self.Multi(0, self, None, -other)
 
     fn __mul__(self, other: Self.Multi) -> Self.Multi:
-        return self*other.s + self*other.v + self*other.b + self*other.a
+        return self * other.s + self * other.v + self * other.b + self * other.a
 
     fn __mul__(self, other: Self.Rotor) -> Self.Multi:
-        return self*other.s + self*other.b
+        return self * other.s + self * other.b
 
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.x * other, self.y * other, self.z * other)
@@ -720,7 +712,8 @@ struct Vector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
         )
 
     fn __mul__(self, other: Self.Bive) -> Self.Multi:
-        return Self.Multi(0,
+        return Self.Multi(
+            0,
             Self(
                 -self.y * other.i - self.z * other.j,
                 +self.x * other.i - self.z * other.k,
@@ -750,7 +743,9 @@ struct Vector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
 # +----------------------------------------------------------------------------------------------+ #
 #
 @register_passable("trivial")
-struct Bivector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
+struct Bivector[type: DType = DType.float64, size: Int = 1](
+    StringableCollectionElement, Formattable, EqualityComparable
+):
     """A G3 Bivector."""
 
     # +------[ Alias ]------+ #
@@ -904,10 +899,10 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
         return Self.Multi(0, None, self, -other)
 
     fn __mul__(self, other: Self.Multi) -> Self.Multi:
-        return self*other.s + self*other.v + self*other.b + self*other.a
+        return self * other.s + self * other.v + self * other.b + self * other.a
 
     fn __mul__(self, other: Self.Rotor) -> Self.Rotor:
-        return self*other.s + self*other.b
+        return self * other.s + self * other.b
 
     fn __mul__(self, other: Self.Coef) -> Self:
         return Self(self.i * other, self.j * other, self.k * other)
@@ -926,10 +921,10 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
 
     fn __mul__(self, other: Self) -> Self.Rotor:
         return Self.Rotor(
-            - self.i * other.i - self.j * other.j - self.k * other.k,
-            + self.k * other.j - self.j * other.k,
-            + self.i * other.k - self.k * other.i,
-            + self.j * other.i - self.i * other.j,
+            -self.i * other.i - self.j * other.j - self.k * other.k,
+            +self.k * other.j - self.j * other.k,
+            +self.i * other.k - self.k * other.i,
+            +self.j * other.i - self.i * other.j,
         )
 
     fn __mul__(self, other: Self.Anti) -> Self.Vect:
@@ -952,7 +947,9 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](EqualityComparable):
 # +----------------------------------------------------------------------------------------------+ #
 #
 @register_passable("trivial")
-struct Antiox[type: DType = DType.float64, size: Int = 1](EqualityComparable):
+struct Antiox[type: DType = DType.float64, size: Int = 1](
+    StringableCollectionElement, Formattable, EqualityComparable
+):
     """A G3 Antiox."""
 
     # +------[ Alias ]------+ #
