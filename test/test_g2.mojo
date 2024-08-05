@@ -112,18 +112,44 @@ def test_ne[type: DType, size: Int]():
 
 def test_add[type: DType, size: Int]():
     assert_equal(Multivector[type, size](1, 2, 3, 4).__add__(Multivector[type, size](5, 4, 3, 2)), Multivector[type, size](6, 6, 6, 6))
-    assert_equal(Vector[type, size](2, 3).__add__(Vector[type, size](4, 3)), Vector[type, size](6, 6))
+    assert_equal(Multivector[type, size](0, 0, 0, 0).__add__(Rotor[type, size](1, 4)), Multivector[type, size](1, 0, 0, 4))
+    assert_equal(Multivector[type, size](0, 0, 0, 0).__add__(Vector[type, size](2, 3)), Multivector[type, size](0, 2, 3, 0))
+    assert_equal(Multivector[type, size](0, 0, 0, 0).__add__(SIMD[type, size](1)), Multivector[type, size](1, 0, 0, 0))
+
+    assert_equal(Rotor[type, size](1, 4).__add__(Multivector[type, size](0, 2, 3, 0)), Multivector[type, size](1, 2, 3, 4))
     assert_equal(Rotor[type, size](1, 4).__add__(Rotor[type, size](5, 2)), Rotor[type, size](6, 6))
     assert_equal(Rotor[type, size](1, 4).__add__(Vector[type, size](2, 3)), Multivector[type, size](1, 2, 3, 4))
+    assert_equal(Rotor[type, size](0, 4).__add__(SIMD[type, size](1)), Rotor[type, size](1, 4))
+
+    assert_equal(Vector[type, size](2, 3).__add__(Multivector[type, size](1, 0, 0, 4)), Multivector[type, size](1, 2, 3, 4))
     assert_equal(Vector[type, size](2, 3).__add__(Rotor[type, size](1, 4)), Multivector[type, size](1, 2, 3, 4))
+    assert_equal(Vector[type, size](2, 3).__add__(Vector[type, size](4, 3)), Vector[type, size](6, 6))
+    assert_equal(Vector[type, size](2, 3).__add__(SIMD[type, size](1)), Multivector[type, size](1, 2, 3, 0))
+
+    assert_equal(Multivector[type, size](0, 2, 3, 4).__radd__(SIMD[type, size](1)), Multivector[type, size](1, 2, 3, 4))
+    assert_equal(Rotor[type, size](0, 4).__radd__(SIMD[type, size](1)), Rotor[type, size](1, 4))
+    assert_equal(Vector[type, size](2, 3).__radd__(SIMD[type, size](1)), Multivector[type, size](1, 2, 3, 0))
 
 
 def test_sub[type: DType, size: Int]():
     assert_equal(Multivector[type, size](6, 6, 6, 6).__sub__(Multivector[type, size](5, 4, 3, 2)), Multivector[type, size](1, 2, 3, 4))
-    assert_equal(Vector[type, size](6, 6).__sub__(Vector[type, size](4, 3)), Vector[type, size](2, 3))
+    assert_equal(Multivector[type, size](1, 0, 0, 4).__sub__(Rotor[type, size](1, 4)), Multivector[type, size](0, 0, 0, 0))
+    assert_equal(Multivector[type, size](0, 2, 3, 0).__sub__(Vector[type, size](2, 3)), Multivector[type, size](0, 0, 0, 0))
+    assert_equal(Multivector[type, size](1, 0, 0, 0).__sub__(SIMD[type, size](1)), Multivector[type, size](0, 0, 0, 0))
+
+    assert_equal(Rotor[type, size](1, 4).__sub__(Multivector[type, size](0, 2, 3, 0)), Multivector[type, size](1, -2, -3, 4))
     assert_equal(Rotor[type, size](6, 6).__sub__(Rotor[type, size](5, 2)), Rotor[type, size](1, 4))
     assert_equal(Rotor[type, size](1, 4).__sub__(Vector[type, size](2, 3)), Multivector[type, size](1, -2, -3, 4))
+    assert_equal(Rotor[type, size](1, 4).__sub__(SIMD[type, size](1)), Rotor[type, size](0, 4))
+
+    assert_equal(Vector[type, size](2, 3).__sub__(Multivector[type, size](1, 0, 0, 4)), Multivector[type, size](-1, 2, 3, -4))
     assert_equal(Vector[type, size](2, 3).__sub__(Rotor[type, size](1, 4)), Multivector[type, size](-1, 2, 3, -4))
+    assert_equal(Vector[type, size](6, 6).__sub__(Vector[type, size](4, 3)), Vector[type, size](2, 3))
+    assert_equal(Vector[type, size](2, 3).__sub__(SIMD[type, size](1)), Multivector[type, size](-1, 2, 3, 0))
+
+    assert_equal(Multivector[type, size](1, 2, 3, 4).__rsub__(SIMD[type, size](1)), Multivector[type, size](0, -2, -3, -4))
+    assert_equal(Rotor[type, size](1, 4).__rsub__(SIMD[type, size](1)), Rotor[type, size](0, -4))
+    assert_equal(Vector[type, size](2, 3).__rsub__(SIMD[type, size](1)), Multivector[type, size](1, -2, -3, 0))
 
 
 def test_mul[type: DType, size: Int]():
@@ -381,9 +407,10 @@ def test_truediv[type: DType, size: Int]():
     assert_equal(Rotor[type, size](2, 8).__truediv__(2), Rotor[type, size](1, 4))
 
     # +--- scalar / multivector
-
+    assert_equal(Multivector[type, size](1, 2, 3, 4).__rtruediv__(SIMD[type, size](2)), Multivector[type, size](0.5, -1, -1.5, -2))
 
     # +--- scalar / vector
-
+    assert_equal(Vector[type, size](1, 1).__rtruediv__(SIMD[type, size](1)), Vector[type, size](0.5, 0.5))
 
     # +--- rotor / scalar
+    assert_equal(Rotor[type, size](1, 1).__rtruediv__(SIMD[type, size](1)), Rotor[type, size](0.5, -0.5))

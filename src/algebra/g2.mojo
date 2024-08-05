@@ -15,7 +15,7 @@ Cl(2,0,0) ⇔ Mat2x2
 `i*i = -1`
 """
 
-from math import cos, sin
+from math import cos, sin, atan2
 
 
 # +----------------------------------------------------------------------------------------------+ #
@@ -265,6 +265,10 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
             if self.is_zero():
                 return degen.unsafe_value()
         return self / self.nom()
+
+    @always_inline("nodebug")
+    fn trans(self, other: Self) -> Self:
+        return (self.v + other.v) + (self.rotor() * other.rotor())
 
     # +------( Arithmetic )------+ #
     #
@@ -694,6 +698,10 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
         return sqrt(self.inn())
 
     @always_inline("nodebug")
+    fn arg(self) -> Self.Coef:
+        return atan2(self.i, self.s)
+
+    @always_inline("nodebug")
     fn normalized[degen: Optional[Self] = None](self) -> Self:
         @parameter
         if degen:
@@ -786,7 +794,7 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 
     @always_inline("nodebug")
     fn __rsub__(rhs, lhs: Self.Coef) -> Self:
-        return Self(lhs - rhs.s, rhs.i)
+        return Self(lhs - rhs.s, -rhs.i)
 
     @always_inline("nodebug")
     fn __rmul__(rhs, lhs: Self.Coef) -> Self:
@@ -1002,6 +1010,14 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     @always_inline("nodebug")
     fn nom(self) -> Self.Coef:
         return sqrt(self.inn())
+
+    @always_inline("nodebug")
+    fn arg(self) -> Self.Coef:
+        return atan2(self.y, self.x)
+
+    @always_inline("nodebug")
+    fn nrm(self) -> Self:
+        return Self(self.y, -self.x)
 
     @always_inline("nodebug")
     fn normalized[degen: Optional[Self] = None](self) -> Self:
