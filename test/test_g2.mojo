@@ -5,7 +5,7 @@
 
 from testing import assert_true, assert_false, assert_equal
 
-from infrared.algebra.g2 import *
+from infrared.hard.g2 import *
 
 
 def main():

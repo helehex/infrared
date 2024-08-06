@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # x--------------------------------------------------------------------------x #
 # | MIT License
 # | Copyright (c) 2024 Helehex
@@ -31,4 +32,5 @@ if [ "$FAILED_COUNT" -eq 0 ]; then
     echo -e "${GREEN}───╖\n   ║ All Successful!\n───╜${NC}"
 else
     echo -e "${RED}───╖\n   ║ ${FAILED_COUNT} Failed!\n───╜${NC}"
+    return 1
 fi
