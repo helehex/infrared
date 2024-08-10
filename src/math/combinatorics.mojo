@@ -5,6 +5,7 @@
 """Combinatorics functions."""
 
 from math import sqrt, log, exp, gamma, lgamma
+from bit import pop_count
 
 
 # +------( lgamma )------+ #
@@ -17,6 +18,101 @@ from math import sqrt, log, exp, gamma, lgamma
 # The tgamma functions compute the gamma function of x.
 # A domain error or pole error may occur if x is a negative integer or zero.
 # A range error occurs if the magnitude of x is too large and may occur if the magnitude of x is too small.
+
+
+# +------( Powerset )------+ #
+#
+fn powerset(list: List[Int]) -> List[List[Int]]:
+    # maybe faster to use powerset_bin to generate this as well
+    if len(list) == 0:
+        return List[List[Int]](List[Int]())
+    var cs = List[List[Int]]()
+    for c in powerset(list[1:]):
+        cs += c[]
+        cs += List(list[0]) + c[]
+    return cs
+
+
+fn powerset_bin(n: Int) -> List[List[Int]]:
+    var result = List[List[Int]](capacity=2**n)
+    for i in range(2**n):
+        var j = 0
+        var l = List[Int](capacity=pop_count(i))
+        while j < i:
+            if (i >> j) & 1:
+                l += j + 1
+            j += 1
+        result += l
+    return result
+
+
+fn powerset_ord(n: Int) -> List[List[Int]]:
+    var result = List[List[Int]](capacity=2**n)
+    for k in range(n + 1):
+        result += combinations_ord(n, k)
+    return result^
+
+
+# +------( Combination )------+ #
+#
+fn increment_combination[offset: Int = 1](n: Int, inout l: List[Int]) -> Bool:
+    var first_gap: Int = -1
+    var first_val: Int = -1
+    for i in range(1, len(l) + 1):
+        if (l[len(l) - i]) < ((n + offset) - i):
+            first_gap = len(l) - i
+            first_val = l[first_gap]
+            break
+    if first_gap == -1:
+        return False
+    for i in range(first_gap, len(l)):
+        l[i] = first_val + (i - first_gap) + 1
+    return True
+
+
+fn combinations_ord[offset: Int = 1](n: Int, k: Int) -> List[List[Int]]:
+    var result = List[List[Int]](capacity=2**n)
+    var idxs = List[Int](capacity=k)
+    for i in range(k):
+        idxs += i + offset
+    result += idxs
+    while increment_combination(n, idxs):
+        result += idxs
+    return result^
+
+
+fn combinations_bin(n: Int, k: Int) -> List[List[Int]]:
+    var result = List[List[Int]](capacity=2**n)
+    for i in range(2**n):
+        var bits = pop_count(i)
+        if bits != k:
+            continue
+        var j = 0
+        var l = List[Int](capacity=bits)
+        while j < i:
+            if (i >> j) & 1:
+                l += j + 1
+            j += 1
+        result += l
+    return result
+
+
+# fn powerset_dan13(n: Int) -> List[List[Int]]:
+#     var result = List[List[Int]](capacity=2**n)
+#     var head = 0
+#     queue.append(List())
+#     tail += 1
+#     while(head < queue.size()):
+#         var current = queue[head]
+#         if current.size() == n:
+#             break
+#         head += 1
+#         for i in range(n):
+#             if i in current:
+#             continue
+#             var next_set = current + i
+#             queue.append(next_set)
+#     return result
 
 
 # +------( Factorial )------+ #
