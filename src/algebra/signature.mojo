@@ -105,14 +105,6 @@ struct Signature:
     fn antiscalar_mask(self) -> List[Bool]:
         return self.grade_mask(self.grds - 1)
 
-    fn sort_basis(self, inout basis: List[Int], inout sign: Int):
-        for i in range(1, len(basis)):
-            var j = i
-            while j > 0 and basis[j] < basis[j - 1]:
-                sign = -sign
-                swap(basis[j - 1], basis[j])
-                j -= 1
-
     fn squash_basis(self, inout basis: List[Int], inout sign: Int):
         var result = List[Int](capacity=len(basis))
         var i = 1
@@ -137,8 +129,7 @@ struct Signature:
         elif len(basis) == 1:
             return SignedBasis(1, basis[0])
         else:
-            var sign: Int = 1
-            self.sort_basis(basis, sign)
+            var sign: Int = 1 - ((signed_sort(basis) % 2) * 2)
             self.squash_basis(basis, sign)
             return SignedBasis(sign, self.order_basis(basis))
 

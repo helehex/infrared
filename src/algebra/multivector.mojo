@@ -122,6 +122,48 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
                 result += "] + "
         return result + str(abs(self._data[len])) + " [" + str(self.entry2basis[len]) + "]"
 
+    # +------( Comparison )------+ #
+    #
+    fn __eq__(self, other: Multivector[sig, _, type]) -> Bool:
+
+        @parameter
+        for basis in range(sig.dims):
+            alias self_entry = self.basis2entry[basis]
+            alias other_entry = other.basis2entry[basis]
+
+            @parameter
+            if (self_entry != -1) and (other_entry != -1):
+                if self._data[self_entry] != other._data[other_entry]:
+                    return False
+            elif (self_entry != -1):
+                if self._data[self_entry] != 0:
+                    return False
+            elif (other_entry != -1):
+                if self._data[other_entry] != 0:
+                    return False
+
+        return True
+
+    fn __ne__(self, other: Multivector[sig, _, type]) -> Bool:
+
+        @parameter
+        for basis in range(sig.dims):
+            alias self_entry = self.basis2entry[basis]
+            alias other_entry = other.basis2entry[basis]
+
+            @parameter
+            if (self_entry != -1) and (other_entry != -1):
+                if self._data[self_entry] != other._data[other_entry]:
+                    return True
+            elif (self_entry != -1):
+                if self._data[self_entry] != 0:
+                    return True
+            elif (other_entry != -1):
+                if self._data[other_entry] != 0:
+                    return True
+
+        return False
+
     # +------( Unary )------+ #
     #
     fn __neg__(self) -> Self:
@@ -184,6 +226,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
         return result
 
+    # +------( Arithmetic )------+ #
+    #
     @always_inline("nodebug")
     fn __add__(
         self, other: Multivector[sig, _, type]
@@ -198,11 +242,11 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             alias other_entry = other.basis2entry[result_basis]
 
             @parameter
-            if self_entry and other_entry:
+            if (self_entry != -1) and (other_entry != -1):
                 result._data[entry] = self._data[self_entry] + other._data[other_entry]
-            elif self_entry:
+            elif (self_entry != -1):
                 result._data[entry] = self._data[self_entry]
-            elif other_entry:
+            elif (other_entry != -1):
                 result._data[entry] = other._data[other_entry]
 
         return result
@@ -221,11 +265,11 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             alias other_entry = other.basis2entry[result_basis]
 
             @parameter
-            if self_entry and other_entry:
+            if (self_entry != -1) and (other_entry != -1):
                 result._data[entry] = self._data[self_entry] - other._data[other_entry]
-            elif self_entry:
+            elif (self_entry != -1):
                 result._data[entry] = self._data[self_entry]
-            elif other_entry:
+            elif (other_entry != -1):
                 result._data[entry] = -other._data[other_entry]
 
         return result

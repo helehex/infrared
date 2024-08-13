@@ -47,3 +47,4 @@ alias SG3 = Signature(1, 3)
 """3D Spacetime Algebra."""
 
 # alias Vector = Multivector[_, mask=sig.vector_mask()]
+

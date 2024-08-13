@@ -195,6 +195,17 @@ struct SignedBasis:
 #         return ansi.Color.colors[sig.grade_of[self.basis] % 8] + str_basis + ansi.Color.clear
 
 
+fn signed_sort(inout basis: List[Int]) -> Int:
+    var count = 0
+    for i in range(1, len(basis)):
+        var j = i
+        while j > 0 and basis[j] < basis[j - 1]:
+            count += 1
+            swap(basis[j - 1], basis[j])
+            j -= 1
+    return count
+
+
 fn count_odd(array: List[Int]) -> Int:
     var count = 0
     var i = 1

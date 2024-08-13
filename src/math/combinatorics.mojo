@@ -22,11 +22,11 @@ from bit import pop_count
 
 # +------( Powerset )------+ #
 #
-fn powerset(list: List[Int]) -> List[List[Int]]:
+fn powerset[T: CollectionElement, //](list: List[T]) -> List[List[T]]:
     # maybe faster to use powerset_bin to generate this as well
     if len(list) == 0:
-        return List[List[Int]](List[Int]())
-    var cs = List[List[Int]]()
+        return List[List[T]](List[T]())
+    var cs = List[List[T]]()
     for c in powerset(list[1:]):
         cs += c[]
         cs += List(list[0]) + c[]

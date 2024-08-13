@@ -9,19 +9,23 @@ from testing.testing import (
 )
 
 
+trait TestableCollectionElement(Testable, RepresentableCollectionElement, EqualityComparableCollectionElement):
+    pass
+
+
 @always_inline
-fn str_(l: List[List[Int]]) -> String:
+fn str_[T: TestableCollectionElement](l: List[List[T]]) -> String:
     var result: String = "["
     for idx in range(len(l) - 1):
-        result += l[idx].__str__() + ", "
+        result += l[idx].__str__[T]() + ", "
     if len(l) > 0:
         result += l[len(l) - 1].__str__()
     return result + "]"
 
 
 @always_inline
-fn assert_equal_(
-    lhs: List[List[Int]],
+fn assert_equal_[T: TestableCollectionElement](
+    lhs: List[List[T]],
     rhs: __type_of(lhs),
     msg: String = "",
     *,
@@ -42,8 +46,8 @@ fn assert_equal_(
 
 
 @always_inline
-fn assert_not_equal_(
-    lhs: List[List[Int]],
+fn assert_not_equal_[T: TestableCollectionElement](
+    lhs: List[List[T]],
     rhs: __type_of(lhs),
     msg: String = "",
     *,
