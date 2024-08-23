@@ -3,6 +3,8 @@
 # | Copyright (c) 2024 Helehex
 # x----------------------------------------------------------------------------------------------x #
 
+from ..io.ansi import Color
+
 
 # TODO: Having these parameterized on sig might not be the best idea...
 #       It seems the best way to get both ctime and rtime performance,
@@ -141,6 +143,13 @@ struct SignedBasis:
 
     @no_inline
     fn __str__(self, sig: Signature) -> String:
+        var result = String()
+        var writer = Formatter(result)
+        self.format_to(writer, sig)
+        return result
+
+    @no_inline
+    fn format_to(self, inout writer: Formatter, sig: Signature):
         var align = len(str(sig.dims)) + 1
         var str_sign: StringLiteral
         if self.sign < 0:
@@ -149,11 +158,9 @@ struct SignedBasis:
             str_sign = "+"
         else:
             str_sign = " "
-        var str_basis = (str(self.basis) if self.sign != 0 else "").rjust(align, str_sign)
-        var color = ansi.Color.colors[
-            sig.grade_of[self.basis] % 8
-        ] if self.sign != 0 else ansi.Color.grey
-        return color + str_basis + ansi.Color.clear
+        writer.write(Color.colors[sig.grade_of[self.basis] % 8] if self.sign else Color.grey)
+        writer.write((str(self.basis) if self.sign != 0 else "").rjust(align, str_sign))
+        writer.write(Color.clear)
 
 
 # @value
@@ -201,7 +208,10 @@ fn signed_sort(inout basis: List[Int]) -> Int:
         var j = i
         while j > 0 and basis[j] < basis[j - 1]:
             count += 1
-            swap(basis[j - 1], basis[j])
+            var temp = basis[j - 1]
+            basis[j - 1] = basis[j]
+            basis[j] = temp
+            # swap(basis[j - 1], basis[j])
             j -= 1
     return count
 

@@ -133,6 +133,25 @@ struct Signature:
             self.squash_basis(basis, sign)
             return SignedBasis(sign, self.order_basis(basis))
 
+    fn squash_vec(self, inout basis: List[Int], vec: Int, inout sign: Int):
+        for idx in reversed(range(len(basis))):
+            if basis[idx] == vec:
+                sign *= self.vec_sqrs[vec - 1]
+                _ = basis.pop(idx)
+                return
+            elif basis[idx] < vec:
+                basis.insert(idx + 1, vec)
+                return
+            else:
+                sign = -sign
+        basis.insert(0, vec)
+
+    fn reduce_basis(self, owned basis1: List[Int], basis2: List[Int]) -> SignedBasis:
+        var sign: Int = 1
+        for vec in basis2:
+            self.squash_vec(basis1, vec[], sign)
+        return SignedBasis(sign, self.order_basis(basis1))
+
     fn order_basis(self, basis: List[Int]) -> Int:
         var result = self.grade_dims[len(basis)]
 
@@ -145,21 +164,32 @@ struct Signature:
 
         return result - 1
 
+    # # old way: append basis, sort, squash, order
+    # fn generate_product_table(inout self):
+    #     for x in range(self.dims):
+    #         var result_x = List[SignedBasis](capacity=self.dims)
+    #         for y in range(self.dims):
+    #             result_x += self.reduce_basis(self.combs[x] + self.combs[y])
+    #         self.mult += result_x^
+
+    # new way: append vec, squash, order, repeat
     fn generate_product_table(inout self):
         for x in range(self.dims):
             var result_x = List[SignedBasis](capacity=self.dims)
             for y in range(self.dims):
-                result_x += self.reduce_basis(self.combs[x] + self.combs[y])
+                result_x += self.reduce_basis(self.combs[x], self.combs[y])
             self.mult += result_x^
 
     @no_inline
     fn __str__(self) -> String:
-        var result: String = ""
+        return String.format_sequence(self)
+
+    @no_inline
+    fn format_to(self, inout writer: Formatter):
         for x in range(len(self.mult)):
             for y in range(len(self.mult[x])):
-                result += self.mult[x][y].__str__(self) + " "
-            result += "\n"
-        return result
+                writer.write(self.mult[x][y].__str__(self) + " ")
+            writer.write("\n")
 
 
 # fn generate_product_table[sig: Signature]() -> List[List[SignedBasis[sig]]]:

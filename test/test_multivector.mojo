@@ -18,34 +18,49 @@ def main():
 
 
 def test_eq():
-    alias sig = Signature(3, 0, 0)
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3) == Multivector[sig, sig.vector_mask()](1, 2, 3))
-    assert_false(Multivector[sig, sig.vector_mask()](1, 2, 3) == Multivector[sig, sig.vector_mask()](1, 4, 3))
-    assert_false(Multivector[sig, sig.vector_mask()](1, 2, 3) == Float64(1))
+    alias g3 = Signature(3, 0, 0)
+    assert_true(Multivector[g3, g3.empty_mask()]().__eq__(Float64(0)))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__eq__(Multivector[g3, g3.vector_mask()](1, 2, 3)))
+    assert_false(Multivector[g3, g3.vector_mask()](1, 2, 3).__eq__(Multivector[g3, g3.vector_mask()](1, 4, 3)))
+    assert_false(Multivector[g3, g3.vector_mask()](1, 2, 3).__eq__(Float64(1)))
 
 
 def test_ne():
-    alias sig = Signature(3, 0, 0)
-    assert_false(Multivector[sig, sig.vector_mask()](1, 2, 3) != Multivector[sig, sig.vector_mask()](1, 2, 3))
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3) != Multivector[sig, sig.vector_mask()](1, 4, 3))
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3) != Float64(1))
+    alias g3 = Signature(3, 0, 0)
+    assert_false(Multivector[g3, g3.empty_mask()]().__ne__(Float64(0)))
+    assert_false(Multivector[g3, g3.vector_mask()](1, 2, 3).__ne__(Multivector[g3, g3.vector_mask()](1, 2, 3)))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__ne__(Multivector[g3, g3.vector_mask()](1, 4, 3)))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__ne__(Float64(1)))
 
 
 def test_add():
-    alias sig = Signature(3, 0, 0)
+    alias g3 = Signature(3, 0, 0)
     alias scalar_vector_mask = List(True, True, True, True, False, False, False, False)
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3).__add__(Multivector[sig, sig.vector_mask()](1, 2, 3)) == Multivector[sig, sig.vector_mask()](2, 4, 6))
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3).__add__(Float64(1)) == Multivector[sig, scalar_vector_mask](1, 1, 2, 3))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__add__(Multivector[g3, g3.vector_mask()](1, 2, 3)) == Multivector[g3, g3.vector_mask()](2, 4, 6))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__add__(Float64(1)) == Multivector[g3, scalar_vector_mask](1, 1, 2, 3))
 
 
 def test_sub():
-    alias sig = Signature(3, 0, 0)
+    alias g3 = Signature(3, 0, 0)
     alias scalar_vector_mask = List(True, True, True, True, False, False, False, False)
-    assert_true(Multivector[sig, sig.vector_mask()](2, 4, 6).__sub__(Multivector[sig, sig.vector_mask()](1, 2, 3)) == Multivector[sig, sig.vector_mask()](1, 2, 3))
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3).__sub__(Float64(1)) == Multivector[sig, scalar_vector_mask](-1, 1, 2, 3))
+    assert_true(Multivector[g3, g3.vector_mask()](2, 4, 6).__sub__(Multivector[g3, g3.vector_mask()](1, 2, 3)) == Multivector[g3, g3.vector_mask()](1, 2, 3))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__sub__(Float64(1)) == Multivector[g3, scalar_vector_mask](-1, 1, 2, 3))
 
 
 def test_mul():
-    alias sig = Signature(3, 0, 0)
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3).__mul__(Float64(2)) == Multivector[sig, sig.vector_mask()](2, 4, 6))
-    assert_true(Multivector[sig, sig.vector_mask()](1, 2, 3).__mul__(Multivector[sig, sig.antiscalar_mask()](1)) == Multivector[sig, sig.bivector_mask()](3, -2, 1))
+    alias g3 = Signature(3, 0, 0)
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__mul__(Float64(2)) == Multivector[g3, g3.vector_mask()](2, 4, 6))
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__mul__(Multivector[g3, g3.antiscalar_mask()](1)) == Multivector[g3, g3.bivector_mask()](3, -2, 1))
+
+    alias ug3 = Signature(1, 1, 1, flip_ze = False)
+    alias v1_mask = List(False, True, False, False, False, False, False, False)
+    assert_true(Multivector[ug3, v1_mask](2).__mul__(Multivector[ug3, v1_mask](2)) == Float64(4))
+    alias v2_mask = List(False, False, True, False, False, False, False, False)
+    assert_true(Multivector[ug3, v2_mask](2).__mul__(Multivector[ug3, v2_mask](2)) == Float64(-4))
+    alias v3_mask = List(False, False, False, True, False, False, False, False)
+    assert_true(Multivector[ug3, v3_mask](2).__mul__(Multivector[ug3, v3_mask](2)) == Float64(0))
+
+    alias pg3 = Signature(3, 0, 1, flip_ze = True)
+    alias niltrivector_mask = List(False, False, False, False, False, False, False, False, False, False, False, True, True, True, False, False)
+    assert_true(Multivector[pg3, pg3.vector_mask()](1, 2, 3, 4).__mul__(Float64(2)) == Multivector[pg3, pg3.vector_mask()](2, 4, 6, 8))
+    assert_true(Multivector[pg3, pg3.vector_mask()](1, 2, 3, 4).__mul__(Multivector[pg3, pg3.antiscalar_mask()](1)) == Multivector[pg3, niltrivector_mask](-4, 3, -2))

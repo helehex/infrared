@@ -3,63 +3,10 @@
 # | Copyright (c) 2024 Helehex
 # x----------------------------------------------------------------------------------------------x #
 
+from os import abort
 from collections import Optional
 from ..utils import SmallArray
-
-
-# +----------------------------------------------------------------------------------------------+ #
-# | Helper Functions
-# +----------------------------------------------------------------------------------------------+ #
-#
-fn generate_basis2entry(mask: List[Bool]) -> List[Int]:
-    # TODO: I tried making this return a List[Optional[Bool]],
-    #       but something breaks when using it at ctime.
-    var result = List[Int](capacity=len(mask))
-    var count = 0
-    for basis in range(len(mask)):
-        if mask[basis]:
-            result += count
-            count += 1
-        else:
-            result += -1
-    return result^
-
-
-fn count_true(mask: List[Bool]) -> Int:
-    var count = 0
-    for basis in range(len(mask)):
-        count += int(mask[basis])
-    return count
-
-
-fn generate_entry2basis(mask: List[Bool]) -> List[Int]:
-    var result = List[Int](capacity=count_true(mask))
-    for basis in range(len(mask)):
-        if mask[basis]:
-            result += basis
-    return result^
-
-
-fn or_mask(a: List[Bool], b: List[Bool]) -> List[Bool]:
-    var result = List[Bool](capacity=len(a))
-    for idx in range(len(a)):
-        result += a[idx] | b[idx]
-    return result^
-
-
-fn mul_mask[sig: Signature](a: List[Bool], b: List[Bool]) -> List[Bool]:
-    # TODO: There's probably a better way todo this
-    var result = sig.empty_mask()
-
-    @parameter
-    for x in range(sig.dims):
-        if a[x]:
-
-            @parameter
-            for y in range(sig.dims):
-                if b[y]:
-                    result[sig.mult[x][y].basis] |= sig.mult[x][y].sign != 0
-    return result
+from .mask import *
 
 
 # +----------------------------------------------------------------------------------------------+ #
@@ -67,7 +14,7 @@ fn mul_mask[sig: Signature](a: List[Bool], b: List[Bool]) -> List[Bool]:
 # +----------------------------------------------------------------------------------------------+ #
 #
 @value
-struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64]:
+struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64](Formattable, Stringable):
     """Multivector."""
 
     # +------[ Alias ]------+ #
@@ -98,7 +45,6 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     fn __init__(inout self: Multivector[sig, sig.scalar_mask(), type], s: Scalar[type]):
         self.__init__[False]()
         self._data[0] = s
-
         @parameter
         for entry in range(1, Self.entry_count):
             self._data[entry] = 0
@@ -106,26 +52,37 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline("nodebug")
     fn __init__(inout self, owned *coefs: Scalar[type]):
         self.__init__[False]()
+        if len(coefs) != Self.entry_count:
+            abort("incorrect number of coefficient passed to masked multivector")
         self._data.__init__(storage=coefs^)
 
-    @always_inline("nodebug")
+    @no_inline
     fn __str__(self) -> String:
+        return String.format_sequence(self)
+
+    @no_inline
+    fn format_to(self, inout writer: Formatter):
+        @parameter
+        if self.entry_count == 0:
+            writer.write("0")
+            return
+
         alias len = self.entry_count - 1
-        var result: String = "-" if self._data[0] < 0 else "+"
+        writer.write("-" if self._data[0] < 0 else "+")
 
         @parameter
         for entry in range(len):
-            result += str(abs(self._data[entry])) + " [" + str(self.entry2basis[entry])
+            writer.write(abs(self._data[entry]), " [", self.entry2basis[entry])
             if self._data[entry + 1] < 0:
-                result += "] - "
+                writer.write("] - ")
             else:
-                result += "] + "
-        return result + str(abs(self._data[len])) + " [" + str(self.entry2basis[len]) + "]"
+                writer.write("] + ")
+        writer.write(abs(self._data[len]), " [", self.entry2basis[len], "]")
 
     # +------( Comparison )------+ #
     #
     fn __eq__(self, other: Multivector[sig, _, type]) -> Bool:
-
+        
         @parameter
         for basis in range(sig.dims):
             alias self_entry = self.basis2entry[basis]
@@ -139,9 +96,9 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
                 if self._data[self_entry] != 0:
                     return False
             elif (other_entry != -1):
-                if self._data[other_entry] != 0:
+                if other._data[other_entry] != 0:
                     return False
-
+        
         return True
 
     fn __ne__(self, other: Multivector[sig, _, type]) -> Bool:
@@ -159,7 +116,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
                 if self._data[self_entry] != 0:
                     return True
             elif (other_entry != -1):
-                if self._data[other_entry] != 0:
+                if other._data[other_entry] != 0:
                     return True
 
         return False
