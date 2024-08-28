@@ -12,6 +12,7 @@ from infrared.algebra import *
 def main():
     test_eq()
     test_ne()
+    test_subspace_constructor()
     test_add()
     test_sub()
     test_mul()
@@ -31,6 +32,17 @@ def test_ne():
     assert_false(Multivector[g3, g3.vector_mask()](1, 2, 3).__ne__(Multivector[g3, g3.vector_mask()](1, 2, 3)))
     assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__ne__(Multivector[g3, g3.vector_mask()](1, 4, 3)))
     assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).__ne__(Float64(1)))
+
+
+def test_subspace_constructor():
+    assert_true(scalar[G3](6) == Multivector[G3](6))
+    assert_true(scalar[G3](0) != Multivector[G3](6))
+
+    assert_true(vector[G3](1, 2, 3) == Multivector[G3, G3.vector_mask()](1, 2, 3))
+    assert_true(vector[G3](1, 0, 3) != Multivector[G3, G3.vector_mask()](1, 2, 3))
+
+    assert_true(bivector[G3](4, 5, 6) == Multivector[G3, G3.bivector_mask()](4, 5, 6))
+    assert_true(bivector[G3](4, 0, 6) != Multivector[G3, G3.bivector_mask()](4, 5, 6))
 
 
 def test_add():

@@ -29,6 +29,8 @@ struct Signature:
     var combs: List[List[Int]]
     var mult: List[List[SignedBasis]]
 
+    # +------( Initialize )------+ #
+    #
     fn __init__(inout self, po: Int, ne: Int = 0, ze: Int = 0, *, flip_ze: Bool = True):
         self.po = po
         self.ne = ne
@@ -69,6 +71,8 @@ struct Signature:
 
         self.generate_product_table()
 
+    # +------( Masks )------+ #
+    #
     fn empty_mask(self) -> List[Bool]:
         var result = List[Bool](capacity=self.dims)
         for _ in range(self.dims):
@@ -87,24 +91,33 @@ struct Signature:
             result += self.grade_of[basis] == grade
         return result
 
+    @always_inline
     fn scalar_mask(self) -> List[Bool]:
         return self.grade_mask(0)
 
+    @always_inline
     fn vector_mask(self) -> List[Bool]:
         return self.grade_mask(1)
 
+    @always_inline
     fn bivector_mask(self) -> List[Bool]:
         return self.grade_mask(2)
 
+    @always_inline
     fn trivector_mask(self) -> List[Bool]:
         return self.grade_mask(3)
 
+    @always_inline
     fn quadvector_mask(self) -> List[Bool]:
         return self.grade_mask(4)
 
+    @always_inline
     fn antiscalar_mask(self) -> List[Bool]:
         return self.grade_mask(self.grds - 1)
 
+    # +------( Basis )------+ #
+    #
+    @always_inline
     fn squash_basis(self, inout basis: List[Int], inout sign: Int):
         var result = List[Int](capacity=len(basis))
         var i = 1
@@ -123,6 +136,7 @@ struct Signature:
 
         basis = result^
 
+    @always_inline
     fn reduce_basis(self, owned basis: List[Int]) -> SignedBasis:
         if len(basis) == 0:
             return SignedBasis(1, 0)
@@ -133,6 +147,7 @@ struct Signature:
             self.squash_basis(basis, sign)
             return SignedBasis(sign, self.order_basis(basis))
 
+    @always_inline
     fn squash_vec(self, inout basis: List[Int], vec: Int, inout sign: Int):
         for idx in reversed(range(len(basis))):
             if basis[idx] == vec:
@@ -146,12 +161,14 @@ struct Signature:
                 sign = -sign
         basis.insert(0, vec)
 
+    @always_inline
     fn reduce_basis(self, owned basis1: List[Int], basis2: List[Int]) -> SignedBasis:
         var sign: Int = 1
         for vec in basis2:
             self.squash_vec(basis1, vec[], sign)
         return SignedBasis(sign, self.order_basis(basis1))
 
+    @always_inline
     fn order_basis(self, basis: List[Int]) -> Int:
         var result = self.grade_dims[len(basis)]
 
@@ -164,15 +181,8 @@ struct Signature:
 
         return result - 1
 
-    # # old way: append basis, sort, squash, order
-    # fn generate_product_table(inout self):
-    #     for x in range(self.dims):
-    #         var result_x = List[SignedBasis](capacity=self.dims)
-    #         for y in range(self.dims):
-    #             result_x += self.reduce_basis(self.combs[x] + self.combs[y])
-    #         self.mult += result_x^
-
-    # new way: append vec, squash, order, repeat
+    # +------( Generate )------+ #
+    #
     fn generate_product_table(inout self):
         for x in range(self.dims):
             var result_x = List[SignedBasis](capacity=self.dims)
@@ -180,6 +190,8 @@ struct Signature:
                 result_x += self.reduce_basis(self.combs[x], self.combs[y])
             self.mult += result_x^
 
+    # +------( Format )------+ #
+    #
     @no_inline
     fn __str__(self) -> String:
         return String.format_sequence(self)
@@ -190,17 +202,3 @@ struct Signature:
             for y in range(len(self.mult[x])):
                 writer.write(self.mult[x][y].__str__(self) + " ")
             writer.write("\n")
-
-
-# fn generate_product_table[sig: Signature]() -> List[List[SignedBasis[sig]]]:
-#     alias dims = sig.dims
-#     var combs = sig.combs
-#     var result = List[List[SignedBasis[sig]]](capacity=dims)
-
-#     for x in range(dims):
-#         var result_x = List[SignedBasis[sig]](capacity=dims)
-#         for y in range(dims):
-#             result_x += ExpandedBasis[sig](combs[x] + combs[y]).reduce()
-#         result += result_x^
-
-#     return result^

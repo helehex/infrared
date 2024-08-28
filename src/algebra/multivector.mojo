@@ -14,7 +14,9 @@ from .mask import *
 # +----------------------------------------------------------------------------------------------+ #
 #
 @value
-struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64](Formattable, Stringable):
+struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64](
+    Formattable, Stringable
+):
     """Multivector."""
 
     # +------[ Alias ]------+ #
@@ -30,7 +32,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     # +------( Initialize )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn __init__[init_data: Bool = True](inout self):
         self._data.__init__[False]()
 
@@ -41,16 +43,21 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             for entry in range(Self.entry_count):
                 self._data[entry] = 0
 
-    @always_inline("nodebug")
+    @always_inline
     fn __init__(inout self: Multivector[sig, sig.scalar_mask(), type], s: Scalar[type]):
         self.__init__[False]()
         self._data[0] = s
+
         @parameter
         for entry in range(1, Self.entry_count):
             self._data[entry] = 0
 
-    @always_inline("nodebug")
+    @always_inline
     fn __init__(inout self, owned *coefs: Scalar[type]):
+        self = Self(coefs^)
+
+    @always_inline
+    fn __init__(inout self, owned coefs: VariadicListMem[Scalar[type]]):
         self.__init__[False]()
         if len(coefs) != Self.entry_count:
             abort("incorrect number of coefficient passed to masked multivector")
@@ -81,8 +88,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     # +------( Comparison )------+ #
     #
+    @always_inline
     fn __eq__(self, other: Multivector[sig, _, type]) -> Bool:
-        
         @parameter
         for basis in range(sig.dims):
             alias self_entry = self.basis2entry[basis]
@@ -92,17 +99,17 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             if (self_entry != -1) and (other_entry != -1):
                 if self._data[self_entry] != other._data[other_entry]:
                     return False
-            elif (self_entry != -1):
+            elif self_entry != -1:
                 if self._data[self_entry] != 0:
                     return False
-            elif (other_entry != -1):
+            elif other_entry != -1:
                 if other._data[other_entry] != 0:
                     return False
-        
+
         return True
 
+    @always_inline
     fn __ne__(self, other: Multivector[sig, _, type]) -> Bool:
-
         @parameter
         for basis in range(sig.dims):
             alias self_entry = self.basis2entry[basis]
@@ -112,10 +119,10 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             if (self_entry != -1) and (other_entry != -1):
                 if self._data[self_entry] != other._data[other_entry]:
                     return True
-            elif (self_entry != -1):
+            elif self_entry != -1:
                 if self._data[self_entry] != 0:
                     return True
-            elif (other_entry != -1):
+            elif other_entry != -1:
                 if other._data[other_entry] != 0:
                     return True
 
@@ -123,6 +130,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     # +------( Unary )------+ #
     #
+    @always_inline
     fn __neg__(self) -> Self:
         var result: Multivector[sig, mask, type]
         result.__init__[False]()
@@ -133,9 +141,11 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
         return result
 
+    @always_inline
     fn __inverse__(self) -> Self:
         return self.__rev__()
 
+    @always_inline
     fn __rev__(self) -> Self:
         """Reversion operator, reverses the subscript of each basis element."""
         var result: Multivector[sig, mask, type]
@@ -148,6 +158,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
         return result
 
+    @always_inline
     fn __invo__(self) -> Self:
         """Involution operator, reverses the subscript of each basis element."""
         var result: Multivector[sig, mask, type]
@@ -160,6 +171,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
         return result
 
+    @always_inline
     fn __conj__(self) -> Self:
         """Reversion operator, reverses the subscript of each basis element."""
         var result: Multivector[sig, mask, type]
@@ -172,6 +184,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
         return result
 
+    @always_inline
     fn __dual__(self) -> Self:
         """Dualization operator, currently just reverses coefficients."""
         var result: Multivector[sig, mask, type]
@@ -185,7 +198,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     # +------( Arithmetic )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn __add__(
         self, other: Multivector[sig, _, type]
     ) -> Multivector[sig, or_mask(mask, other.mask), type]:
@@ -201,14 +214,14 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             @parameter
             if (self_entry != -1) and (other_entry != -1):
                 result._data[entry] = self._data[self_entry] + other._data[other_entry]
-            elif (self_entry != -1):
+            elif self_entry != -1:
                 result._data[entry] = self._data[self_entry]
-            elif (other_entry != -1):
+            elif other_entry != -1:
                 result._data[entry] = other._data[other_entry]
 
         return result
 
-    @always_inline("nodebug")
+    @always_inline
     fn __sub__(
         self, other: Multivector[sig, _, type]
     ) -> Multivector[sig, or_mask(mask, other.mask), type]:
@@ -224,13 +237,14 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             @parameter
             if (self_entry != -1) and (other_entry != -1):
                 result._data[entry] = self._data[self_entry] - other._data[other_entry]
-            elif (self_entry != -1):
+            elif self_entry != -1:
                 result._data[entry] = self._data[self_entry]
-            elif (other_entry != -1):
+            elif other_entry != -1:
                 result._data[entry] = -other._data[other_entry]
 
         return result
 
+    @always_inline
     fn __mul__(
         lhs, rhs: Multivector[sig, _, type]
     ) -> Multivector[sig, mul_mask[sig](mask, rhs.mask), type]:

@@ -79,7 +79,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
     # +------( Subscript )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn get_lane(self, idx: Int) -> Self.Lane:
         return Self.Lane(
             self.s[idx],
@@ -92,7 +92,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
             self.a.a[idx],
         )
 
-    @always_inline("nodebug")
+    @always_inline
     fn set_lane(inout self, idx: Int, value: Self.Lane):
         self.s[idx] = value.s
         self.v.x[idx] = value.v.x
@@ -105,7 +105,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
     # +------( Cast )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.s == 0) & self.v.is_zero() & self.b.is_zero() & self.a.is_zero()
 
@@ -383,11 +383,11 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 
     # +------( Subscript )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn get_lane(self, idx: Int) -> Self.Lane:
         return Self.Lane(self.s[idx], self.b.i[idx], self.b.j[idx], self.b.k[idx])
 
-    @always_inline("nodebug")
+    @always_inline
     fn set_lane(inout self, idx: Int, value: Self.Lane):
         self.s[idx] = value.s
         self.b.i[idx] = value.b.i
@@ -396,7 +396,7 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 
     # +------( Cast )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.s == 0) & self.b.is_zero()
 
@@ -586,11 +586,11 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 
     # +------( Subscript )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn get_lane(self, idx: Int) -> Self.Lane:
         return Self.Lane(self.x[idx], self.y[idx], self.z[idx])
 
-    @always_inline("nodebug")
+    @always_inline
     fn set_lane(inout self, idx: Int, value: Self.Lane):
         self.x[idx] = value.x
         self.y[idx] = value.y
@@ -598,7 +598,7 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 
     # +------( Cast )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.x == 0) & (self.y == 0) & (self.z == 0)
 
@@ -778,11 +778,11 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](
 
     # +------( Subscript )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn get_lane(self, idx: Int) -> Self.Lane:
         return Self.Lane(self.i[idx], self.j[idx], self.k[idx])
 
-    @always_inline("nodebug")
+    @always_inline
     fn set_lane(inout self, idx: Int, value: Self.Lane):
         self.i[idx] = value.i
         self.j[idx] = value.j
@@ -790,7 +790,7 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](
 
     # +------( Cast )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return (self.i == 0) & (self.j == 0) & (self.k == 0)
 
@@ -979,17 +979,17 @@ struct Antiox[type: DType = DType.float64, size: Int = 1](
 
     # +------( Subscript )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn get_lane(self, idx: Int) -> Self.Lane:
         return Self.Lane(self.a[idx])
 
-    @always_inline("nodebug")
+    @always_inline
     fn set_lane(inout self, idx: Int, value: Self.Lane):
         self.a[idx] = value.a
 
     # +------( Cast )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn is_zero(self) -> SIMD[DType.bool, size]:
         return self.a == 0
 

@@ -46,5 +46,27 @@ alias SG2 = Signature(1, 2)
 alias SG3 = Signature(1, 3)
 """3D Spacetime Algebra."""
 
-# alias Vector = Multivector[_, mask=sig.vector_mask()]
 
+# +----------------------------------------------------------------------------------------------+ #
+# | Subspace Constructors
+# +----------------------------------------------------------------------------------------------+ #
+#
+@always_inline
+fn scalar[
+    sig: Signature, type: DType = DType.float64
+](owned coef: Scalar[type]) -> Multivector[sig, sig.scalar_mask(), type]:
+    return Multivector[sig, sig.scalar_mask(), type](coef)
+
+
+@always_inline
+fn vector[
+    sig: Signature, type: DType = DType.float64
+](owned *coefs: Scalar[type]) -> Multivector[sig, sig.vector_mask(), type]:
+    return Multivector[sig, sig.vector_mask(), type](coefs^)
+
+
+@always_inline
+fn bivector[
+    sig: Signature, type: DType = DType.float64
+](owned *coefs: Scalar[type]) -> Multivector[sig, sig.bivector_mask(), type]:
+    return Multivector[sig, sig.bivector_mask(), type](coefs^)

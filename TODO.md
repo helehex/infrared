@@ -4,3 +4,4 @@
 - Improve model for multivector subspace initialization
     - Multivector eval() from string
     - Maybe add a SignatureMask struct for helping with masking
+- Make some examples

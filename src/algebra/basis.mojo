@@ -22,7 +22,7 @@ from ..io.ansi import Color
 #     #
 #     var vecs: List[Int]
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn sort(inout self) -> Int:
 #         var sign = 1
 
@@ -35,7 +35,7 @@ from ..io.ansi import Color
 
 #         return sign
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn squash(inout self):
 #         var result = List[Int]()
 
@@ -54,7 +54,7 @@ from ..io.ansi import Color
 
 #         self = result^
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn reduce(owned self) -> SignedBasis[sig]:
 #         if len(self) == 0:
 #             return SignedBasis[sig](1, 0)
@@ -65,7 +65,7 @@ from ..io.ansi import Color
 #             self.squash()
 #             return SignedBasis[sig](temp, self.order())
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn order(self) -> Int:
 #         # return sig.order_of_expanded(self.vecs)
 
@@ -94,11 +94,11 @@ from ..io.ansi import Color
 
 #         return result - 1
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn __add__(self, other: Self) -> Self:
 #         return self.vecs.__add__(other.vecs)
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn __len__(self) -> Int:
 #         return self.vecs.__len__()
 
@@ -124,7 +124,7 @@ struct SignedBasis:
     var sign: Int
     var basis: Int
 
-    # @always_inline("nodebug")
+    # @always_inline
     # fn expand(self) -> List[Int]:
     #     var result = List[Int](capacity=sig.grade_of[self.basis])
     #     alias n = sig.vecs
@@ -171,7 +171,7 @@ struct SignedBasis:
 #     var sign: Int
 #     var basis: Int
 
-#     @always_inline("nodebug")
+#     @always_inline
 #     fn expand(self) -> ExpandedBasis[sig]:
 #         var result = List[Int](capacity=sig.grade_of[self.basis])
 #         alias n = sig.vecs

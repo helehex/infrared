@@ -1,8 +1,3 @@
-# x----------------------------------------------------------------------------------------------x #
-# | MIT License
-# | Copyright (c) 2024 Helehex
-# x----------------------------------------------------------------------------------------------x #
-
 from sys.intrinsics import _type_is_eq
 from collections._index_normalization import normalize_index
 
@@ -95,12 +90,12 @@ struct SmallArray[T: CollectionElement, size: Int](Sized, CollectionElement):
 
     # +------( Subscript )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn __getitem__(ref [_]self, idx: Int) -> ref [__lifetime_of(self)] T:
         var normalized_index = normalize_index["SmallArray"](idx, self)
         return self.unsafe_get(normalized_index)
 
-    @always_inline("nodebug")
+    @always_inline
     fn __getitem__[idx: Int](ref [_]self) -> ref [__lifetime_of(self)] T:
         constrained[-size <= idx < size, "Index out of bounds."]()
         var normalized_idx = idx
@@ -110,7 +105,7 @@ struct SmallArray[T: CollectionElement, size: Int](Sized, CollectionElement):
             normalized_idx += size
         return self.unsafe_get(normalized_idx)
 
-    @always_inline("nodebug")
+    @always_inline
     fn unsafe_get(ref [_]self, idx: Int) -> ref [__lifetime_of(self)] T:
         var idx_as_int = index(idx)
         debug_assert(
@@ -125,7 +120,7 @@ struct SmallArray[T: CollectionElement, size: Int](Sized, CollectionElement):
 
     # +------( Unary )------+ #
     #
-    @always_inline("nodebug")
+    @always_inline
     fn __len__(self) -> Int:
         return size
 

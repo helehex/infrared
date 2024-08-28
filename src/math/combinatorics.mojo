@@ -8,19 +8,27 @@ from math import sqrt, log, exp, gamma, lgamma
 from bit import pop_count
 
 
-# +------( lgamma )------+ #
-# The lgamma functions compute the natural logarithm of the absolute value of gamma of x.
-# A range error occurs if x is too large.
-# A pole error may occur if x is a negative integer or zero.
-
-
-# +------( tgamma )------+ #
-# The tgamma functions compute the gamma function of x.
+# +----------------------------------------------------------------------------------------------+ #
+# | gamma
+# +----------------------------------------------------------------------------------------------+ #
+#
+# Computes the gamma function of x.
 # A domain error or pole error may occur if x is a negative integer or zero.
 # A range error occurs if the magnitude of x is too large and may occur if the magnitude of x is too small.
 
 
-# +------( Powerset )------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | lgamma
+# +----------------------------------------------------------------------------------------------+ #
+#
+# The lgamma function computes the natural logarithm of the absolute value of gamma of x.
+# A range error occurs if x is too large.
+# A pole error may occur if x is a negative integer or zero.
+
+
+# +----------------------------------------------------------------------------------------------+ #
+# | Powerset
+# +----------------------------------------------------------------------------------------------+ #
 #
 fn powerset[T: CollectionElement, //](list: List[T]) -> List[List[T]]:
     # maybe faster to use powerset_bin to generate this as well
@@ -33,6 +41,7 @@ fn powerset[T: CollectionElement, //](list: List[T]) -> List[List[T]]:
     return cs
 
 
+@always_inline
 fn powerset_bin(n: Int) -> List[List[Int]]:
     var result = List[List[Int]](capacity=2**n)
     for i in range(2**n):
@@ -46,6 +55,7 @@ fn powerset_bin(n: Int) -> List[List[Int]]:
     return result
 
 
+@always_inline
 fn powerset_ord(n: Int) -> List[List[Int]]:
     var result = List[List[Int]](capacity=2**n)
     for k in range(n + 1):
@@ -53,8 +63,11 @@ fn powerset_ord(n: Int) -> List[List[Int]]:
     return result^
 
 
-# +------( Combination )------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | Combination
+# +----------------------------------------------------------------------------------------------+ #
 #
+@always_inline
 fn increment_combination[offset: Int = 1](n: Int, inout l: List[Int]) -> Bool:
     var first_gap: Int = -1
     var first_val: Int = -1
@@ -70,6 +83,7 @@ fn increment_combination[offset: Int = 1](n: Int, inout l: List[Int]) -> Bool:
     return True
 
 
+@always_inline
 fn combinations_ord[offset: Int = 1](n: Int, k: Int) -> List[List[Int]]:
     var result = List[List[Int]](capacity=2**n)
     var idxs = List[Int](capacity=k)
@@ -81,6 +95,7 @@ fn combinations_ord[offset: Int = 1](n: Int, k: Int) -> List[List[Int]]:
     return result^
 
 
+@always_inline
 fn combinations_bin(n: Int, k: Int) -> List[List[Int]]:
     var result = List[List[Int]](capacity=2**n)
     for i in range(2**n):
@@ -115,7 +130,9 @@ fn combinations_bin(n: Int, k: Int) -> List[List[Int]]:
 #     return result
 
 
-# +------( Factorial )------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | Factorial
+# +----------------------------------------------------------------------------------------------+ #
 #
 @always_inline
 fn factorial_slow(n: Int) -> Float64:
@@ -136,16 +153,6 @@ fn factorial_gamma(n: Float64) -> Float64:
 
 
 @always_inline
-fn factorial[n: IntLiteral]() -> IntLiteral:
-    return multifactorial[1, n]()
-
-
-@always_inline
-fn factorial[n: Int]() -> Int:
-    return multifactorial[1, n]()
-
-
-@always_inline
 fn factorial(n: IntLiteral) -> IntLiteral:
     return multifactorial[1](n)
 
@@ -155,16 +162,10 @@ fn factorial(n: Int) -> Int:
     return multifactorial[1](n)
 
 
-@always_inline
-fn double_factorial[n: IntLiteral]() -> IntLiteral:
-    return multifactorial[2, n]()
-
-
-@always_inline
-fn double_factorial[n: Int]() -> Int:
-    return multifactorial[2, n]()
-
-
+# +----------------------------------------------------------------------------------------------+ #
+# | Multifactorial
+# +----------------------------------------------------------------------------------------------+ #
+#
 @always_inline
 fn double_factorial(n: IntLiteral) -> IntLiteral:
     return multifactorial[2](n)
@@ -173,18 +174,6 @@ fn double_factorial(n: IntLiteral) -> IntLiteral:
 @always_inline
 fn double_factorial(n: Int) -> Int:
     return multifactorial[2](n)
-
-
-@always_inline  # shortcut of using your own alias, probably unnecessary
-fn multifactorial[step: IntLiteral, n: IntLiteral]() -> IntLiteral:
-    alias result: IntLiteral = multifactorial[step](n)
-    return result
-
-
-@always_inline  # shortcut of using your own alias, probably unnecessary
-fn multifactorial[step: Int, n: Int]() -> Int:
-    alias result: Int = multifactorial[step](n)
-    return result
 
 
 @always_inline
@@ -209,23 +198,13 @@ fn multifactorial[step: Int](n: Int) -> Int:
     return result
 
 
-# +------ Permutial ------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | Permutial
+# +----------------------------------------------------------------------------------------------+ #
 #
 # n! / (n-r)!
 #
 alias nPr: fn (Int, Int) -> Int = permutial
-
-
-@always_inline
-fn permutial[n: IntLiteral, r: IntLiteral]() -> IntLiteral:
-    alias result: IntLiteral = permutial(n, r)
-    return result
-
-
-@always_inline
-fn permutial[n: Int, r: Int]() -> Int:
-    alias result: Int = permutial(n, r)
-    return result
 
 
 @always_inline
@@ -261,22 +240,12 @@ fn permutial(n: Int, r: Int) -> Int:
     return result
 
 
-# +------ Supertial ------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | Supertial
+# +----------------------------------------------------------------------------------------------+ #
 #
 # (d+n)! / n!
 #
-@always_inline
-fn supertial[d: IntLiteral, n: IntLiteral]() -> IntLiteral:
-    alias result: IntLiteral = supertial(d, n)
-    return result
-
-
-@always_inline
-fn supertial[d: Int, n: Int]() -> Int:
-    alias result: Int = supertial(d, n)
-    return result
-
-
 @always_inline
 fn supertial(d: IntLiteral, n: IntLiteral) -> IntLiteral:
     var i: IntLiteral = n + 1
@@ -310,23 +279,13 @@ fn supertial(d: Int, n: Int) -> Int:
     return result
 
 
-# +------ Pascal ------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | Pascal
+# +----------------------------------------------------------------------------------------------+ #
 #
 # n! / (n-r)!r!
 #
 alias nCr: fn (Int, Int) -> Int = pascal
-
-
-@always_inline
-fn pascal[n: IntLiteral, r: IntLiteral]() -> IntLiteral:
-    alias result: IntLiteral = pascal(n, r)
-    return result
-
-
-@always_inline
-fn pascal[n: Int, r: Int]() -> Int:
-    alias result: Int = pascal(n, r)
-    return result
 
 
 @always_inline
@@ -344,25 +303,15 @@ fn pascal(n: Int, r: Int) -> Int:
     return permutial(n, r) // factorial(r)
 
 
-# +------ Simplicial ------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# | Simplicial
+# +----------------------------------------------------------------------------------------------+ #
 #
 # justified pascal
 # (d+n)! / d!n!
 #
 alias ntri = simplicial[Int(2)]
 # alias ntet = simplicial[3]
-
-
-@always_inline
-fn simplicial[d: IntLiteral, n: IntLiteral]() -> IntLiteral:
-    alias result: IntLiteral = simplicial(d, n)
-    return result
-
-
-@always_inline
-fn simplicial[d: Int, n: Int]() -> Int:
-    alias result: Int = simplicial(d, n)
-    return result
 
 
 @always_inline
