@@ -63,6 +63,24 @@ fn powerset_ord(n: Int) -> List[List[Int]]:
     return result^
 
 
+# fn powerset_dan13(n: Int) -> List[List[Int]]:
+#     var result = List[List[Int]](capacity=2**n)
+#     var head = 0
+#     queue.append(List())
+#     tail += 1
+#     while(head < queue.size()):
+#         var current = queue[head]
+#         if current.size() == n:
+#             break
+#         head += 1
+#         for i in range(n):
+#             if i in current:
+#             continue
+#             var next_set = current + i
+#             queue.append(next_set)
+#     return result
+
+
 # +----------------------------------------------------------------------------------------------+ #
 # | Combination
 # +----------------------------------------------------------------------------------------------+ #
@@ -112,22 +130,31 @@ fn combinations_bin(n: Int, k: Int) -> List[List[Int]]:
     return result
 
 
-# fn powerset_dan13(n: Int) -> List[List[Int]]:
-#     var result = List[List[Int]](capacity=2**n)
-#     var head = 0
-#     queue.append(List())
-#     tail += 1
-#     while(head < queue.size()):
-#         var current = queue[head]
-#         if current.size() == n:
-#             break
-#         head += 1
-#         for i in range(n):
-#             if i in current:
-#             continue
-#             var next_set = current + i
-#             queue.append(next_set)
-#     return result
+@always_inline
+fn order_of_comb(n: Int, comb: List[Int]) -> Int:
+    var result = pascal(n, len(comb))
+
+    for i in range(len(comb)):
+        var _n = n - comb[i]
+        var _k = len(comb) - i
+        if _n >= _k:
+            result -= pascal(_n, _k)
+
+    return result - 1
+
+
+@always_inline
+fn order_of_scomb(n: Int, comb: List[Int]) -> Int:
+    var result = pascal(n, len(comb))
+
+    for i in range(len(comb)):
+        result += pascal(n, i)
+        var _n = n - comb[i]
+        var _k = len(comb) - i
+        if _n >= _k:
+            result -= pascal(_n, _k)
+
+    return result - 1
 
 
 # +----------------------------------------------------------------------------------------------+ #
