@@ -3,6 +3,8 @@
 # | Copyright (c) 2024 Helehex
 # x----------------------------------------------------------------------------------------------x #
 
+from nova import Table
+
 
 # +----------------------------------------------------------------------------------------------+ #
 # | Signature
@@ -27,7 +29,7 @@ struct Signature:
     var grade_of: List[Int]
     var index_in_grade: List[Int]
     var combs: List[List[Int]]
-    var mult: List[List[SignedBasis]]
+    var mult: Table[SignedBasis]
 
     # +------( Initialize )------+ #
     #
@@ -45,7 +47,7 @@ struct Signature:
         self.grade_of = List[Int](capacity=self.dims)
         self.index_in_grade = List[Int](capacity=self.dims)
         self.combs = powerset_ord(self.vecs)
-        self.mult = List[List[SignedBasis]](capacity=self.dims)
+        self.mult.__init__[False](self.dims, self.dims)
 
         if flip_ze:
             for _ in range(ze):
@@ -185,10 +187,8 @@ struct Signature:
     #
     fn generate_product_table(inout self):
         for x in range(self.dims):
-            var result_x = List[SignedBasis](capacity=self.dims)
             for y in range(self.dims):
-                result_x += self.reduce_basis(self.combs[x], self.combs[y])
-            self.mult += result_x^
+                self.mult[x, y] = self.reduce_basis(self.combs[x], self.combs[y])
 
     # +------( Format )------+ #
     #
@@ -198,7 +198,7 @@ struct Signature:
 
     @no_inline
     fn format_to(self, inout writer: Formatter):
-        for x in range(len(self.mult)):
-            for y in range(len(self.mult[x])):
-                writer.write(self.mult[x][y].__str__(self) + " ")
+        for x in range(self.mult._cols):
+            for y in range(self.mult._rows):
+                writer.write(self.mult[x, y].__str__(self) + " ")
             writer.write("\n")

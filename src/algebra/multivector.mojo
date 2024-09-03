@@ -5,7 +5,7 @@
 
 from os import abort
 from collections import Optional
-from ..utils import SmallArray
+from nova import SmallVector
 from .mask import *
 
 
@@ -24,7 +24,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     alias basis2entry = generate_basis2entry(mask)
     alias entry2basis = generate_entry2basis(mask)
     alias entry_count = count_true(mask)
-    alias DataType = SmallArray[Scalar[type], Self.entry_count]
+    alias DataType = SmallVector[type, Self.entry_count]
 
     # +------< Data >------+ #
     #
@@ -258,10 +258,10 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             for rhs_entry in range(rhs.entry_count):
                 alias lhs_basis = lhs.entry2basis[lhs_entry]
                 alias rhs_basis = rhs.entry2basis[rhs_entry]
-                # These have to be var's, otherwise it crashes
-                var signed_basis = sig.mult[lhs_basis][rhs_basis]
-                var entry = result.basis2entry[signed_basis.basis]
-                var sign = signed_basis.sign
+                alias signed_basis = sig.mult[lhs_basis, rhs_basis]
+                alias entry = result.basis2entry[signed_basis.basis]
+                alias sign = signed_basis.sign
+                @parameter
                 if sign != 0:
                     result._data[entry] += sign * lhs._data[lhs_entry] * rhs._data[rhs_entry]
         return result

@@ -19,6 +19,11 @@ struct SignedBasis:
     var basis: Int
 
     @always_inline
+    fn __init__(inout self):
+        self.sign = 0
+        self.basis = 0
+
+    @always_inline
     fn expand(self, sig: Signature) -> List[Int]:
         var result = List[Int](capacity=sig.grade_of[self.basis])
         var k = sig.grade_of[self.basis]
@@ -33,6 +38,17 @@ struct SignedBasis:
             result += cs
             j = cs
         return result^
+
+    @no_inline
+    fn __str__(self) -> String:
+        var str_sign: StringLiteral
+        if self.sign < 0:
+            str_sign = "-"
+        elif self.sign > 0:
+            str_sign = "+"
+        else:
+            str_sign = " "
+        return str_sign + str(self.basis)
 
     @no_inline
     fn __str__(self, sig: Signature) -> String:
@@ -54,6 +70,12 @@ struct SignedBasis:
         writer.write(Color.colors[sig.grade_of[self.basis] % 8] if self.sign else Color.grey)
         writer.write((str(self.basis) if self.sign != 0 else "").rjust(align, str_sign))
         writer.write(Color.clear)
+
+    fn __eq__(lhs, rhs: Self) -> Bool:
+        return lhs.sign == rhs.sign and lhs.basis == rhs.basis
+
+    fn __ne__(lhs, rhs: Self) -> Bool:
+        return lhs.sign != rhs.sign or lhs.basis != rhs.basis
 
 
 fn signed_sort(inout basis: List[Int]) -> Int:

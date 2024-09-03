@@ -5,3 +5,4 @@
     - Multivector eval() from string
     - Maybe add a SignatureMask struct for helping with masking
 - Make some examples
+- Decide what to do with the nova dependency

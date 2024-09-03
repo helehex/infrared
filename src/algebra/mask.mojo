@@ -56,5 +56,5 @@ fn mul_mask[sig: Signature](a: List[Bool], b: List[Bool]) -> List[Bool]:
             @parameter
             for y in range(sig.dims):
                 if b[y]:
-                    result[sig.mult[x][y].basis] |= sig.mult[x][y].sign != 0
+                    result[sig.mult[x, y].basis] |= sig.mult[x, y].sign != 0
     return result

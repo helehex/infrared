@@ -3,6 +3,9 @@ Geometric Algebra for Mojo 🔥
 
 Mojo nightly version: `mojo 2024.8.2916 (1e9c68e6)`
 
+I made `nova.mojopkg` a dependency for now, but that may change since i'm only using a few things.  
+(nova is my testing ground for collection types)
+
 ## package layout:
 
 - algebra
