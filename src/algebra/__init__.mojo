@@ -53,20 +53,20 @@ alias SG3 = Signature(1, 3)
 #
 @always_inline
 fn scalar[
-    sig: Signature, type: DType = DType.float64
-](owned coef: Scalar[type]) -> Multivector[sig, sig.scalar_mask(), type]:
-    return Multivector[sig, sig.scalar_mask(), type](coef)
+    sig: Signature, type: DType = DType.float64, size: Int = 1
+](coef: SIMD[type, size]) -> Multivector[sig, sig.scalar_mask(), type, size]:
+    return Multivector[sig, sig.scalar_mask(), type, size](coef)
 
 
 @always_inline
 fn vector[
-    sig: Signature, type: DType = DType.float64
-](owned *coefs: Scalar[type]) -> Multivector[sig, sig.vector_mask(), type]:
-    return Multivector[sig, sig.vector_mask(), type](coefs^)
+    sig: Signature, type: DType = DType.float64, size: Int = 1
+](*coefs: SIMD[type, size]) -> Multivector[sig, sig.vector_mask(), type, size]:
+    return Multivector[sig, sig.vector_mask(), type, size](coefs)
 
 
 @always_inline
 fn bivector[
-    sig: Signature, type: DType = DType.float64
-](owned *coefs: Scalar[type]) -> Multivector[sig, sig.bivector_mask(), type]:
-    return Multivector[sig, sig.bivector_mask(), type](coefs^)
+    sig: Signature, type: DType = DType.float64, size: Int = 1
+](*coefs: SIMD[type, size]) -> Multivector[sig, sig.bivector_mask(), type, size]:
+    return Multivector[sig, sig.bivector_mask(), type, size](coefs)

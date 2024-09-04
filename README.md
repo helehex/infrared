@@ -1,7 +1,7 @@
 # Infrared 🔆
 Geometric Algebra for Mojo 🔥
 
-Mojo nightly version: `mojo 2024.8.2916 (1e9c68e6)`
+Mojo nightly version: `mojo 2024.9.315 (62cda08f)`
 
 I made `nova.mojopkg` a dependency for now, but that may change since i'm only using a few things.  
 (nova is my testing ground for collection types)

@@ -3,8 +3,6 @@
 # | Copyright (c) 2024 Helehex
 # x----------------------------------------------------------------------------------------------x #
 
-from nova import SmallArray
-
 
 struct Color:
     """Ansi Color Characters."""
@@ -30,6 +28,6 @@ struct Color:
     alias bg_cyan = "\033[0;46m"
     alias bg_white = "\033[0;47m"
 
-    alias colors = SmallArray[String, 8](
+    alias colors = List[StringLiteral](
         Self.grey, Self.red, Self.yellow, Self.green, Self.cyan, Self.blue, Self.pink, Self.white
     )

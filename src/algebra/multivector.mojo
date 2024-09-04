@@ -5,7 +5,7 @@
 
 from os import abort
 from collections import Optional
-from nova import SmallVector
+from ..utils import ThickVector
 from .mask import *
 
 
@@ -14,7 +14,7 @@ from .mask import *
 # +----------------------------------------------------------------------------------------------+ #
 #
 @value
-struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64](
+struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64, size: Int = 1](
     Formattable, Stringable
 ):
     """Multivector."""
@@ -24,7 +24,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     alias basis2entry = generate_basis2entry(mask)
     alias entry2basis = generate_entry2basis(mask)
     alias entry_count = count_true(mask)
-    alias DataType = SmallVector[type, Self.entry_count]
+    alias DataType = ThickVector[type, Self.entry_count, size]
 
     # +------< Data >------+ #
     #
@@ -34,14 +34,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     #
     @always_inline
     fn __init__[init_data: Bool = True](inout self):
-        self._data.__init__[False]()
-
-        @parameter
-        if init_data:
-
-            @parameter
-            for entry in range(Self.entry_count):
-                self._data[entry] = 0
+        self._data.__init__[init_data]()
 
     @always_inline
     fn __init__(inout self: Multivector[sig, sig.scalar_mask(), type], s: Scalar[type]):
@@ -53,15 +46,15 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             self._data[entry] = 0
 
     @always_inline
-    fn __init__(inout self, owned *coefs: Scalar[type]):
-        self = Self(coefs^)
+    fn __init__(inout self, *coefs: SIMD[type, size]):
+        self = Self(coefs)
 
     @always_inline
-    fn __init__(inout self, owned coefs: VariadicListMem[Scalar[type]]):
+    fn __init__(inout self, owned coefs: VariadicList[SIMD[type, size]]):
         self.__init__[False]()
         if len(coefs) != Self.entry_count:
             abort("incorrect number of coefficient passed to masked multivector")
-        self._data.__init__(storage=coefs^)
+        self._data.__init__(coefs)
 
     @no_inline
     fn __str__(self) -> String:
@@ -89,7 +82,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     # +------( Comparison )------+ #
     #
     @always_inline
-    fn __eq__(self, other: Multivector[sig, _, type]) -> Bool:
+    fn __eq__(self, other: Multivector[sig, _, type, size]) -> Bool:
         @parameter
         for basis in range(sig.dims):
             alias self_entry = self.basis2entry[basis]
@@ -109,7 +102,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         return True
 
     @always_inline
-    fn __ne__(self, other: Multivector[sig, _, type]) -> Bool:
+    fn __ne__(self, other: Multivector[sig, _, type, size]) -> Bool:
         @parameter
         for basis in range(sig.dims):
             alias self_entry = self.basis2entry[basis]
@@ -132,7 +125,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     #
     @always_inline
     fn __neg__(self) -> Self:
-        var result: Multivector[sig, mask, type]
+        var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
         @parameter
@@ -148,7 +141,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __rev__(self) -> Self:
         """Reversion operator, reverses the subscript of each basis element."""
-        var result: Multivector[sig, mask, type]
+        var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
         @parameter
@@ -161,7 +154,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __invo__(self) -> Self:
         """Involution operator, reverses the subscript of each basis element."""
-        var result: Multivector[sig, mask, type]
+        var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
         @parameter
@@ -174,7 +167,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __conj__(self) -> Self:
         """Reversion operator, reverses the subscript of each basis element."""
-        var result: Multivector[sig, mask, type]
+        var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
         @parameter
@@ -187,7 +180,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __dual__(self) -> Self:
         """Dualization operator, currently just reverses coefficients."""
-        var result: Multivector[sig, mask, type]
+        var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
         @parameter
@@ -200,9 +193,9 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     #
     @always_inline
     fn __add__(
-        self, other: Multivector[sig, _, type]
-    ) -> Multivector[sig, or_mask(mask, other.mask), type]:
-        var result: Multivector[sig, or_mask(mask, other.mask), type]
+        self, other: Multivector[sig, _, type, size]
+    ) -> Multivector[sig, or_mask(mask, other.mask), type, size]:
+        var result: Multivector[sig, or_mask(mask, other.mask), type, size]
         result.__init__[False]()
 
         @parameter
@@ -223,9 +216,9 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     @always_inline
     fn __sub__(
-        self, other: Multivector[sig, _, type]
-    ) -> Multivector[sig, or_mask(mask, other.mask), type]:
-        var result: Multivector[sig, or_mask(mask, other.mask), type]
+        self, other: Multivector[sig, _, type, size]
+    ) -> Multivector[sig, or_mask(mask, other.mask), type, size]:
+        var result: Multivector[sig, or_mask(mask, other.mask), type, size]
         result.__init__[False]()
 
         @parameter
@@ -246,9 +239,9 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     @always_inline
     fn __mul__(
-        lhs, rhs: Multivector[sig, _, type]
-    ) -> Multivector[sig, mul_mask[sig](mask, rhs.mask), type]:
-        var result: Multivector[sig, mul_mask[sig](mask, rhs.mask), type]
+        lhs, rhs: Multivector[sig, _, type, size]
+    ) -> Multivector[sig, mul_mask[sig](mask, rhs.mask), type, size]:
+        var result: Multivector[sig, mul_mask[sig](mask, rhs.mask), type, size]
         result.__init__[True]()
 
         @parameter
@@ -261,6 +254,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
                 alias signed_basis = sig.mult[lhs_basis, rhs_basis]
                 alias entry = result.basis2entry[signed_basis.basis]
                 alias sign = signed_basis.sign
+
                 @parameter
                 if sign != 0:
                     result._data[entry] += sign * lhs._data[lhs_entry] * rhs._data[rhs_entry]
