@@ -35,25 +35,21 @@ struct SignedBasis:
         return result^
 
     @no_inline
-    fn __str__(self, sig: Signature) -> String:
+    fn __str__(self) -> String:
         var result = String()
         var writer = Formatter(result)
-        self.format_to(writer, sig)
+        self.format_to(writer)
         return result
 
     @no_inline
-    fn format_to(self, inout writer: Formatter, sig: Signature):
-        var align = len(str(sig.dims)) + 1
-        var str_sign: StringLiteral
+    fn format_to(self, inout writer: Formatter):
         if self.sign < 0:
-            str_sign = "-"
+            writer.write("-")
         elif self.sign > 0:
-            str_sign = "+"
+            writer.write("+")
         else:
-            str_sign = " "
-        writer.write(Color.colors[sig.grade_of[self.basis] % 8] if self.sign else Color.grey)
-        writer.write((str(self.basis) if self.sign != 0 else "").rjust(align, str_sign))
-        writer.write(Color.clear)
+            writer.write("o")
+        writer.write(self.basis)
 
 
 fn signed_sort(inout basis: List[Int]) -> Int:

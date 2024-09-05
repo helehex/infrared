@@ -197,8 +197,24 @@ struct Signature:
         return String.format_sequence(self)
 
     @no_inline
+    fn format_basis(self, inout writer: Formatter, basis: SignedBasis):
+        var align = len(str(self.dims)) + 1
+        var str_basis: String = ""
+        if basis.sign < 0:
+            str_basis = str(basis)
+            writer.write(Color.grey, Color.bg_colors[(self.grade_of[basis.basis] % 6) + 1])
+        elif basis.sign > 0:
+            str_basis = str(basis)
+            writer.write(Color.white, Color.bg_colors[(self.grade_of[basis.basis] % 6) + 1])
+        else:
+            writer.write(Color.clear)
+        for _ in range(align - len(str_basis)):
+            writer.write(" ")
+        writer.write(str_basis, " ")
+
+    @no_inline
     fn format_to(self, inout writer: Formatter):
         for x in range(self.mult._cols):
             for y in range(self.mult._rows):
-                writer.write(self.mult[x, y].__str__(self) + " ")
-            writer.write("\n")
+                self.format_basis(writer, self.mult[x, y])
+            writer.write(Color.clear, "\n")

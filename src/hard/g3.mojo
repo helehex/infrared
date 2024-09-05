@@ -724,7 +724,7 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
         )
 
     fn __mul__(self, other: Self.Anti) -> Self.Bive:
-        return Self.Bive(self.z, -self.y, self.x)
+        return Self.Bive(self.z * other.a, -self.y * other.a, self.x * other.a)
 
     # +------( Reverse Arithmetic )------+ #
     #
@@ -928,7 +928,7 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](
         )
 
     fn __mul__(self, other: Self.Anti) -> Self.Vect:
-        return Self.Vect(-self.k, self.j, -self.i)
+        return Self.Vect(-self.k * other.a, self.j * other.a, -self.i * other.a)
 
     # +------( Reverse Arithmetic )------+ #
     #
@@ -1095,10 +1095,10 @@ struct Antiox[type: DType = DType.float64, size: Int = 1](
         return Self(self.a * other)
 
     fn __mul__(self, other: Self.Vect) -> Self.Bive:
-        return Self.Bive(other.z, -other.y, other.x)
+        return Self.Bive(self.a * other.z, self.a * -other.y, self.a * other.x)
 
     fn __mul__(self, other: Self.Bive) -> Self.Vect:
-        return Self.Vect(-other.k, other.j, -other.i)
+        return Self.Vect(self.a * -other.k, self.a * other.j, self.a * -other.i)
 
     fn __mul__(self, other: Self) -> Self.Coef:
         return -self.a * other.a

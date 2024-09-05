@@ -33,11 +33,15 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     # +------( Initialize )------+ #
     #
     @always_inline
-    fn __init__[init_data: Bool = True](inout self):
-        self._data.__init__[init_data]()
+    fn __init__[init: Bool = True](inout self):
+        self._data.__init__[init]()
 
     @always_inline
-    fn __init__(inout self: Multivector[sig, sig.scalar_mask(), type], s: Scalar[type]):
+    fn __init__[init: Bool = True](inout self: Multivector[sig, sig.full_mask(), type, size]):
+        self._data.__init__[init]()
+
+    @always_inline
+    fn __init__(inout self: Multivector[sig, sig.scalar_mask(), type, size], s: SIMD[type, size]):
         self.__init__[False]()
         self._data[0] = s
 
@@ -252,10 +256,11 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
                 alias lhs_basis = lhs.entry2basis[lhs_entry]
                 alias rhs_basis = rhs.entry2basis[rhs_entry]
                 alias signed_basis = sig.mult[lhs_basis, rhs_basis]
-                alias entry = result.basis2entry[signed_basis.basis]
                 alias sign = signed_basis.sign
 
                 @parameter
                 if sign != 0:
+                    alias entry = result.basis2entry[signed_basis.basis]
                     result._data[entry] += sign * lhs._data[lhs_entry] * rhs._data[rhs_entry]
+        
         return result

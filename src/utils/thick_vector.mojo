@@ -21,16 +21,15 @@ struct ThickVector[type: DType, size: Int, thickness: Int = 1]:
 
     # +------< Data >------+ #
     #
-    var _data: __mlir_type[`!pop.array<`, size.value, `, `, SIMD[type, thickness], `>`]
+    alias Data = __mlir_type[`!pop.array<`, size.value, `, `, SIMD[type, thickness], `>`]
+    var _data: Self.Data
 
     # +------( Initialize )------+ #
     #
     @always_inline
     fn __init__[clear: Bool = True](inout self):
         _thick_vector_construction_checks[size, thickness]()
-        self._data = __mlir_op.`kgen.undef`[
-            _type = __mlir_type[`!pop.array<`, size.value, `, `, SIMD[type, thickness], `>`]
-        ]()
+        self._data = __mlir_op.`kgen.undef`[_type = Self.Data]()
 
         @parameter
         if clear:
