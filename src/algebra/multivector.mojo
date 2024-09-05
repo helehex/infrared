@@ -37,8 +37,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         self._data.__init__[init]()
 
     @always_inline
-    fn __init__[init: Bool = True](inout self: Multivector[sig, sig.full_mask(), type, size]):
-        self._data.__init__[init]()
+    fn __init__(inout self: Multivector[sig, sig.full_mask(), type, size]):
+        self._data.__init__[True]()
 
     @always_inline
     fn __init__(inout self: Multivector[sig, sig.scalar_mask(), type, size], s: SIMD[type, size]):
@@ -244,23 +244,24 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __mul__(
         lhs, rhs: Multivector[sig, _, type, size]
-    ) -> Multivector[sig, mul_mask[sig](mask, rhs.mask), type, size]:
-        var result: Multivector[sig, mul_mask[sig](mask, rhs.mask), type, size]
+    ) -> Multivector[sig, mul_mask(sig, mask, rhs.mask), type, size]:
+        var result: Multivector[sig, mul_mask(sig, mask, rhs.mask), type, size]
         result.__init__[True]()
 
         @parameter
         for lhs_entry in range(lhs.entry_count):
+            alias lhs_basis = lhs.entry2basis[lhs_entry]
 
             @parameter
             for rhs_entry in range(rhs.entry_count):
-                alias lhs_basis = lhs.entry2basis[lhs_entry]
                 alias rhs_basis = rhs.entry2basis[rhs_entry]
                 alias signed_basis = sig.mult[lhs_basis, rhs_basis]
-                alias sign = signed_basis.sign
+                alias entry = result.basis2entry[signed_basis.basis]
 
                 @parameter
-                if sign != 0:
-                    alias entry = result.basis2entry[signed_basis.basis]
-                    result._data[entry] += sign * lhs._data[lhs_entry] * rhs._data[rhs_entry]
-        
+                if entry >= 0:
+                    result._data[entry] += (
+                        signed_basis.sign * lhs._data[lhs_entry] * rhs._data[rhs_entry]
+                    )
+
         return result

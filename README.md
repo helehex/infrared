@@ -1,18 +1,15 @@
 # Infrared 🔆
 Geometric Algebra for Mojo 🔥
 
-Mojo nightly version: `mojo 2024.9.315 (62cda08f)`
-
-I made `nova.mojopkg` a dependency for now, but that may change since i'm only using a few things.  
-(nova is my testing ground for collection types)
+Mojo nightly version: `mojo 2024.9.505 (db76a77f)`
 
 ## package layout:
 
 - algebra
     - signature: general algebra generation
-    - multivector: implements signature with arbitrary basis masking
-    - mask: implements helper functions for basis masking
-    - basis: implements representations for basis elements
+    - multivector: a general multivector type
+    - mask: helper functions for basis masking
+    - basis: representations for basis elements
 - hard
     - g2 (hard-coded cl(2))
     - g3 (hard-coded cl(3))

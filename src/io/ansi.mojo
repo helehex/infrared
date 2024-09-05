@@ -35,5 +35,12 @@ struct Color:
     )
 
     alias bg_colors = List[String](
-        Self.bg_grey, Self.bg_red, Self.bg_yellow, Self.bg_green, Self.bg_cyan, Self.bg_blue, Self.bg_pink, Self.bg_white
+        Self.bg_grey,
+        Self.bg_red,
+        Self.bg_yellow,
+        Self.bg_green,
+        Self.bg_cyan,
+        Self.bg_blue,
+        Self.bg_pink,
+        Self.bg_white,
     )

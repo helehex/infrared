@@ -45,7 +45,7 @@ fn or_mask(a: List[Bool], b: List[Bool]) -> List[Bool]:
 
 
 @always_inline
-fn mul_mask[sig: Signature](a: List[Bool], b: List[Bool]) -> List[Bool]:
+fn mul_mask(sig: Signature, a: List[Bool], b: List[Bool]) -> List[Bool]:
     # TODO: There's probably a better way todo this
     var result = sig.empty_mask()
 
