@@ -6,31 +6,30 @@
 
 set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+UNCOLOR='\033[0m'
 
-TEST_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+REPO_ROOT=$(cd -- $(realpath "$( dirname -- "${BASH_SOURCE[0]}" )/..") &> /dev/null && pwd)
+TEST_DIR="${REPO_ROOT}/test"
 FAILED_COUNT=0
-
-source ${TEST_DIR}/build.sh
 
 for test in ${TEST_DIR}/test_*.mojo; do
     echo -e "\n╓─── Testing: $(basename $test)"
     if mojo $test; then
-        echo -e ${GREEN}╙─── Test Successful!${NC}
+        echo -e ${GREEN}╙─── Test Successful!${UNCOLOR}
     else
         ((FAILED_COUNT+=1))
-        echo -e ${RED}╙─── Test Failed!${NC}
+        echo -e ${RED}╙─── Test Failed!${UNCOLOR}
     fi
 done
 
 echo
 
 if [ "$FAILED_COUNT" -eq 0 ]; then
-    echo -e "${GREEN}───╖\n   ║ All Successful!\n───╜${NC}"
+    echo -e "${GREEN}───╖\n   ║ All Successful!\n───╜${UNCOLOR}"
 else
-    echo -e "${RED}───╖\n   ║ ${FAILED_COUNT} Failed!\n───╜${NC}"
+    echo -e "${RED}───╖\n   ║ ${FAILED_COUNT} Failed!\n───╜${UNCOLOR}"
     return 1
 fi

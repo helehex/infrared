@@ -13,9 +13,12 @@ def main():
     test_eq()
     test_ne()
     test_subspace_constructor()
+    test_getattr()
+    test_normalized()
     test_add()
     test_sub()
     test_mul()
+    test_sandwich()
 
 
 def test_eq():
@@ -43,6 +46,20 @@ def test_subspace_constructor():
 
     assert_true(bivector[G3](4, 5, 6) == Multivector[G3, G3.bivector_mask()](4, 5, 6))
     assert_true(bivector[G3](4, 0, 6) != Multivector[G3, G3.bivector_mask()](4, 5, 6))
+
+
+def test_getattr():
+    alias g3 = Signature(3, 0, 0)
+    alias scalar_vector_mask = List(True, True, True, True, False, False, False, False)
+    assert_equal(Multivector[g3](6).s, Float64(6))
+    assert_equal(Multivector[g3, g3.vector_mask()](7, 8, 9).s, Float64(0))
+    assert_equal(Multivector[g3, scalar_vector_mask](6, 7, 8, 9).s, Float64(6))
+
+
+def test_normalized():
+    alias g3 = Signature(3, 0, 0)
+    assert_true(Multivector[g3, g3.vector_mask()](1, 2, 3).normalized() == Multivector[g3, g3.vector_mask()](0.2672612419124244, 0.53452248382484879, 0.80178372573727319))
+    assert_true(Multivector[g3, g3.bivector_mask()](1, 2, 3).normalized() == Multivector[g3, g3.bivector_mask()](0.2672612419124244, 0.53452248382484879, 0.80178372573727319))
 
 
 def test_add():
@@ -76,3 +93,8 @@ def test_mul():
     alias niltrivector_mask = List(False, False, False, False, False, False, False, False, False, False, False, True, True, True, False, False)
     assert_true(Multivector[pg3, pg3.vector_mask()](1, 2, 3, 4).__mul__(Float64(2)) == Multivector[pg3, pg3.vector_mask()](2, 4, 6, 8))
     assert_true(Multivector[pg3, pg3.vector_mask()](1, 2, 3, 4).__mul__(Multivector[pg3, pg3.antiscalar_mask()](1)) == Multivector[pg3, niltrivector_mask](-4, 3, -2))
+
+
+def test_sandwich():
+    alias g3 = Signature(3, 0, 0)
+    assert_true(Multivector[g3, g3.even_mask()](0, 1, 0, 0)(Multivector[g3, g3.vector_mask()](1, 2, 3)) == Multivector[g3, g3.vector_mask()](-1, -2, 3))

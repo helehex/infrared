@@ -8,13 +8,13 @@ set -euo pipefail
 
 REPO_NAME="infrared"
 
-BUILD_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-REPO_ROOT=$(realpath "${BUILD_DIR}/..")
-SRC_PATH="${REPO_ROOT}/src"
+REPO_ROOT=$(cd -- $(realpath "$( dirname -- "${BASH_SOURCE[0]}" )/..") &> /dev/null && pwd)
+BUILD_DIR="${REPO_ROOT}/test"
+SRC_DIR="${REPO_ROOT}/src"
 
 PACKAGE_NAME=${REPO_NAME}".mojopkg"
 PACKAGE_PATH=${BUILD_DIR}"/"${PACKAGE_NAME}
 
-echo "╓───  Packaging the Infrared library"
-mojo package "${SRC_PATH}" -o "${PACKAGE_PATH}"
+echo "╓───  Packaging "${REPO_NAME}
+mojo package "${SRC_DIR}" -o "${PACKAGE_PATH}"
 echo Successfully created "${PACKAGE_PATH}"

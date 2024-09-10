@@ -1,7 +1,8 @@
 # Infrared 🔆
 Geometric Algebra for Mojo 🔥
 
-Mojo nightly version: `mojo 2024.9.505 (db76a77f)`
+Infrared version: `0.1.0`  
+Mojo version: `24.6.0.dev2024090917`
 
 ## package layout:
 

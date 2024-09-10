@@ -60,6 +60,23 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             abort("incorrect number of coefficient passed to masked multivector")
         self._data.__init__(coefs)
 
+    # +------( Subscript )------+ #
+    #
+    @always_inline
+    fn __getattr__[key: StringLiteral](self) -> SIMD[type, size]:
+        @parameter
+        if key == "s":
+            @parameter
+            if Self.basis2entry[0] != -1:
+                return self._data[Self.basis2entry[0]]
+            else:
+                return 0
+        else:
+            abort("multivector attribute " + key + " does not exist")
+            return 0
+
+    # +------( Format )------+ #
+    #
     @no_inline
     fn __str__(self) -> String:
         return String.format_sequence(self)
@@ -139,7 +156,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         return result
 
     @always_inline
-    fn __inverse__(self) -> Self:
+    fn __invert__(self) -> Self:
         return self.__rev__()
 
     @always_inline
@@ -157,7 +174,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     @always_inline
     fn __invo__(self) -> Self:
-        """Involution operator, reverses the subscript of each basis element."""
+        """Involution operator."""
         var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
@@ -170,7 +187,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
 
     @always_inline
     fn __conj__(self) -> Self:
-        """Reversion operator, reverses the subscript of each basis element."""
+        """Conjugate operator."""
         var result: Multivector[sig, mask, type, size]
         result.__init__[False]()
 
@@ -192,6 +209,14 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
             result._data[entry] = self._data[(result.entry_count - 1) - entry]
 
         return result
+
+    @always_inline
+    fn norm(self) -> SIMD[type, size]:
+        return sqrt(abs((self * self.__conj__()).s))
+
+    @always_inline
+    fn normalized(self) -> Multivector[sig, mul_mask(sig, mask, sig.scalar_mask()), type, size]:
+        return self * (1 / self.norm())
 
     # +------( Arithmetic )------+ #
     #
@@ -265,3 +290,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
                     )
 
         return result
+
+    @always_inline
+    fn __call__(versor, operand: Multivector[sig, _, type, size]) -> Multivector[sig, mul_mask(sig, mul_mask(sig, versor.mask, operand.mask), versor.mask), type, size]:
+        """Shorthand for the sandwich operator."""
+        return versor * operand * ~versor
