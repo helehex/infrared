@@ -94,6 +94,13 @@ struct Signature:
         return result
 
     @always_inline
+    fn even_mask(self) -> List[Bool]:
+        var result = List[Bool](capacity=self.dims)
+        for basis in range(self.dims):
+            result += (self.grade_of[basis] % 2) == 0
+        return result
+
+    @always_inline
     fn scalar_mask(self) -> List[Bool]:
         return self.grade_mask(0)
 
