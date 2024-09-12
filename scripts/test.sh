@@ -31,5 +31,5 @@ if [ "$FAILED_COUNT" -eq 0 ]; then
     echo -e "${GREEN}───╖\n   ║ All Successful!\n───╜${UNCOLOR}"
 else
     echo -e "${RED}───╖\n   ║ ${FAILED_COUNT} Failed!\n───╜${UNCOLOR}"
-    return 1
+    exit 1
 fi
