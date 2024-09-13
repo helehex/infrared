@@ -66,6 +66,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     fn __getattr__[key: StringLiteral](self) -> SIMD[type, size]:
         @parameter
         if key == "s":
+
             @parameter
             if Self.basis2entry[0] != -1:
                 return self._data[Self.basis2entry[0]]
@@ -292,6 +293,10 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         return result
 
     @always_inline
-    fn __call__(versor, operand: Multivector[sig, _, type, size]) -> Multivector[sig, mul_mask(sig, mul_mask(sig, versor.mask, operand.mask), versor.mask), type, size]:
+    fn __call__(
+        versor, operand: Multivector[sig, _, type, size]
+    ) -> Multivector[
+        sig, mul_mask(sig, mul_mask(sig, versor.mask, operand.mask), versor.mask), type, size
+    ]:
         """Shorthand for the sandwich operator."""
         return versor * operand * ~versor
