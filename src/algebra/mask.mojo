@@ -4,54 +4,32 @@
 # x----------------------------------------------------------------------------------------------x #
 
 
-@always_inline
-fn generate_basis2entry(mask: List[Bool]) -> List[Int]:
-    # TODO: I tried making this return a List[Optional[Bool]],
-    #       but something breaks when using it at ctime.
-    var result = List[Int](capacity=len(mask))
-    var count = 0
-    for basis in range(len(mask)):
-        if mask[basis]:
-            result += count
-            count += 1
-        else:
-            result += -1
-    return result^
+struct BasisMask:
+    var entry_count: Int
+    var basis2entry: List[Int]
+    var entry2basis: List[Int]
 
+    fn __init__(inout self, mask: List[Bool]):
+        self.entry_count = 0
+        self.basis2entry = List[Int](capacity=len(mask))
+        self.entry2basis = List[Int](capacity=len(mask))
+        for basis in range(len(mask)):
+            if mask[basis]:
+                self.entry2basis += basis
+                self.basis2entry += self.entry_count
+                self.entry_count += 1
+            else:
+                self.basis2entry += -1
 
-@always_inline
-fn generate_entry2basis(mask: List[Bool]) -> List[Int]:
-    var result = List[Int](capacity=count_true(mask))
-    for basis in range(len(mask)):
-        if mask[basis]:
-            result += basis
-    return result^
+    fn __or__(lhs, rhs: Self) -> Self:
+        var result = List[Bool](capacity=len(lhs.basis2entry))
+        for idx in range(len(lhs.basis2entry)):
+            result += (lhs.basis2entry[idx] != -1) | (rhs.basis2entry[idx] != -1)
+        return result
 
-
-@always_inline
-fn count_true(mask: List[Bool]) -> Int:
-    var count = 0
-    for basis in range(len(mask)):
-        count += int(mask[basis])
-    return count
-
-
-@always_inline
-fn or_mask(a: List[Bool], b: List[Bool]) -> List[Bool]:
-    var result = List[Bool](capacity=len(a))
-    for idx in range(len(a)):
-        result += a[idx] | b[idx]
-    return result^
-
-
-@always_inline
-fn mul_mask(sig: Signature, a: List[Bool], b: List[Bool]) -> List[Bool]:
-    # TODO: There's probably a better way todo this
-    var result = sig.empty_mask()
-
-    for x in range(sig.dims):
-        if a[x]:
-            for y in range(sig.dims):
-                if b[y]:
-                    result[sig.mult[x, y].basis] |= sig.mult[x, y].sign != 0
-    return result
+    fn mul(lhs, rhs: Self, sig: Signature) -> Self:
+        var result = sig.empty_mask()
+        for x in lhs.entry2basis:
+            for y in rhs.entry2basis:
+                result[sig.mult[x[], y[]].basis] |= sig.mult[x[], y[]].sign != 0
+        return result

@@ -14,17 +14,14 @@ from .mask import *
 # +----------------------------------------------------------------------------------------------+ #
 #
 @value
-struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64, size: Int = 1](
+struct Multivector[sig: Signature, mask: BasisMask, type: DType = DType.float64, size: Int = 1](
     Formattable, Stringable
 ):
     """Multivector."""
 
     # +------[ Alias ]------+ #
     #
-    alias basis2entry = generate_basis2entry(mask)
-    alias entry2basis = generate_entry2basis(mask)
-    alias entry_count = count_true(mask)
-    alias DataType = ThickVector[type, Self.entry_count, size]
+    alias DataType = ThickVector[type, Self.mask.entry_count, size]
 
     # +------< Data >------+ #
     #
@@ -46,7 +43,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         self._data[0] = s
 
         @parameter
-        for entry in range(1, Self.entry_count):
+        for entry in range(1, Self.mask.entry_count):
             self._data[entry] = 0
 
     @always_inline
@@ -56,7 +53,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __init__(inout self, owned coefs: VariadicList[SIMD[type, size]]):
         self.__init__[False]()
-        if len(coefs) != Self.entry_count:
+        if len(coefs) != Self.mask.entry_count:
             abort("incorrect number of coefficient passed to masked multivector")
         self._data.__init__(coefs)
 
@@ -68,8 +65,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         if key == "s":
 
             @parameter
-            if Self.basis2entry[0] != -1:
-                return self._data[Self.basis2entry[0]]
+            if Self.mask.basis2entry[0] != -1:
+                return self._data[Self.mask.basis2entry[0]]
             else:
                 return 0
         else:
@@ -85,21 +82,21 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @no_inline
     fn format_to(self, inout writer: Formatter):
         @parameter
-        if self.entry_count == 0:
+        if self.mask.entry_count == 0:
             writer.write("0")
             return
 
-        alias len = self.entry_count - 1
+        alias len = self.mask.entry_count - 1
         writer.write("-" if self._data[0] < 0 else "+")
 
         @parameter
         for entry in range(len):
-            writer.write(abs(self._data[entry]), " [", self.entry2basis[entry])
+            writer.write(abs(self._data[entry]), " [", self.mask.entry2basis[entry])
             if self._data[entry + 1] < 0:
                 writer.write("] - ")
             else:
                 writer.write("] + ")
-        writer.write(abs(self._data[len]), " [", self.entry2basis[len], "]")
+        writer.write(abs(self._data[len]), " [", self.mask.entry2basis[len], "]")
 
     # +------( Comparison )------+ #
     #
@@ -107,8 +104,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     fn __eq__(self, other: Multivector[sig, _, type, size]) -> Bool:
         @parameter
         for basis in range(sig.dims):
-            alias self_entry = self.basis2entry[basis]
-            alias other_entry = other.basis2entry[basis]
+            alias self_entry = self.mask.basis2entry[basis]
+            alias other_entry = other.mask.basis2entry[basis]
 
             @parameter
             if (self_entry != -1) and (other_entry != -1):
@@ -127,8 +124,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     fn __ne__(self, other: Multivector[sig, _, type, size]) -> Bool:
         @parameter
         for basis in range(sig.dims):
-            alias self_entry = self.basis2entry[basis]
-            alias other_entry = other.basis2entry[basis]
+            alias self_entry = self.mask.basis2entry[basis]
+            alias other_entry = other.mask.basis2entry[basis]
 
             @parameter
             if (self_entry != -1) and (other_entry != -1):
@@ -151,7 +148,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
+        for entry in range(result.mask.entry_count):
             result._data[entry] = -self._data[entry]
 
         return result
@@ -167,8 +164,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
-            alias sign = (1 - (((sig.grade_of[self.entry2basis[entry]] // 2) % 2) * 2))
+        for entry in range(result.mask.entry_count):
+            alias sign = (1 - (((sig.grade_of[self.mask.entry2basis[entry]] // 2) % 2) * 2))
             result._data[entry] = self._data[entry] * sign
 
         return result
@@ -180,8 +177,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
-            alias sign = (((sig.grade_of[self.entry2basis[entry]] % 2) * 2) - 1)
+        for entry in range(result.mask.entry_count):
+            alias sign = (((sig.grade_of[self.mask.entry2basis[entry]] % 2) * 2) - 1)
             result._data[entry] = self._data[entry] * sign
 
         return result
@@ -193,8 +190,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
-            alias sign = (((((sig.grade_of[self.entry2basis[entry]] + 3) // 2) % 2) * 2) - 1)
+        for entry in range(result.mask.entry_count):
+            alias sign = (((((sig.grade_of[self.mask.entry2basis[entry]] + 3) // 2) % 2) * 2) - 1)
             result._data[entry] = self._data[entry] * sign
 
         return result
@@ -206,8 +203,8 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
-            result._data[entry] = self._data[(result.entry_count - 1) - entry]
+        for entry in range(result.mask.entry_count):
+            result._data[entry] = self._data[(result.mask.entry_count - 1) - entry]
 
         return result
 
@@ -216,7 +213,7 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
         return sqrt(abs((self * self.__conj__()).s))
 
     @always_inline
-    fn normalized(self) -> Multivector[sig, mul_mask(sig, mask, sig.scalar_mask()), type, size]:
+    fn normalized(self) -> Multivector[sig, mask.mul(sig.scalar_mask(), sig), type, size]:
         return self * (1 / self.norm())
 
     # +------( Arithmetic )------+ #
@@ -224,15 +221,15 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __add__(
         self, other: Multivector[sig, _, type, size]
-    ) -> Multivector[sig, or_mask(mask, other.mask), type, size]:
-        var result: Multivector[sig, or_mask(mask, other.mask), type, size]
+    ) -> Multivector[sig, mask | other.mask, type, size]:
+        var result: Multivector[sig, mask | other.mask, type, size]
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
-            alias result_basis = result.entry2basis[entry]
-            alias self_entry = self.basis2entry[result_basis]
-            alias other_entry = other.basis2entry[result_basis]
+        for entry in range(result.mask.entry_count):
+            alias result_basis = result.mask.entry2basis[entry]
+            alias self_entry = self.mask.basis2entry[result_basis]
+            alias other_entry = other.mask.basis2entry[result_basis]
 
             @parameter
             if (self_entry != -1) and (other_entry != -1):
@@ -247,15 +244,15 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __sub__(
         self, other: Multivector[sig, _, type, size]
-    ) -> Multivector[sig, or_mask(mask, other.mask), type, size]:
-        var result: Multivector[sig, or_mask(mask, other.mask), type, size]
+    ) -> Multivector[sig, mask | other.mask, type, size]:
+        var result: Multivector[sig, mask | other.mask, type, size]
         result.__init__[False]()
 
         @parameter
-        for entry in range(result.entry_count):
-            alias result_basis = result.entry2basis[entry]
-            alias self_entry = self.basis2entry[result_basis]
-            alias other_entry = other.basis2entry[result_basis]
+        for entry in range(result.mask.entry_count):
+            alias result_basis = result.mask.entry2basis[entry]
+            alias self_entry = self.mask.basis2entry[result_basis]
+            alias other_entry = other.mask.basis2entry[result_basis]
 
             @parameter
             if (self_entry != -1) and (other_entry != -1):
@@ -270,19 +267,19 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __mul__(
         lhs, rhs: Multivector[sig, _, type, size]
-    ) -> Multivector[sig, mul_mask(sig, mask, rhs.mask), type, size]:
-        var result: Multivector[sig, mul_mask(sig, mask, rhs.mask), type, size]
+    ) -> Multivector[sig, mask.mul(rhs.mask, sig), type, size]:
+        var result: Multivector[sig, mask.mul(rhs.mask, sig), type, size]
         result.__init__[True]()
 
         @parameter
-        for lhs_entry in range(lhs.entry_count):
-            alias lhs_basis = lhs.entry2basis[lhs_entry]
+        for lhs_entry in range(lhs.mask.entry_count):
+            alias lhs_basis = lhs.mask.entry2basis[lhs_entry]
 
             @parameter
-            for rhs_entry in range(rhs.entry_count):
-                alias rhs_basis = rhs.entry2basis[rhs_entry]
+            for rhs_entry in range(rhs.mask.entry_count):
+                alias rhs_basis = rhs.mask.entry2basis[rhs_entry]
                 alias signed_basis = sig.mult[lhs_basis, rhs_basis]
-                alias entry = result.basis2entry[signed_basis.basis]
+                alias entry = result.mask.basis2entry[signed_basis.basis]
 
                 @parameter
                 if entry >= 0:
@@ -295,8 +292,6 @@ struct Multivector[sig: Signature, mask: List[Bool], type: DType = DType.float64
     @always_inline
     fn __call__(
         versor, operand: Multivector[sig, _, type, size]
-    ) -> Multivector[
-        sig, mul_mask(sig, mul_mask(sig, versor.mask, operand.mask), versor.mask), type, size
-    ]:
+    ) -> Multivector[sig, versor.mask.mul(operand.mask, sig).mul(versor.mask, sig), type, size]:
         """Shorthand for the sandwich operator."""
         return versor * operand * ~versor
