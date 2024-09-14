@@ -1,6 +1,6 @@
 [project]
 authors = ["helehex <helehex@gmail.com>"]
-channels = ["conda-forge", "https://conda.modular.com/max-nightly"]
+channels = ["conda-forge", "https://conda.modular.com/max"]
 description = "Geometric algebra."
 name = "infrared"
 platforms = ["linux-64", "osx-arm64"]
@@ -15,4 +15,4 @@ temp = "mojo temp.mojo"
 format = "mojo format -l 100 src"
 
 [dependencies]
-max = "==24.6.0.dev2024091305"
+max = "==24.5.0"
