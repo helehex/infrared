@@ -25,6 +25,50 @@ fn str_[T: TestableCollectionElement](l: List[List[T]]) -> String:
 
 @always_inline
 fn assert_equal_[T: TestableCollectionElement](
+    lhs: List[T],
+    rhs: __type_of(lhs),
+    msg: String = "",
+    *,
+    location: Optional[_SourceLocation] = None,
+) raises:
+    var eq = len(lhs) == len(rhs)
+
+    if eq:
+        for idx in range(len(lhs)):
+            if lhs[idx] != rhs[idx]:
+                eq = False
+                break
+    
+    if not eq:
+        raise _assert_cmp_error["`left == right` comparison"](
+            lhs.__str__(), rhs.__str__(), msg=msg, loc=location.or_else(__call_location())
+        )
+
+
+@always_inline
+fn assert_not_equal_[T: TestableCollectionElement](
+    lhs: List[T],
+    rhs: __type_of(lhs),
+    msg: String = "",
+    *,
+    location: Optional[_SourceLocation] = None,
+) raises:
+    var ne = len(lhs) != len(rhs)
+
+    if not ne:
+        for idx in range(len(lhs)):
+            if lhs[idx] != rhs[idx]:
+                ne = True
+                break
+
+    if not ne:
+        raise _assert_cmp_error["`left != right` comparison"](
+            lhs.__str__(), rhs.__str__(), msg=msg, loc=location.or_else(__call_location())
+        )
+
+
+@always_inline
+fn assert_equal_[T: TestableCollectionElement](
     lhs: List[List[T]],
     rhs: __type_of(lhs),
     msg: String = "",
