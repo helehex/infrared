@@ -19,7 +19,7 @@ NEW_MAX_VERSION=${NEW_MAX_VERSION##"Version"* }
 
 if [ "$OLD_MAX_VERSION" = "$NEW_MAX_VERSION" ]; then
     echo -e "no update"
-    exit 1
+    return 1
 else
     magic add "max==${NEW_MAX_VERSION}"
     sed -i "s/Mojo version: \`.*\`/Mojo version: \`${NEW_MAX_VERSION}\`/" ${README_PATH}

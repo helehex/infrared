@@ -4,7 +4,7 @@
 # x----------------------------------------------------------------------------------------------x #
 """Thick Vector."""
 
-from .memory import memclr, simd_load, simd_store
+from .memory import UnsafePointer, memclr, simd_load, simd_store
 
 
 fn _thick_vector_construction_checks[size: Int, width: Int]():

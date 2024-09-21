@@ -4,6 +4,7 @@
 # x----------------------------------------------------------------------------------------------x #
 """Memory."""
 
+from memory import UnsafePointer
 from algorithm import vectorize
 from sys import simdwidthof, sizeof
 
