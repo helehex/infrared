@@ -17,7 +17,7 @@ trait TestableCollectionElement(Testable, RepresentableCollectionElement, Equali
 fn str_[T: TestableCollectionElement](l: List[List[T]]) -> String:
     var result: String = "["
     for idx in range(len(l) - 1):
-        result += l[idx].__str__[T]() + ", "
+        result += l[idx].__str__() + ", "
     if len(l) > 0:
         result += l[len(l) - 1].__str__()
     return result + "]"
