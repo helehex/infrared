@@ -29,7 +29,9 @@ struct ThickVector[type: DType, size: Int, thickness: Int = 1]:
     @always_inline
     fn __init__[clear: Bool = True](inout self):
         _thick_vector_construction_checks[size, thickness]()
-        self._data = __mlir_op.`kgen.undef`[_type = Self.Data]()
+        self._data = __mlir_op.`kgen.param.constant`[
+            _type = Self.Data, value = __mlir_attr[`#kgen.unknown : `, Self.Data]
+        ]()
 
         @parameter
         if clear:
