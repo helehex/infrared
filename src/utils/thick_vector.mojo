@@ -58,13 +58,13 @@ struct ThickVector[type: DType, size: Int, thickness: Int = 1]:
 
     @always_inline
     fn __setitem__[
-        lif: MutableLifetime, //, width: Int
+        lif: MutableOrigin, //, width: Int
     ](ref [lif]self: ThickVector[type, size, 1], owned idx: Int, value: SIMD[type, width]):
         simd_store[width](self.unsafe_ptr(), idx, value)
 
     @always_inline
     fn __setitem__[
-        lif: MutableLifetime, //
+        lif: MutableOrigin, //
     ](ref [lif]self, owned idx: Int, owned value: SIMD[type, thickness]):
         (self.unsafe_ptr() + idx)[] = value
 

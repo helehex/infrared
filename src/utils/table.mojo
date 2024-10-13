@@ -74,11 +74,11 @@ struct Table[T: AnyTrivialRegType]:
     # +------( Subscript )------+ #
     #
     @always_inline
-    fn __getitem__(ref [_]self, col: Int, row: Int) -> ref [__lifetime_of(self)] T:
+    fn __getitem__(ref [_]self, col: Int, row: Int) -> ref [__origin_of(self)] T:
         return (self._data + (row * self._cols + col))[]
 
     @always_inline
-    fn __getitem__(ref [_]self, ind: (Int, Int)) -> ref [__lifetime_of(self)] T:
+    fn __getitem__(ref [_]self, ind: (Int, Int)) -> ref [__origin_of(self)] T:
         return self[ind[0], ind[1]]
 
     # +------( Operations )------+ #
