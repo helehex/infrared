@@ -57,18 +57,59 @@ struct Multivector[sig: Signature, mask: BasisMask, type: DType = DType.float64,
             abort("incorrect number of coefficient passed to masked multivector")
         self._data.__init__(coefs)
 
+    @always_inline
+    fn __init__(inout self, owned **coefs: SIMD[type, size]):
+        self.__init__[True]()
+
+        @parameter
+        fn _set_basis[basis: Int](value: SIMD[type, size]):
+            @parameter
+            if basis > sig.vecs:
+                abort("basis is not a member of signature")
+            elif mask.basis2entry[basis] > -1:
+                self._data[mask.basis2entry[basis]] = value
+            else:
+                abort("basis is not a member of mask")
+
+        for entry in coefs.items():
+            if entry[].key == "s":
+                _set_basis[0](entry[].value)
+            elif entry[].key == "e1":
+                _set_basis[1](entry[].value)
+            elif entry[].key == "e2":
+                _set_basis[2](entry[].value)
+            elif entry[].key == "e3":
+                _set_basis[3](entry[].value)
+            elif entry[].key == "e4":
+                _set_basis[4](entry[].value)
+            else:
+                abort("unknown basis: " + entry[].key)
+
+
     # +------( Subscript )------+ #
     #
     @always_inline
     fn __getattr__[key: StringLiteral](self) -> SIMD[type, size]:
         @parameter
-        if key == "s":
-
+        fn _get_basis[basis: Int]() -> SIMD[type, size]:
             @parameter
-            if Self.mask.basis2entry[0] != -1:
-                return self._data[Self.mask.basis2entry[0]]
-            else:
-                return 0
+            if basis > sig.vecs:
+                abort(key + " is not a member of signature")
+            elif mask.basis2entry[basis] != -1:
+                return self._data[mask.basis2entry[basis]]
+            return 0
+
+        @parameter
+        if key == "s":
+            return _get_basis[0]()
+        elif key == "e1":
+            return _get_basis[1]()
+        elif key == "e2":
+            return _get_basis[2]()
+        elif key == "e3":
+            return _get_basis[3]()
+        elif key == "e4":
+            return _get_basis[4]()
         else:
             abort("multivector attribute " + key + " does not exist")
             return 0
