@@ -201,10 +201,10 @@ struct Signature:
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_basis(self, inout writer: Formatter, basis: SignedBasis):
+    fn write_basis_to[WriterType: Writer, //](self, inout writer: WriterType, basis: SignedBasis):
         var align = len(str(self.dims)) + 1
         var str_basis: String = ""
         if basis.sign < 0:
@@ -220,8 +220,8 @@ struct Signature:
         writer.write(str_basis, " ")
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
         for x in range(self.mult._cols):
             for y in range(self.mult._rows):
-                self.format_basis(writer, self.mult[x, y])
+                self.write_basis_to(writer, self.mult[x, y])
             writer.write(Color.clear, "\n")

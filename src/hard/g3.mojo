@@ -24,7 +24,7 @@ Cl(3,0,0) ⇔ Mat2x2(C)
 #
 @register_passable("trivial")
 struct Multivector[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """A G3 Multivector."""
 
@@ -113,14 +113,14 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(
@@ -145,9 +145,9 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -348,7 +348,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Rotor[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """A G3 Rotor. The even sub-algebra of G3. Isomorphic with Quaternions."""
 
@@ -404,14 +404,14 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.s, " + ", self.b.i, "i + ", self.b.j, "j + ", self.b.k, "k")
@@ -419,9 +419,9 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -552,7 +552,7 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Vector[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """A G3 Vector."""
 
@@ -606,14 +606,14 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.x, "x + ", self.y, "y + ", self.z, "z")
@@ -621,9 +621,9 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -744,7 +744,7 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Bivector[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """A G3 Bivector."""
 
@@ -798,14 +798,14 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.i, "i + ", self.j, "j + ", self.k, "k + ")
@@ -813,9 +813,9 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -948,7 +948,7 @@ struct Bivector[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Antiox[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """A G3 Antiox."""
 
@@ -997,14 +997,14 @@ struct Antiox[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.a, "a")
@@ -1012,9 +1012,9 @@ struct Antiox[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #

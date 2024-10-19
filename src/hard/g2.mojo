@@ -24,7 +24,7 @@ from math import cos, sin, atan2
 #
 @register_passable("trivial")
 struct Multivector[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """A G2 Multivector."""
 
@@ -135,14 +135,14 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.s, " + ", self.v.x, "x + ", self.v.y, "y + ", self.i, "i")
@@ -150,9 +150,9 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -508,7 +508,7 @@ struct Multivector[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Rotor[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     """The real and anti parts of a Multivector G2. Useful for rotating vectors."""
 
@@ -590,14 +590,14 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.s, " + ", self.i, "i")
@@ -605,9 +605,9 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #
@@ -845,7 +845,7 @@ struct Rotor[type: DType = DType.float64, size: Int = 1](
 #
 @register_passable("trivial")
 struct Vector[type: DType = DType.float64, size: Int = 1](
-    StringableCollectionElement, Formattable, EqualityComparable
+    StringableCollectionElement, Writable, EqualityComparable
 ):
     # +------[ Alias ]------+ #
     #
@@ -920,14 +920,14 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
-        self.format_to["\n"](writer)
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
+        self.write_to[sep = "\n"](writer)
 
     @no_inline
-    fn format_to[sep: StringLiteral](self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //, sep: StringLiteral](self, inout writer: WriterType):
         @parameter
         if size == 1:
             writer.write(self.x, "x + ", self.y, "y")
@@ -935,9 +935,9 @@ struct Vector[type: DType = DType.float64, size: Int = 1](
 
             @parameter
             for lane in range(size - 1):
-                self.get_lane(lane).format_to(writer)
+                self.get_lane(lane).write_to(writer)
                 writer.write(sep)
-            self.get_lane(size - 1).format_to(writer)
+            self.get_lane(size - 1).write_to(writer)
 
     # +------( Comparison )------+ #
     #

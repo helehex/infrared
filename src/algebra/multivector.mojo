@@ -15,7 +15,7 @@ from .mask import *
 #
 @value
 struct Multivector[sig: Signature, mask: BasisMask, type: DType = DType.float64, size: Int = 1](
-    Formattable, Stringable
+    Writable, Stringable
 ):
     """Multivector."""
 
@@ -118,10 +118,10 @@ struct Multivector[sig: Signature, mask: BasisMask, type: DType = DType.float64,
     #
     @no_inline
     fn __str__(self) -> String:
-        return String.format_sequence(self)
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
         @parameter
         if self.mask.entry_count == 0:
             writer.write("0")

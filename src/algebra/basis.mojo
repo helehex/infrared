@@ -12,7 +12,7 @@ from ..io.ansi import Color
 #
 @value
 @register_passable("trivial")
-struct SignedBasis:
+struct SignedBasis(Writable):
     # +------< Data >------+ #
     #
     var sign: Int
@@ -36,13 +36,10 @@ struct SignedBasis:
 
     @no_inline
     fn __str__(self) -> String:
-        var result = String()
-        var writer = Formatter(result)
-        self.format_to(writer)
-        return result
+        return String.write(self)
 
     @no_inline
-    fn format_to(self, inout writer: Formatter):
+    fn write_to[WriterType: Writer, //](self, inout writer: WriterType):
         if self.sign < 0:
             writer.write("-")
         elif self.sign > 0:
